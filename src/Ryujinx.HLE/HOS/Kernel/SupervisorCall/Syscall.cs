@@ -2005,16 +2005,15 @@ namespace Ryujinx.HLE.HOS.Kernel.SupervisorCall
                                 value = process.MemoryManager.AliasRegionStart;
                                 break;
                             case InfoType.AliasRegionSize:
-                                value = (process.MemoryManager.AliasRegionEnd -
-                                         process.MemoryManager.AliasRegionStart);
+                                value = process.MemoryManager.AliasRegionEnd - process.MemoryManager.AliasRegionStart;
                                 break;
 
                             case InfoType.HeapRegionAddress:
                                 value = process.MemoryManager.HeapRegionStart;
                                 break;
+
                             case InfoType.HeapRegionSize:
-                                value = (process.MemoryManager.HeapRegionEnd -
-                                         process.MemoryManager.HeapRegionStart);
+                                value = process.MemoryManager.HeapRegionEnd - process.MemoryManager.HeapRegionStart;
                                 break;
 
                             case InfoType.TotalMemorySize:
@@ -2026,19 +2025,19 @@ namespace Ryujinx.HLE.HOS.Kernel.SupervisorCall
                                 break;
 
                             case InfoType.AslrRegionAddress:
-                                value = process.MemoryManager.GetAddrSpaceBaseAddr();
+                                value = process.MemoryManager.AslrRegionStart;
                                 break;
 
                             case InfoType.AslrRegionSize:
-                                value = process.MemoryManager.GetAddrSpaceSize();
+                                value = process.MemoryManager.AslrRegionEnd - process.MemoryManager.AslrRegionStart;
                                 break;
 
                             case InfoType.StackRegionAddress:
                                 value = process.MemoryManager.StackRegionStart;
                                 break;
+
                             case InfoType.StackRegionSize:
-                                value = (process.MemoryManager.StackRegionEnd -
-                                         process.MemoryManager.StackRegionStart);
+                                value = process.MemoryManager.StackRegionEnd - process.MemoryManager.StackRegionStart;
                                 break;
 
                             case InfoType.SystemResourceSizeTotal:
@@ -2872,7 +2871,7 @@ namespace Ryujinx.HLE.HOS.Kernel.SupervisorCall
             {
                 KProcess currentProcess = KernelStatic.GetCurrentProcess();
 
-                if (currentProcess.MemoryManager.AddrSpaceStart > handlesPtr)
+                if (currentProcess.MemoryManager.AddressSpaceStart > handlesPtr)
                 {
                     return KernelResult.UserCopyFailed;
                 }
@@ -2884,7 +2883,7 @@ namespace Ryujinx.HLE.HOS.Kernel.SupervisorCall
                     return KernelResult.UserCopyFailed;
                 }
 
-                if (handlesPtr + (ulong)handlesSize - 1 > currentProcess.MemoryManager.AddrSpaceEnd - 1)
+                if (handlesPtr + (ulong)handlesSize - 1 > currentProcess.MemoryManager.AddressSpaceEnd - 1)
                 {
                     return KernelResult.UserCopyFailed;
                 }
