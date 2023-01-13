@@ -34,8 +34,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
         protected readonly KernelContext Context;
         protected virtual bool Supports4KBPages => true;
 
-        public ulong AddrSpaceStart { get; private set; }
-        public ulong AddrSpaceEnd { get; private set; }
+        public ulong AddressSpaceStart { get; private set; }
+        public ulong AddressSpaceEnd { get; private set; }
 
         public ulong CodeRegionStart { get; private set; }
         public ulong CodeRegionEnd { get; private set; }
@@ -68,6 +68,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
         private MemoryRegion _memRegion;
 
         private bool _allocateFromBack;
+
         private readonly bool _isKernel;
 
         private bool _aslrEnabled;
@@ -267,8 +268,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
             _aslrEnabled = aslrEnabled;
 
-            AddrSpaceStart = addrSpaceStart;
-            AddrSpaceEnd = addrSpaceEnd;
+            AddressSpaceStart = addrSpaceStart;
+            AddressSpaceEnd = addrSpaceEnd;
 
             _slabManager = slabManager;
 
@@ -291,10 +292,6 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
             aliasRegion.End = aliasRegion.Start + aliasRegion.Size;
             heapRegion.Start = mapBaseAddress + heapRegion.AslrOffset;
             heapRegion.End = heapRegion.Start + heapRegion.Size;
-            stackRegion.Start = mapBaseAddress + stackRegion.AslrOffset;
-            stackRegion.End = stackRegion.Start + stackRegion.Size;
-            tlsIoRegion.Start = mapBaseAddress + tlsIoRegion.AslrOffset;
-            tlsIoRegion.End = tlsIoRegion.Start + tlsIoRegion.Size;
 
             SortRegion(ref aliasRegion, ref heapRegion, true);
 
@@ -421,9 +418,9 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
             ulong endAddr = address + size;
 
-            ulong addrSpacePagesCount = (AddrSpaceEnd - AddrSpaceStart) / PageSize;
+            ulong addrSpacePagesCount = (AddressSpaceEnd - AddressSpaceStart) / PageSize;
 
-            if (AddrSpaceStart > address)
+            if (AddressSpaceStart > address)
             {
                 return KernelResult.InvalidMemState;
             }
@@ -433,7 +430,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                 return KernelResult.InvalidMemState;
             }
 
-            if (endAddr - 1 > AddrSpaceEnd - 1)
+            if (endAddr - 1 > AddressSpaceEnd - 1)
             {
                 return KernelResult.InvalidMemState;
             }
@@ -966,8 +963,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
         public KMemoryInfo QueryMemory(ulong address)
         {
-            if (address >= AddrSpaceStart &&
-                address < AddrSpaceEnd)
+            if (address >= AddressSpaceStart &&
+                address < AddressSpaceEnd)
             {
                 lock (_blockManager)
                 {
@@ -977,8 +974,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
             else
             {
                 return new KMemoryInfo(
-                    AddrSpaceEnd,
-                    ~AddrSpaceEnd + 1,
+                    AddressSpaceEnd,
+                    ~AddressSpaceEnd + 1,
                     MemoryState.Reserved,
                     KMemoryPermission.None,
                     MemoryAttribute.None,
@@ -1540,14 +1537,14 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
             MemoryAttribute attributeExpected,
             bool toServer)
         {
-            if (AddrSpaceStart > clientAddress)
+            if (AddressSpaceStart > clientAddress)
             {
                 return KernelResult.InvalidMemState;
             }
 
             ulong srcEndAddr = clientAddress + size;
 
-            if (srcEndAddr <= clientAddress || srcEndAddr - 1 > AddrSpaceEnd - 1)
+            if (srcEndAddr <= clientAddress || srcEndAddr - 1 > AddressSpaceEnd - 1)
             {
                 return KernelResult.InvalidMemState;
             }
@@ -1671,14 +1668,14 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
         {
             blocksNeeded = 0;
 
-            if (AddrSpaceStart > address)
+            if (AddressSpaceStart > address)
             {
                 return KernelResult.InvalidMemState;
             }
 
             ulong endAddr = address + size;
 
-            if (endAddr <= address || endAddr - 1 > AddrSpaceEnd - 1)
+            if (endAddr <= address || endAddr - 1 > AddressSpaceEnd - 1)
             {
                 return KernelResult.InvalidMemState;
             }
@@ -2011,14 +2008,14 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
         public Result UnmapNoAttributeIfStateEquals(ulong address, ulong size, MemoryState state)
         {
-            if (AddrSpaceStart > address)
+            if (AddressSpaceStart > address)
             {
                 return KernelResult.InvalidMemState;
             }
 
             ulong endAddr = address + size;
 
-            if (endAddr <= address || endAddr - 1 > AddrSpaceEnd - 1)
+            if (endAddr <= address || endAddr - 1 > AddressSpaceEnd - 1)
             {
                 return KernelResult.InvalidMemState;
             }
@@ -2792,7 +2789,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                 case MemoryState.ProcessMemory:
                 case MemoryState.CodeReadOnly:
                 case MemoryState.CodeWritable:
-                    return GetAddrSpaceBaseAddr();
+                    return AslrRegionStart;
 
                 case MemoryState.Heap:
                     return HeapRegionStart;
@@ -2806,7 +2803,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                     return StackRegionStart;
 
                 case MemoryState.KernelStack:
-                    return AddrSpaceStart;
+                    return AddressSpaceStart;
             }
 
             throw new ArgumentException($"Invalid state value \"{state}\".");
@@ -2831,7 +2828,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                 case MemoryState.ProcessMemory:
                 case MemoryState.CodeReadOnly:
                 case MemoryState.CodeWritable:
-                    return GetAddrSpaceSize();
+                    return AslrRegionEnd - AslrRegionStart;
 
                 case MemoryState.Heap:
                     return HeapRegionEnd - HeapRegionStart;
@@ -2845,20 +2842,10 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
                     return StackRegionEnd - StackRegionStart;
 
                 case MemoryState.KernelStack:
-                    return AddrSpaceEnd - AddrSpaceStart;
+                    return AddressSpaceEnd - AddressSpaceStart;
             }
 
             throw new ArgumentException($"Invalid state value \"{state}\".");
-        }
-
-        public ulong GetAddrSpaceBaseAddr()
-        {
-            return AslrRegionStart;
-        }
-
-        public ulong GetAddrSpaceSize()
-        {
-            return AslrRegionEnd - AslrRegionStart;
         }
 
         private static ulong GetDramAddressFromPa(ulong pa)
@@ -2886,12 +2873,12 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
         public bool IsInvalidRegion(ulong address, ulong size)
         {
-            return address + size - 1 > GetAddrSpaceBaseAddr() + GetAddrSpaceSize() - 1;
+            return address + size - 1 > AslrRegionEnd - 1;
         }
 
         public bool InsideAddrSpace(ulong address, ulong size)
         {
-            return AddrSpaceStart <= address && address + size - 1 <= AddrSpaceEnd - 1;
+            return AddressSpaceStart <= address && address + size - 1 <= AddressSpaceEnd - 1;
         }
 
         public bool InsideAliasRegion(ulong address, ulong size)
@@ -2916,7 +2903,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Memory
 
         public bool OutsideAddrSpace(ulong address, ulong size)
         {
-            return AddrSpaceStart > address || address + size - 1 > AddrSpaceEnd - 1;
+            return AddressSpaceStart > address || address + size - 1 > AddressSpaceEnd - 1;
         }
 
         public bool OutsideStackRegion(ulong address, ulong size)
