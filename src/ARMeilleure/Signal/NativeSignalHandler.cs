@@ -112,8 +112,14 @@ namespace ARMeilleure.Signal
 
                 ref SignalHandlerConfig config = ref GetConfigRef();
 
-                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || OperatingSystem.IsAndroid())
                 {
+                    if (OperatingSystem.IsAndroid())
+                    {
+                        config.StructAddressOffset = 16; // si_addr
+                        config.StructWriteOffset = 8; // si_code
+                    }
+
                     _signalHandlerPtr = Marshal.GetFunctionPointerForDelegate(GenerateUnixSignalHandler(_handlerConfig));
 
                     if (customSignalHandlerFactory != null)
@@ -277,7 +283,7 @@ namespace ARMeilleure.Signal
                     return context.BitwiseAnd(err, Const(2ul));
                 }
             }
-            else if (OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux() || OperatingSystem.IsAndroid())
             {
                 if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
                 {
