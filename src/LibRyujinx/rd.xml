@@ -1,10 +1,5 @@
 <Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
     <Application>
-        <Assembly Name="ARMeilleure">
-            <Type Name="ARMeilleure.Instructions.NativeInterface">
-                <Method Name="Break"/>
-            </Type>
-        </Assembly>
         <Assembly Name="Silk.NET.Vulkan.Extensions.EXT">
             <Type Name="Silk.NET.Vulkan.Extensions.EXT.ExtDebugUtils" 
                   Dynamic="Required All"/>
