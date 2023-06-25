@@ -47,7 +47,7 @@ namespace LibRyujinx
             GraphicsConfig.Fast2DCopy = graphicsConfiguration.Fast2DCopy;
             GraphicsConfig.EnableMacroJit = graphicsConfiguration.EnableMacroJit;
             GraphicsConfig.EnableMacroHLE = graphicsConfiguration.EnableMacroHLE;
-            GraphicsConfig.EnableShaderCache = graphicsConfiguration.EnableShaderCache;
+            GraphicsConfig.EnableShaderCache = false;//graphicsConfiguration.EnableShaderCache;
             GraphicsConfig.EnableSpirvCompilationOnVulkan = graphicsConfiguration.EnableSpirvCompilationOnVulkan;
             GraphicsConfig.EnableTextureRecompression = graphicsConfiguration.EnableTextureRecompression;
 
