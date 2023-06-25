@@ -18,7 +18,7 @@ namespace LibRyujinx.NativeSample
                     Size = new Vector2i(800, 600),
                     Title = "Ryujinx",
                     API = ContextAPI.NoAPI,
-                    IsEventDriven = true,
+                    IsEventDriven = false,
                     // This is needed to run on macos
                     Flags = ContextFlags.ForwardCompatible,
                 };

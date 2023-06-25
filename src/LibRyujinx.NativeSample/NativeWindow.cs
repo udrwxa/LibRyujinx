@@ -1,5 +1,7 @@
 ﻿using LibRyujinx.Sample;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Runtime.InteropServices;
@@ -13,7 +15,12 @@ namespace LibRyujinx.NativeSample
         public delegate IntPtr GetProcAddress(string name);
         public delegate IntPtr CreateSurface(IntPtr instance);
 
+        private bool _run;
         private bool _isVulkan;
+        private Vector2 _lastPosition;
+        private bool _mousePressed;
+        private nint _gamepadIdPtr;
+        private string? _gamepadId;
 
         public NativeWindow(NativeWindowSettings nativeWindowSettings) : base(nativeWindowSettings)
         {
@@ -55,6 +62,7 @@ namespace LibRyujinx.NativeSample
                 };
                 var success = LibRyujinxInterop.InitializeGraphicsRenderer(_isVulkan ? GraphicsBackend.Vulkan : GraphicsBackend.OpenGl, nativeGraphicsInterop);
                 success = LibRyujinxInterop.InitializeDevice();
+                LibRyujinxInterop.InitializeInput(ClientSize.X, ClientSize.Y);
 
                 var path = Marshal.StringToHGlobalAnsi(gamePath);
                 var loaded = LibRyujinxInterop.LoadApplication(path);
@@ -62,19 +70,28 @@ namespace LibRyujinx.NativeSample
                 Marshal.FreeHGlobal(path);
             }
 
+            _gamepadIdPtr = LibRyujinxInterop.ConnectGamepad(0);
+            _gamepadId = Marshal.PtrToStringAnsi(_gamepadIdPtr);
+
             if (!_isVulkan)
             {
                 Context.MakeNoneCurrent();
             }
 
+            _run = true;
             var thread = new Thread(new ThreadStart(RunLoop));
             thread.Start();
+
+            UpdateLoop();
+
             thread.Join();
 
             foreach(var ptr in pointers)
             {
                 Marshal.FreeHGlobal(ptr);
             }
+
+            Marshal.FreeHGlobal(_gamepadIdPtr);
         }
 
         public void RunLoop()
@@ -89,14 +106,16 @@ namespace LibRyujinx.NativeSample
                 Context.SwapInterval = 0;
             }
 
-            Task.Run(async () =>
+           /* Task.Run(async () =>
             {
                 await Task.Delay(1000);
 
-                LibRyujinxInterop.SetVsyncState(false);
-            });
+                LibRyujinxInterop.SetVsyncState(true);
+            });*/
 
             LibRyujinxInterop.RunLoop();
+
+            _run = false;
 
             if (!_isVulkan)
             {
@@ -111,5 +130,120 @@ namespace LibRyujinx.NativeSample
                 this.Context.SwapBuffers();
             }
         }
+
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            base.OnMouseMove(e);
+            _lastPosition = e.Position;
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if(e.Button == MouseButton.Left)
+            {
+                _mousePressed = true;
+            }
+        }
+
+        protected override void OnResize(ResizeEventArgs e)
+        {
+            base.OnResize(e);
+
+            if (_run)
+            {
+                LibRyujinxInterop.SetRendererSize(e.Width, e.Height);
+                LibRyujinxInterop.SetClientSize(e.Width, e.Height);
+            }
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (e.Button == MouseButton.Left)
+            {
+                _mousePressed = false;
+            }
+        }
+
+        protected override void OnKeyUp(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+
+            if (_gamepadIdPtr != IntPtr.Zero)
+            {
+                var key = GetKeyMapping(e.Key);
+
+                LibRyujinxInterop.SetButtonReleased(key, _gamepadIdPtr);
+            }
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            if (_gamepadIdPtr != IntPtr.Zero)
+            {
+                var key = GetKeyMapping(e.Key);
+
+                LibRyujinxInterop.SetButtonPressed(key, _gamepadIdPtr);
+            }
+        }
+
+        public void UpdateLoop()
+        {
+            while(_run)
+            {
+                ProcessWindowEvents(true);
+                ProcessInputEvents();
+                ProcessWindowEvents(IsEventDriven);
+                if (_mousePressed)
+                {
+                    LibRyujinxInterop.SetTouchPoint((int)_lastPosition.X, (int)_lastPosition.Y);
+                }
+                else
+                {
+                    LibRyujinxInterop.ReleaseTouchPoint();
+                }
+
+                LibRyujinxInterop.UpdateInput();
+
+                Thread.Sleep(1);
+            }
+        }
+
+        public GamepadButtonInputId GetKeyMapping(Keys key)
+        {
+            if(_keyMapping.TryGetValue(key, out var mapping))
+            {
+                return mapping;
+            }
+
+            return GamepadButtonInputId.Unbound;
+        }
+
+        private Dictionary<Keys, GamepadButtonInputId> _keyMapping = new Dictionary<Keys, GamepadButtonInputId>()
+        {
+            {Keys.A, GamepadButtonInputId.A },
+            {Keys.S, GamepadButtonInputId.B },
+            {Keys.Z, GamepadButtonInputId.X },
+            {Keys.X, GamepadButtonInputId.Y },
+            {Keys.Equal, GamepadButtonInputId.Plus },
+            {Keys.Minus, GamepadButtonInputId.Minus },
+            {Keys.Q, GamepadButtonInputId.LeftShoulder },
+            {Keys.D1, GamepadButtonInputId.LeftTrigger },
+            {Keys.W, GamepadButtonInputId.RightShoulder },
+            {Keys.D2, GamepadButtonInputId.RightTrigger },
+            {Keys.E, GamepadButtonInputId.LeftStick },
+            {Keys.R, GamepadButtonInputId.RightStick },
+            {Keys.Up, GamepadButtonInputId.DpadUp },
+            {Keys.Down, GamepadButtonInputId.DpadDown },
+            {Keys.Left, GamepadButtonInputId.DpadLeft },
+            {Keys.Right, GamepadButtonInputId.DpadRight },
+            {Keys.U, GamepadButtonInputId.SingleLeftTrigger0 },
+            {Keys.D7, GamepadButtonInputId.SingleLeftTrigger1 },
+            {Keys.O, GamepadButtonInputId.SingleRightTrigger0 },
+            {Keys.D9, GamepadButtonInputId.SingleRightTrigger1 }
+        };
     }
 }
