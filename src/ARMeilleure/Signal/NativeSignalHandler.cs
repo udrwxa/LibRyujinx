@@ -112,9 +112,9 @@ namespace ARMeilleure.Signal
 
                 ref SignalHandlerConfig config = ref GetConfigRef();
 
-                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || OperatingSystem.IsAndroid())
+                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
                 {
-                    if (OperatingSystem.IsAndroid())
+                    if (Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
                     {
                         config.StructAddressOffset = 16; // si_addr
                         config.StructWriteOffset = 8; // si_code
@@ -283,7 +283,7 @@ namespace ARMeilleure.Signal
                     return context.BitwiseAnd(err, Const(2ul));
                 }
             }
-            else if (OperatingSystem.IsLinux() || OperatingSystem.IsAndroid())
+            else if (OperatingSystem.IsLinux() || Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
             {
                 if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
                 {
