@@ -41,10 +41,16 @@ namespace LibRyujinx
 
                 ConfigurationState.Initialize();
                 LoggerModule.Initialize();
+                Logger.AddTarget(
+                    new AsyncLogTargetWrapper(
+                    new AndroidLogTarget("Ryujinx"),
+                    1000,
+                    AsyncLogTargetOverflowAction.Block
+                    ));
 
                 SwitchDevice = new SwitchDevice();
 
-                Logger.SetEnable(LogLevel.Debug, false);
+                Logger.SetEnable(LogLevel.Debug, true);
                 Logger.SetEnable(LogLevel.Stub, true);
                 Logger.SetEnable(LogLevel.Info, true);
                 Logger.SetEnable(LogLevel.Warning, true);
@@ -94,7 +100,7 @@ namespace LibRyujinx
             UserChannelPersistence = new UserChannelPersistence();
         }
 
-        public bool InitializeContext()
+        public bool InitializeContext(bool isHostMapped)
         {
             if(LibRyujinx.Renderer == null)
             {
@@ -130,7 +136,7 @@ namespace LibRyujinx
                                                                   0,
                                                                   0,
                                                                   "UTC",
-                                                                  MemoryManagerMode.HostMappedUnsafe,
+                                                                  isHostMapped ? MemoryManagerMode.HostMappedUnsafe : MemoryManagerMode.SoftwarePageTable,
                                                                   false,
                                                                    LibRyujinx.GraphicsConfiguration.AspectRatio,
                                                                   0,
