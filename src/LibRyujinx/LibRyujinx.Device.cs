@@ -15,17 +15,17 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "device_initialize")]
         public static bool InitializeDeviceNative()
         {
-            return InitializeDevice();
+            return InitializeDevice(true);
         }
 
-        public static bool InitializeDevice()
+        public static bool InitializeDevice(bool isHostMapped)
         {
             if (SwitchDevice == null)
             {
                 return false;
             }
 
-            return SwitchDevice.InitializeContext();
+            return SwitchDevice.InitializeContext(isHostMapped);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "device_load")]

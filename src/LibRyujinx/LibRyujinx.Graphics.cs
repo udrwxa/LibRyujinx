@@ -19,13 +19,12 @@ namespace LibRyujinx
         private static bool _isActive;
         private static bool _isStopped;
         private static CancellationTokenSource _gpuCancellationTokenSource;
-        private static SwapBuffersCallback _swapBuffersCallback;
+        private static SwapBuffersCallback? _swapBuffersCallback;
         private static NativeGraphicsInterop _nativeGraphicsInterop;
 
         public delegate void SwapBuffersCallback();
         public delegate IntPtr GetProcAddress(string name);
         public delegate IntPtr CreateSurface(IntPtr instance);
-
 
         public static IRenderer? Renderer { get; set; }
         public static GraphicsConfiguration GraphicsConfiguration { get; private set; }
@@ -33,12 +32,13 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "graphics_initialize")]
         public static bool InitializeGraphicsNative(GraphicsConfiguration graphicsConfiguration)
         {
-            if(OperatingSystem.IsAndroid())
+            if(Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
             {
                 Silk.NET.Core.Loader.SearchPathContainer.Platform = Silk.NET.Core.Loader.UnderlyingPlatform.Android;
             }
             return InitializeGraphics(graphicsConfiguration);
         }
+        
         public static bool InitializeGraphics(GraphicsConfiguration graphicsConfiguration)
         {
             GraphicsConfig.ResScale = graphicsConfiguration.ResScale;
