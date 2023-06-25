@@ -132,7 +132,7 @@ namespace LibRyujinx
                                                                   "UTC",
                                                                   MemoryManagerMode.HostMappedUnsafe,
                                                                   false,
-                                                                  AspectRatio.Fixed16x9,
+                                                                   LibRyujinx.GraphicsConfiguration.AspectRatio,
                                                                   0,
                                                                   true,
                                                                   "");
