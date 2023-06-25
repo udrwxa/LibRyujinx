@@ -87,6 +87,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon", "src\Ryuj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon.Kernel.Generators", "src\Ryujinx.Horizon.Kernel.Generators\Ryujinx.Horizon.Kernel.Generators.csproj", "{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibRyujinx.Shared", "src\LibRyujinx\LibRyujinx.Shared.csproj", "{5BBF478C-A520-41E7-9B88-890AD26766B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.HLE.Generators", "src\Ryujinx.HLE.Generators\Ryujinx.HLE.Generators.csproj", "{C75176EB-C44E-449A-8077-A48AD94534EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibRyujinx.NativeSample", "src\LibRyujinx.NativeSample\LibRyujinx.NativeSample.csproj", "{63D2C96B-5194-4592-BC91-30BEB11C06BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRyujinx.Build", "src\LibRyujinx.Build\LibRyujinx.Build.csproj", "{028BA6E8-BDB5-4F85-BCA0-EDC559C85F4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -249,6 +257,22 @@ Global
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BBF478C-A520-41E7-9B88-890AD26766B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BBF478C-A520-41E7-9B88-890AD26766B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BBF478C-A520-41E7-9B88-890AD26766B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BBF478C-A520-41E7-9B88-890AD26766B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C75176EB-C44E-449A-8077-A48AD94534EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C75176EB-C44E-449A-8077-A48AD94534EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C75176EB-C44E-449A-8077-A48AD94534EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C75176EB-C44E-449A-8077-A48AD94534EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D2C96B-5194-4592-BC91-30BEB11C06BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D2C96B-5194-4592-BC91-30BEB11C06BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D2C96B-5194-4592-BC91-30BEB11C06BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D2C96B-5194-4592-BC91-30BEB11C06BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{028BA6E8-BDB5-4F85-BCA0-EDC559C85F4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{028BA6E8-BDB5-4F85-BCA0-EDC559C85F4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{028BA6E8-BDB5-4F85-BCA0-EDC559C85F4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{028BA6E8-BDB5-4F85-BCA0-EDC559C85F4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
