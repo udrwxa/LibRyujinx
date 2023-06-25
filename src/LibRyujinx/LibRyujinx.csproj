@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
@@ -9,7 +9,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\Ryujinx.Input\Ryujinx.Input.csproj" />
         <ProjectReference Include="..\Ryujinx.Common\Ryujinx.Common.csproj" />
@@ -23,19 +22,13 @@
     <ItemGroup>
         <RdXmlFile Include="rd.xml" />
     </ItemGroup>
-
     <ItemGroup>
-      <Compile Update="LibRyujinx.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
-      <Compile Update="LibRyujinx.Device.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
-      <Compile Update="LibRyujinx.Graphics.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
-      <Compile Update="LibRyujinx.Input.cs">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Compile>
+		  <PackageReference Include="Rxmxnx.PInvoke.Extensions"/>        
+      <PackageReference Include="Silk.NET.Vulkan" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" />
+      <LinkerArg Include="-llog" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Jni\" />
     </ItemGroup>
 </Project>
