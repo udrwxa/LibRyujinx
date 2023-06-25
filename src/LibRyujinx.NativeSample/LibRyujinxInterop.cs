@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,33 @@ namespace LibRyujinx.Sample
 
         [DllImport(dll, EntryPoint = "graphics_renderer_set_vsync")]
         internal extern static void SetVsyncState(bool enabled);
+
+        [DllImport(dll, EntryPoint = "input_initialize")]
+        internal extern static void InitializeInput(int width, int height);
+
+        [DllImport(dll, EntryPoint = "input_set_client_size")]
+        internal extern static void SetClientSize(int width, int height);
+
+        [DllImport(dll, EntryPoint = "input_set_touch_point")]
+        internal extern static void SetTouchPoint(int x, int y);
+
+        [DllImport(dll, EntryPoint = "input_release_touch_point")]
+        internal extern static void ReleaseTouchPoint();
+
+        [DllImport(dll, EntryPoint = "input_update")]
+        internal extern static void UpdateInput();
+
+        [DllImport(dll, EntryPoint = "input_set_button_pressed")]
+        public extern static void SetButtonPressed(GamepadButtonInputId button, IntPtr idPtr);
+
+        [DllImport(dll, EntryPoint = "input_set_button_released")]
+        public extern static void SetButtonReleased(GamepadButtonInputId button, IntPtr idPtr);
+
+        [DllImport(dll, EntryPoint = "input_set_stick_axis")]
+        public extern static void SetStickAxis(StickInputId stick, Vector2 axes, IntPtr idPtr);
+
+        [DllImport(dll, EntryPoint = "input_connect_gamepad")]
+        public extern static IntPtr ConnectGamepad(int index);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -53,11 +81,13 @@ namespace LibRyujinx.Sample
         public bool EnableSpirvCompilationOnVulkan = true;
         public bool EnableTextureRecompression = false;
         public BackendThreading BackendThreading = BackendThreading.Auto;
+        public AspectRatio AspectRatio = AspectRatio.Fixed16x9;
 
         public GraphicsConfiguration()
         {
         }
     }
+
     public enum GraphicsBackend
     {
         Vulkan,
@@ -77,5 +107,78 @@ namespace LibRyujinx.Sample
         public IntPtr VkCreateSurface;
         public IntPtr VkRequiredExtensions;
         public int VkRequiredExtensionsCount;
+    }
+    public enum AspectRatio
+    {
+        Fixed4x3,
+        Fixed16x9,
+        Fixed16x10,
+        Fixed21x9,
+        Fixed32x9,
+        Stretched
+    }
+
+    /// <summary>
+    /// Represent a button from a gamepad.
+    /// </summary>
+    public enum GamepadButtonInputId : byte
+    {
+        Unbound,
+        A,
+        B,
+        X,
+        Y,
+        LeftStick,
+        RightStick,
+        LeftShoulder,
+        RightShoulder,
+
+        // Likely axis
+        LeftTrigger,
+        // Likely axis
+        RightTrigger,
+
+        DpadUp,
+        DpadDown,
+        DpadLeft,
+        DpadRight,
+
+        // Special buttons
+
+        Minus,
+        Plus,
+
+        Back = Minus,
+        Start = Plus,
+
+        Guide,
+        Misc1,
+
+        // Xbox Elite paddle
+        Paddle1,
+        Paddle2,
+        Paddle3,
+        Paddle4,
+
+        // PS5 touchpad button
+        Touchpad,
+
+        // Virtual buttons for single joycon
+        SingleLeftTrigger0,
+        SingleRightTrigger0,
+
+        SingleLeftTrigger1,
+        SingleRightTrigger1,
+
+        Count
+    }
+
+    public enum StickInputId : byte
+    {
+        Unbound,
+        Left,
+        Right,
+
+        Count
     }
 }

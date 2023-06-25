@@ -207,6 +207,7 @@ namespace LibRyujinx
         public bool EnableSpirvCompilationOnVulkan = true;
         public bool EnableTextureRecompression = false;
         public BackendThreading BackendThreading = BackendThreading.Auto;
+        public AspectRatio AspectRatio = AspectRatio.Fixed16x9;
 
         public GraphicsConfiguration()
         {
