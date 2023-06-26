@@ -87,7 +87,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon", "src\Ryuj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.Horizon.Kernel.Generators", "src\Ryujinx.Horizon.Kernel.Generators\Ryujinx.Horizon.Kernel.Generators.csproj", "{7F55A45D-4E1D-4A36-ADD3-87F29A285AA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibRyujinx.Shared", "src\LibRyujinx\LibRyujinx.Shared.csproj", "{5BBF478C-A520-41E7-9B88-890AD26766B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibRyujinx.Shared", "src\LibRyujinx\LibRyujinx.csproj", "{5BBF478C-A520-41E7-9B88-890AD26766B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ryujinx.HLE.Generators", "src\Ryujinx.HLE.Generators\Ryujinx.HLE.Generators.csproj", "{C75176EB-C44E-449A-8077-A48AD94534EE}"
 EndProject
