@@ -10,6 +10,8 @@ using LibRyujinx.Jni;
 using Rxmxnx.PInvoke;
 using System.Text;
 using LibRyujinx.Jni.Internal.Pointers;
+using Ryujinx.Common.Logging;
+using Ryujinx.Common.Logging.Targets;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 
@@ -32,7 +34,16 @@ namespace LibRyujinx
 
             Ryujinx.Common.SystemInfo.SystemInfo.IsBionic = true;
 
-            return Initialize(path);
+            var init = Initialize(path);
+
+            Logger.AddTarget(
+                new AsyncLogTargetWrapper(
+                new AndroidLogTarget("Ryujinx"),
+                1000,
+                AsyncLogTargetOverflowAction.Block
+                ));
+
+            return init;
         }
 
         private static string GetString(JEnvRef jEnv, JStringLocalRef jString)
@@ -52,6 +63,17 @@ namespace LibRyujinx
             releaseString(jEnv, jString, stringPtr);
 
             return str;
+        }
+
+        private static JStringLocalRef CreateString(in IReadOnlyFixedContext<Char> ctx, JEnvRef jEnv)
+        {
+            JEnvValue value = jEnv.Environment;
+            ref JNativeInterface jInterface = ref value.Functions;
+
+            IntPtr newStringPtr = jInterface.NewStringPointer;
+            NewStringDelegate newString = newStringPtr.GetUnsafeDelegate<NewStringDelegate>();
+
+            return newString(jEnv, ctx.Pointer, ctx.Values.Length);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceInitialize")]
@@ -203,6 +225,62 @@ namespace LibRyujinx
         public static void JniSetSwapBuffersCallbackNative(JEnvRef jEnv, JObjectLocalRef jObj, IntPtr swapBuffersCallback)
         {
             _swapBuffersCallback = Marshal.GetDelegateForFunctionPointer<SwapBuffersCallback>(swapBuffersCallback);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputInitialize")]
+        public static void JniInitializeInput(JEnvRef jEnv, JObjectLocalRef jObj, JInt width, JInt height)
+        {
+            InitializeInput(width, height);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetClientSize")]
+        public static void JniSetClientSize(JEnvRef jEnv, JObjectLocalRef jObj, JInt width, JInt height)
+        {
+            SetClientSize(width, height);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetTouchPoint")]
+        public static void JniSetTouchPoint(JEnvRef jEnv, JObjectLocalRef jObj, JInt x, JInt y)
+        {
+            SetTouchPoint(x, y);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputReleaseTouchPoint")]
+        public static void JniReleaseTouchPoint(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            ReleaseTouchPoint();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputUpdate")]
+        public static void JniUpdateInput(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            UpdateInput();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetButtonPressed")]
+        public static void JniSetButtonPressed(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JStringLocalRef id)
+        {
+            SetButtonPressed((Ryujinx.Input.GamepadButtonInputId)(int)button, GetString(jEnv, id));
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetButtonReleased")]
+        public static void JniSetButtonReleased(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JStringLocalRef id)
+        {
+            SetButtonReleased((Ryujinx.Input.GamepadButtonInputId)(int)button, GetString(jEnv, id));
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetStickAxis")]
+        public static void JniSetStickAxis(JEnvRef jEnv, JObjectLocalRef jObj, JInt stick, JFloat x, JFloat y, JStringLocalRef id)
+        {
+            SetStickAxis((Ryujinx.Input.StickInputId)(int)stick, new System.Numerics.Vector2(x, y), GetString(jEnv, id));
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputConnectGamepad")]
+        public static JStringLocalRef JniConnectGamepad(JEnvRef jEnv, JObjectLocalRef jObj, JInt index)
+        {
+            var id = ConnectGamepad(index);
+
+            return (id ?? "").AsSpan().WithSafeFixed(jEnv, CreateString);
         }
     }
 
