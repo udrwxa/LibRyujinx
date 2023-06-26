@@ -1,5 +1,7 @@
 ﻿using Ryujinx.Common;
 using Ryujinx.Common.Logging;
+using Ryujinx.Common.Logging.Formatters;
+using Ryujinx.Common.Logging.Targets;
 using System;
 using System.IO;
 using System.Linq;

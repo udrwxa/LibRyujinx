@@ -41,12 +41,6 @@ namespace LibRyujinx
 
                 ConfigurationState.Initialize();
                 LoggerModule.Initialize();
-                Logger.AddTarget(
-                    new AsyncLogTargetWrapper(
-                    new AndroidLogTarget("Ryujinx"),
-                    1000,
-                    AsyncLogTargetOverflowAction.Block
-                    ));
 
                 SwitchDevice = new SwitchDevice();
 
