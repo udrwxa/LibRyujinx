@@ -10,5 +10,6 @@
 
     <ItemGroup>
         <PackageReference Include="OpenTK" />
+        <PackageReference Include="Ryujinx.SDL2-CS" />
     </ItemGroup>
 </Project>

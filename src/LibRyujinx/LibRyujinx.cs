@@ -13,11 +13,14 @@ using Ryujinx.Audio.Backends.Dummy;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.Ui.Common.Configuration;
 using Ryujinx.Common.Logging;
+using Ryujinx.Audio.Integration;
+using Ryujinx.Audio.Backends.SDL2;
 
 namespace LibRyujinx
 {
     public static partial class LibRyujinx
     {
+        internal static IHardwareDeviceDriver AudioDriver { get; set; } = new DummyHardwareDeviceDriver();
         public static SwitchDevice? SwitchDevice { get; set; }
 
         [UnmanagedCallersOnly(EntryPoint = "initialize")]
@@ -25,7 +28,11 @@ namespace LibRyujinx
         {
             var path = Marshal.PtrToStringAnsi(basePathPtr);
 
-            return Initialize(path);
+            var res = Initialize(path);
+
+            InitializeAudio();
+
+            return res;
         }
 
         public static bool Initialize(string? basePath)
@@ -59,6 +66,11 @@ namespace LibRyujinx
             }
 
             return true;
+        }
+
+        public static void InitializeAudio()
+        {
+            AudioDriver = new SDL2HardwareDeviceDriver();
         }
     }
 
@@ -117,7 +129,7 @@ namespace LibRyujinx
                                                                   AccountManager,
                                                                   UserChannelPersistence,
                                                                   renderer,
-                                                                  new DummyHardwareDeviceDriver(), //Audio
+                                                                  LibRyujinx.AudioDriver, //Audio
                                                                   MemoryConfiguration.MemoryConfiguration4GiB,
                                                                   null,
                                                                   SystemLanguage.AmericanEnglish,
@@ -133,7 +145,7 @@ namespace LibRyujinx
                                                                   isHostMapped ? MemoryManagerMode.HostMappedUnsafe : MemoryManagerMode.SoftwarePageTable,
                                                                   false,
                                                                    LibRyujinx.GraphicsConfiguration.AspectRatio,
-                                                                  0,
+                                                                  100,
                                                                   true,
                                                                   "");
 
