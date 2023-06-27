@@ -8,6 +8,10 @@
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+      <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+      <OptimizationPreference>Speed</OptimizationPreference>
   </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Ryujinx.Input\Ryujinx.Input.csproj" />
