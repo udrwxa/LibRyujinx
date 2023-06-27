@@ -78,7 +78,6 @@ namespace LibRyujinx.Sample
         public bool EnableMacroJit = false;
         public bool EnableMacroHLE = true;
         public bool EnableShaderCache = true;
-        public bool EnableSpirvCompilationOnVulkan = true;
         public bool EnableTextureRecompression = false;
         public BackendThreading BackendThreading = BackendThreading.Auto;
         public AspectRatio AspectRatio = AspectRatio.Fixed16x9;

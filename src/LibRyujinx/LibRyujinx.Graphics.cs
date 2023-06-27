@@ -47,8 +47,7 @@ namespace LibRyujinx
             GraphicsConfig.Fast2DCopy = graphicsConfiguration.Fast2DCopy;
             GraphicsConfig.EnableMacroJit = graphicsConfiguration.EnableMacroJit;
             GraphicsConfig.EnableMacroHLE = graphicsConfiguration.EnableMacroHLE;
-            GraphicsConfig.EnableShaderCache = false;//graphicsConfiguration.EnableShaderCache;
-            GraphicsConfig.EnableSpirvCompilationOnVulkan = graphicsConfiguration.EnableSpirvCompilationOnVulkan;
+            GraphicsConfig.EnableShaderCache = graphicsConfiguration.EnableShaderCache;
             GraphicsConfig.EnableTextureRecompression = graphicsConfiguration.EnableTextureRecompression;
 
             GraphicsConfiguration = graphicsConfiguration;
@@ -203,8 +202,7 @@ namespace LibRyujinx
         public bool Fast2DCopy = true;
         public bool EnableMacroJit = false;
         public bool EnableMacroHLE = true;
-        public bool EnableShaderCache;
-        public bool EnableSpirvCompilationOnVulkan = true;
+        public bool EnableShaderCache = true;
         public bool EnableTextureRecompression = false;
         public BackendThreading BackendThreading = BackendThreading.Auto;
         public AspectRatio AspectRatio = AspectRatio.Fixed16x9;
