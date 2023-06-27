@@ -19,6 +19,9 @@ namespace LibRyujinx
 {
     public static partial class LibRyujinx
     {
+        [DllImport("libryujinxjni")]
+        private extern static IntPtr getStringPointer(JEnvRef jEnv, JStringLocalRef s);
+
         public delegate IntPtr JniCreateSurface(IntPtr native_surface, IntPtr instance);
 
         [UnmanagedCallersOnly(EntryPoint = "JNI_OnLoad")]
@@ -31,7 +34,7 @@ namespace LibRyujinx
         public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef jpath)
         {
             var path = GetString(jEnv, jpath);
-
+//"/storage/emulated/0/Android/data/org.ryujinx.k/files"; 
             Ryujinx.Common.SystemInfo.SystemInfo.IsBionic = true;
 
             var init = Initialize(path);
@@ -48,7 +51,7 @@ namespace LibRyujinx
 
         private static string GetString(JEnvRef jEnv, JStringLocalRef jString)
         {
-            JEnvValue value = jEnv.Environment;
+            /*JEnvValue value = jEnv.Environment;
             ref JNativeInterface jInterface = ref value.Functions;
 
             IntPtr newStringPtr = jInterface.GetStringUtfCharsPointer;
@@ -60,9 +63,13 @@ namespace LibRyujinx
 
             var str = stringPtr.AsString();
 
-            releaseString(jEnv, jString, stringPtr);
+            releaseString(jEnv, jString, stringPtr);*/
 
-            return str;
+            var stringPtr = getStringPointer(jEnv, jString);
+
+            var s = Marshal.PtrToStringAnsi(stringPtr);
+            Marshal.FreeHGlobal(stringPtr);
+            return s;
         }
 
         private static JStringLocalRef CreateString(in IReadOnlyFixedContext<Char> ctx, JEnvRef jEnv)
