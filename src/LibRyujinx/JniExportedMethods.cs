@@ -14,6 +14,8 @@ using Ryujinx.Common.Logging;
 using Ryujinx.Common.Logging.Targets;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
+using LibRyujinx.Shared.Audio.Oboe;
+
 
 namespace LibRyujinx
 {
@@ -34,10 +36,12 @@ namespace LibRyujinx
         public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef jpath)
         {
             var path = GetString(jEnv, jpath);
-//"/storage/emulated/0/Android/data/org.ryujinx.k/files"; 
+
             Ryujinx.Common.SystemInfo.SystemInfo.IsBionic = true;
 
             var init = Initialize(path);
+
+            AudioDriver = new OboeHardwareDeviceDriver();
 
             Logger.AddTarget(
                 new AsyncLogTargetWrapper(
@@ -51,20 +55,6 @@ namespace LibRyujinx
 
         private static string GetString(JEnvRef jEnv, JStringLocalRef jString)
         {
-            /*JEnvValue value = jEnv.Environment;
-            ref JNativeInterface jInterface = ref value.Functions;
-
-            IntPtr newStringPtr = jInterface.GetStringUtfCharsPointer;
-            IntPtr releaseStringPtr = jInterface.ReleaseStringUtfCharsPointer;
-            var newString = newStringPtr.GetUnsafeDelegate<GetStringUtfCharsDelegate>();
-            var releaseString = releaseStringPtr.GetUnsafeDelegate<ReleaseStringUtfCharsDelegate>();
-
-            var stringPtr = newString(jEnv, jString, new JBooleanRef(false));
-
-            var str = stringPtr.AsString();
-
-            releaseString(jEnv, jString, stringPtr);*/
-
             var stringPtr = getStringPointer(jEnv, jString);
 
             var s = Marshal.PtrToStringAnsi(stringPtr);
@@ -128,7 +118,6 @@ namespace LibRyujinx
                 EnableShaderCache = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("EnableShaderCache"), GetCCharSequence("Z"))),
                 EnableMacroHLE = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("EnableMacroHLE"), GetCCharSequence("Z"))),
                 EnableMacroJit = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("EnableMacroJit"), GetCCharSequence("Z"))),
-                EnableSpirvCompilationOnVulkan = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("EnableSpirvCompilationOnVulkan"), GetCCharSequence("Z"))),
                 EnableTextureRecompression = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("EnableTextureRecompression"), GetCCharSequence("Z"))),
                 Fast2DCopy = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("Fast2DCopy"), GetCCharSequence("Z"))),
                 FastGpuTime = getBooleanField(jEnv, graphicObject, getFieldId(jEnv, jobject, GetCCharSequence("FastGpuTime"), GetCCharSequence("Z"))),
