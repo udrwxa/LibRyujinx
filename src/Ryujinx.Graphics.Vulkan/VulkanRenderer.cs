@@ -842,6 +842,15 @@ namespace Ryujinx.Graphics.Vulkan
             ScreenCaptured?.Invoke(this, bitmap);
         }
 
+        internal unsafe void RecreateSurface()
+        {
+            SurfaceApi.DestroySurface(_instance.Instance, _surface, null);
+
+            _surface = _getSurface(_instance.Instance, Api);
+
+            (_window as Window)?.SetSurface(_surface);
+        }
+
         public unsafe void Dispose()
         {
             if (!_initialized)
