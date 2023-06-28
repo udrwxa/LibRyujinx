@@ -15,12 +15,15 @@ using Ryujinx.Common.Logging.Targets;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 using LibRyujinx.Shared.Audio.Oboe;
-
+using System.Threading;
 
 namespace LibRyujinx
 {
     public static partial class LibRyujinx
     {
+        private static ManualResetEvent _surfaceEvent;
+        private static long _surfacePtr;
+
         [DllImport("libryujinxjni")]
         private extern static IntPtr getStringPointer(JEnvRef jEnv, JStringLocalRef s);
 
@@ -42,6 +45,8 @@ namespace LibRyujinx
             var init = Initialize(path);
 
             AudioDriver = new OboeHardwareDeviceDriver();
+
+            _surfaceEvent = new ManualResetEvent(false);
 
             Logger.AddTarget(
                 new AsyncLogTargetWrapper(
@@ -134,8 +139,16 @@ namespace LibRyujinx
             return (CCharSequence)Encoding.UTF8.GetBytes(s).AsSpan();
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsSetSurface")]
+        public unsafe static void JniSetSurface(JEnvRef jEnv, JObjectLocalRef jObj, JLong surfacePtr)
+        {
+            _surfacePtr = surfacePtr;
+
+            _surfaceEvent.Set();
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsInitializeRenderer")]
-        public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv, JObjectLocalRef jObj, JObjectLocalRef nativeInterop, JArrayLocalRef extensionsArray, JLong surfacePtr)
+        public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv, JObjectLocalRef jObj, JArrayLocalRef extensionsArray, JLong surfacePtr)
         {
             if (Renderer != null)
             {
@@ -171,21 +184,23 @@ namespace LibRyujinx
 
                 extensions.Add(GetString(jEnv, ext));
             }
-            var jobject = getObjectClass(jEnv, nativeInterop);
-            var getSurfacePtr = (nint)getLongField(jEnv, nativeInterop, getFieldId(jEnv, jobject, GetCCharSequence("VkCreateSurface"), GetCCharSequence("J")));
-            JavaVMRef javaVM = default;
 
-            getJvm(jEnv, ref javaVM);
+            _surfaceEvent.Set();
+
+            _surfacePtr = (long)surfacePtr;
 
             CreateSurface createSurfaceFunc = (IntPtr instance) =>
             {
+                _surfaceEvent.WaitOne();
+                _surfaceEvent.Reset();
+
                 var api = Vk.GetApi();
                 if (api.TryGetInstanceExtension(new Instance(instance), out KhrAndroidSurface surfaceExtension))
                 {
                     var createInfo = new AndroidSurfaceCreateInfoKHR()
                     {
                         SType = StructureType.AndroidSurfaceCreateInfoKhr,
-                        Window = (nint*)(long)surfacePtr
+                        Window = (nint*)_surfacePtr
                     };
 
                     var result = surfaceExtension.CreateAndroidSurface(new Instance(instance), createInfo, null, out var surface);
