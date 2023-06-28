@@ -14,10 +14,10 @@ namespace Ryujinx.Graphics.Vulkan
         private const int SurfaceHeight = 720;
 
         private readonly VulkanRenderer _gd;
-        private readonly SurfaceKHR _surface;
         private readonly PhysicalDevice _physicalDevice;
         private readonly Device _device;
         private SwapchainKHR _swapchain;
+        private SurfaceKHR _surface;
 
         private Image[] _swapchainImages;
         private Auto<DisposableImageView>[] _swapchainImageViews;
@@ -82,6 +82,12 @@ namespace Ryujinx.Graphics.Vulkan
             _gd.SwapchainApi.DestroySwapchain(_device, oldSwapchain, Span<AllocationCallbacks>.Empty);
 
             CreateSwapchain();
+        }
+
+        internal void SetSurface(SurfaceKHR surface)
+        {
+            _surface = surface;
+            RecreateSwapchain();
         }
 
         private unsafe void CreateSwapchain()
@@ -312,6 +318,10 @@ namespace Ryujinx.Graphics.Vulkan
                     _swapchainIsDirty)
                 {
                     RecreateSwapchain();
+                }
+                else if(acquireResult == Result.ErrorSurfaceLostKhr)
+                {
+                    _gd.RecreateSurface();
                 }
                 else
                 {
