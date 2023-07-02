@@ -41,6 +41,12 @@ namespace LibRyujinx
             return LoadApplication(path);
         }
 
+        public static bool LoadApplication(Stream stream, bool isXci)
+        {
+            var emulationContext = SwitchDevice.EmulationContext;
+            return (isXci ? emulationContext?.LoadXci(stream) : emulationContext.LoadNsp(stream)) ?? false;
+        }
+
         public static bool LoadApplication(string path)
         {
             var emulationContext = SwitchDevice.EmulationContext;
