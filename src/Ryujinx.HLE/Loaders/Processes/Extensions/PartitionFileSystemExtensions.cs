@@ -20,7 +20,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
         private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, string path, out string errorMessage)
+        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, , Stream stream, out string errorMessage, string extension)
             where TMetaData : PartitionFileSystemMetaCore<TFormat, THeader, TEntry>, new()
             where TFormat : IPartitionFileSystemFormat
             where THeader : unmanaged, IPartitionFileSystemHeader
@@ -141,7 +141,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                 // Load contained DownloadableContents.
                 // TODO: If we want to support multi-processes in future, we shouldn't clear AddOnContent data here.
                 device.Configuration.ContentManager.ClearAocData();
-                device.Configuration.ContentManager.AddAocData(partitionFileSystem, path, mainNca.Header.TitleId, device.Configuration.FsIntegrityCheckLevel);
+                device.Configuration.ContentManager.AddAocData(partitionFileSystem, stream, mainNca.Header.TitleId, device.Configuration.FsIntegrityCheckLevel, extension);
 
                 // Load DownloadableContents.
                 string addOnContentMetadataPath = System.IO.Path.Combine(AppDataManager.GamesDirPath, mainNca.Header.TitleId.ToString("x16"), "dlc.json");
@@ -155,7 +155,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
                         {
                             if (File.Exists(downloadableContentContainer.ContainerPath) && downloadableContentNca.Enabled)
                             {
-                                device.Configuration.ContentManager.AddAocItem(downloadableContentNca.TitleId, downloadableContentContainer.ContainerPath, downloadableContentNca.FullPath);
+                                device.Configuration.ContentManager.AddAocItem(downloadableContentNca.TitleId, stream, downloadableContentNca.FullPath, System.IO.Path.GetExtension(downloadableContentContainer.ContainerPath));
                             }
                             else
                             {
