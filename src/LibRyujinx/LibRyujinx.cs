@@ -73,8 +73,8 @@ namespace LibRyujinx
 
                 SwitchDevice = new SwitchDevice();
 
-                Logger.SetEnable(LogLevel.Debug, true);
-                Logger.SetEnable(LogLevel.Stub, true);
+                Logger.SetEnable(LogLevel.Debug, false);
+                Logger.SetEnable(LogLevel.Stub, false);
                 Logger.SetEnable(LogLevel.Info, true);
                 Logger.SetEnable(LogLevel.Warning, true);
                 Logger.SetEnable(LogLevel.Error, true);
