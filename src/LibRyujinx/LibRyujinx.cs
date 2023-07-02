@@ -33,6 +33,8 @@ using Ryujinx.HLE.Loaders.Npdm;
 using Ryujinx.Common.Utilities;
 using System.Globalization;
 using Ryujinx.Ui.Common.Configuration.System;
+using Ryujinx.Common.Logging.Targets;
+using Ryujinx.Common;
 
 namespace LibRyujinx
 {
@@ -78,7 +80,13 @@ namespace LibRyujinx
                 Logger.SetEnable(LogLevel.Error, true);
                 Logger.SetEnable(LogLevel.Trace, false);
                 Logger.SetEnable(LogLevel.Guest, true);
-                Logger.SetEnable(LogLevel.AccessLog, false);
+                Logger.SetEnable(LogLevel.AccessLog, false); 
+                
+                Logger.AddTarget(new AsyncLogTargetWrapper(
+                    new FileLogTarget(ReleaseInformation.GetBaseApplicationDirectory(), "file"),
+                    1000,
+                    AsyncLogTargetOverflowAction.Block
+                ));
             }
             catch (Exception ex)
             {
