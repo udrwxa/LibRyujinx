@@ -6,7 +6,7 @@ namespace LibRyujinx.Jni.References
     public readonly struct JStringLocalRef : IEquatable<JStringLocalRef>
     {
 #pragma warning disable 0649
-        private readonly JObjectLocalRef _value;
+        public readonly JObjectLocalRef _value;
 #pragma warning restore 0649
 
         #region Public Methods

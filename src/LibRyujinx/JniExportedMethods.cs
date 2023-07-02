@@ -16,6 +16,10 @@ using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 using LibRyujinx.Shared.Audio.Oboe;
 using System.Threading;
+using System.IO;
+using Microsoft.Win32.SafeHandles;
+using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
 
 namespace LibRyujinx
 {
@@ -67,6 +71,12 @@ namespace LibRyujinx
             return s;
         }
 
+        private static JStringLocalRef CreateString(string str, JEnvRef jEnv)
+        {
+            return str.AsSpan().WithSafeFixed(jEnv, CreateString);
+        }
+
+
         private static JStringLocalRef CreateString(in IReadOnlyFixedContext<Char> ctx, JEnvRef jEnv)
         {
             JEnvValue value = jEnv.Environment;
@@ -95,6 +105,19 @@ namespace LibRyujinx
             var path = GetString(jEnv, pathPtr);
 
             return LoadApplication(path);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceLoadDescriptor")]
+        public static JBoolean JniLoadApplicationNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JBoolean isXci)
+        {
+            if (SwitchDevice?.EmulationContext == null)
+            {
+                return false;
+            }
+
+            var stream = OpenFile(descriptor);
+
+            return LoadApplication(stream, isXci);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsInitialize")]
@@ -163,7 +186,6 @@ namespace LibRyujinx
             IntPtr getArrayLengthPtr = jInterface.GetArrayLengthPointer;
             IntPtr getObjectArrayElementPtr = jInterface.GetObjectArrayElementPointer;
             IntPtr getObjectFieldPtr = jInterface.GetObjectFieldPointer;
-            IntPtr getJvmPtr = jInterface.GetJavaVMPointer;
 
             var getObjectClass = getObjectClassPtr.GetUnsafeDelegate<GetObjectClassDelegate>();
             var getFieldId = getFieldIdPtr.GetUnsafeDelegate<GetFieldIdDelegate>();
@@ -171,7 +193,6 @@ namespace LibRyujinx
             var getObjectArrayElement = getObjectArrayElementPtr.GetUnsafeDelegate<GetObjectArrayElementDelegate>();
             var getLongField = getLongFieldPtr.GetUnsafeDelegate<GetLongFieldDelegate>();
             var getObjectField = getObjectFieldPtr.GetUnsafeDelegate<GetObjectFieldDelegate>();
-            var getJvm = getJvmPtr.GetUnsafeDelegate<GetJavaVMDelegate>();
 
             List<string> extensions = new List<string>();
 
@@ -224,6 +245,63 @@ namespace LibRyujinx
         public static void JniRunLoopNative(JEnvRef jEnv, JObjectLocalRef jObj)
         {
             RunLoop();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameInfo")]
+        public static JObjectLocalRef JniGetGameInfo(JEnvRef jEnv, JObjectLocalRef jObj, JInt fileDescriptor, JBoolean isXci)
+        {
+            using var stream = OpenFile(fileDescriptor);
+
+            var info = GetGameInfo(stream, isXci) ?? new GameInfo();
+
+            var javaClassName = GetCCharSequence("org/ryujinx/android/viewmodels/GameInfo");
+
+            JEnvValue value = jEnv.Environment;
+            ref JNativeInterface jInterface = ref value.Functions;
+            IntPtr findClassPtr = jInterface.FindClassPointer;
+            IntPtr newGlobalRefPtr = jInterface.NewGlobalRefPointer;
+            IntPtr getFieldIdPtr = jInterface.GetFieldIdPointer;
+            IntPtr getMethodPtr = jInterface.GetMethodIdPointer;
+            IntPtr newObjectPtr = jInterface.NewObjectPointer;
+            IntPtr setObjectFieldPtr = jInterface.SetObjectFieldPointer;
+            IntPtr setDoubleFieldPtr = jInterface.SetDoubleFieldPointer;
+
+
+            var findClass = findClassPtr.GetUnsafeDelegate<FindClassDelegate>();
+            var newGlobalRef = newGlobalRefPtr.GetUnsafeDelegate <NewGlobalRefDelegate>();
+            var getFieldId = getFieldIdPtr.GetUnsafeDelegate<GetFieldIdDelegate>();
+            var getMethod = getMethodPtr.GetUnsafeDelegate<GetMethodIdDelegate>();
+            var newObject = newObjectPtr.GetUnsafeDelegate<NewObjectDelegate>();
+            var setObjectField = setObjectFieldPtr.GetUnsafeDelegate<SetObjectFieldDelegate>();
+            var setDoubleField = setDoubleFieldPtr.GetUnsafeDelegate<SetDoubleFieldDelegate>();
+
+            var javaClass = findClass(jEnv, javaClassName);
+            var newGlobal = newGlobalRef(jEnv, javaClass._value);
+            var constructor = getMethod(jEnv, javaClass, GetCCharSequence("<init>"), GetCCharSequence("()V"));
+            var newObj = newObject(jEnv, javaClass, constructor, 0);
+
+            using var sha = SHA256.Create();
+
+            var iconCacheByte = sha.ComputeHash(info.Icon ?? new byte[0]);
+            var iconCache = BitConverter.ToString(iconCacheByte).Replace("-", "");
+
+            var cacheDirectory = Path.Combine(AppDataManager.BaseDirPath, "iconCache");
+            Directory.CreateDirectory(cacheDirectory);
+
+            var cachePath = Path.Combine(cacheDirectory, iconCache);
+            if (!File.Exists(cachePath))
+            {
+                File.WriteAllBytes(cachePath, info.Icon ?? new byte[0]);
+            }
+
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleName"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.TitleName, jEnv)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleId"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.TitleId, jEnv)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Developer"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.Developer, jEnv)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Version"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.Version, jEnv)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("IconCache"), GetCCharSequence("Ljava/lang/String;")), CreateString(iconCache, jEnv)._value);
+            setDoubleField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("FileSize"), GetCCharSequence("D")), info.FileSize);
+
+            return newObj;
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsRendererSetVsync")]
@@ -292,6 +370,13 @@ namespace LibRyujinx
             var id = ConnectGamepad(index);
 
             return (id ?? "").AsSpan().WithSafeFixed(jEnv, CreateString);
+        }
+
+        private static Stream OpenFile(int descriptor)
+        {
+            var safeHandle = new SafeFileHandle(descriptor, false);
+
+            return new FileStream(safeHandle, FileAccess.Read);
         }
     }
 
