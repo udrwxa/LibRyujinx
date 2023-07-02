@@ -40,13 +40,13 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_initialize")]
-        public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef jpath)
+        public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef jpath, JBoolean enableDebugLogs)
         {
             var path = GetString(jEnv, jpath);
 
             Ryujinx.Common.SystemInfo.SystemInfo.IsBionic = true;
 
-            var init = Initialize(path);
+            var init = Initialize(path, enableDebugLogs);
 
             AudioDriver = new OboeHardwareDeviceDriver();
 
@@ -376,7 +376,7 @@ namespace LibRyujinx
         {
             var safeHandle = new SafeFileHandle(descriptor, false);
 
-            return new FileStream(safeHandle, FileAccess.Read);
+            return new FileStream(safeHandle, FileAccess.ReadWrite);
         }
     }
 
