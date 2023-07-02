@@ -100,6 +100,21 @@ namespace LibRyujinx
             AudioDriver = new SDL2HardwareDeviceDriver();
         }
 
+        public static GameStats GetGameStats()
+        {
+            if (SwitchDevice?.EmulationContext == null)
+                return new GameStats();
+
+            var context = SwitchDevice.EmulationContext;
+
+            return new GameStats()
+            {
+                Fifo = context.Statistics.GetFifoPercent(),
+                GameFps = context.Statistics.GetGameFrameRate(),
+                GameTime = context.Statistics.GetGameFrameTime()
+            };
+        }
+
         public static GameInfo GetGameInfo(Stream gameStream, bool isXci)
         {
             var gameInfo = new GameInfo();
@@ -578,5 +593,12 @@ namespace LibRyujinx
         public string Developer;
         public string Version;
         public byte[] Icon;
+    }
+
+    public class GameStats
+    {
+        public double Fifo;
+        public double GameFps;
+        public double GameTime;
     }
 }
