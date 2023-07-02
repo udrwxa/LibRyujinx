@@ -57,7 +57,7 @@ namespace LibRyujinx
             return res;
         }
 
-        public static bool Initialize(string? basePath)
+        public static bool Initialize(string? basePath, bool enableDebugLogs = false)
         {
             if (SwitchDevice != null)
             {
@@ -73,7 +73,7 @@ namespace LibRyujinx
 
                 SwitchDevice = new SwitchDevice();
 
-                Logger.SetEnable(LogLevel.Debug, false);
+                Logger.SetEnable(LogLevel.Debug, enableDebugLogs);
                 Logger.SetEnable(LogLevel.Stub, false);
                 Logger.SetEnable(LogLevel.Info, true);
                 Logger.SetEnable(LogLevel.Warning, true);
