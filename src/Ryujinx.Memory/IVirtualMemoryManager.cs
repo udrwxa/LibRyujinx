@@ -45,6 +45,14 @@ namespace Ryujinx.Memory
         void Unmap(ulong va, ulong size);
 
         /// <summary>
+        /// Reprotects a previously mapped range of virtual memory.
+        /// </summary>
+        /// <param name="va">Virtual address of the range to be reprotected</param>
+        /// <param name="size">Size of the range to be reprotected</param>
+        /// <param name="permission">New protection of the memory range</param>
+        void Reprotect(ulong va, ulong size, MemoryPermission permission);
+
+        /// <summary>
         /// Reads data from CPU mapped memory.
         /// </summary>
         /// <typeparam name="T">Type of the data being read</typeparam>

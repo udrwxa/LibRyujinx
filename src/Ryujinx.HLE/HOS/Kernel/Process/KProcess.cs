@@ -139,7 +139,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
 
             bool aslrEnabled = creationInfo.Flags.HasFlag(ProcessCreationFlags.EnableAslr);
 
-            ulong codeAddress = creationInfo.CodeAddress;
+            ulong codeAddress = creationInfo.CodeAddress + Context.ReservedSize;
 
             ulong codeSize = (ulong)creationInfo.CodePagesCount * KPageTableBase.PageSize;
 
@@ -154,6 +154,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
                 memRegion,
                 codeAddress,
                 codeSize,
+                Context.ReservedSize,
                 slabManager);
 
             if (result != Result.Success)
@@ -189,7 +190,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
             KResourceLimit resourceLimit,
             MemoryRegion memRegion,
             IProcessContextFactory contextFactory,
-            ThreadStart customThreadStart = null)
+            ThreadStart customThreadStart = null,
+            ulong entrypointOffset = 0UL)
         {
             ResourceLimit = resourceLimit;
             _memRegion = memRegion;
@@ -247,7 +249,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
 
             bool aslrEnabled = creationInfo.Flags.HasFlag(ProcessCreationFlags.EnableAslr);
 
-            ulong codeAddress = creationInfo.CodeAddress;
+            ulong codeAddress = creationInfo.CodeAddress + Context.ReservedSize;
 
             ulong codeSize = codePagesCount * KPageTableBase.PageSize;
 
@@ -258,6 +260,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
                 memRegion,
                 codeAddress,
                 codeSize,
+                Context.ReservedSize,
                 slabManager);
 
             if (result != Result.Success)
@@ -303,6 +306,8 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
                 CleanUpForError();
             }
 
+            _entrypoint += entrypointOffset;
+
             return result;
         }
 
@@ -347,7 +352,7 @@ namespace Ryujinx.HLE.HOS.Kernel.Process
 
             Flags = creationInfo.Flags;
             TitleId = creationInfo.TitleId;
-            _entrypoint = creationInfo.CodeAddress;
+            _entrypoint = creationInfo.CodeAddress + Context.ReservedSize;
             _imageSize = (ulong)creationInfo.CodePagesCount * KPageTableBase.PageSize;
 
             switch (Flags & ProcessCreationFlags.AddressSpaceMask)

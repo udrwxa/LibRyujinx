@@ -97,6 +97,11 @@ namespace Ryujinx.Memory
         }
 
         /// <inheritdoc/>
+        public void Reprotect(ulong va, ulong size, MemoryPermission permission)
+        {
+        }
+
+        /// <inheritdoc/>
         public T Read<T>(ulong va) where T : unmanaged
         {
             return MemoryMarshal.Cast<byte, T>(GetSpan(va, Unsafe.SizeOf<T>()))[0];
