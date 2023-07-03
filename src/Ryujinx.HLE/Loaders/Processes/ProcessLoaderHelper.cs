@@ -313,7 +313,7 @@ namespace Ryujinx.HLE.Loaders.Processes
                 programId,
                 codeStart,
                 codePagesCount,
-                (ProcessCreationFlags)meta.Flags,
+                (ProcessCreationFlags)meta.Flags | ProcessCreationFlags.IsApplication,
                 0,
                 personalMmHeapPagesCount);
 
