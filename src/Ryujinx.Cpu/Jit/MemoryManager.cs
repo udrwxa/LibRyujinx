@@ -14,7 +14,7 @@ namespace Ryujinx.Cpu.Jit
     /// <summary>
     /// Represents a CPU memory manager.
     /// </summary>
-    public sealed class MemoryManager : MemoryManagerBase, IMemoryManager, IVirtualMemoryManagerTracked, IWritableBlock
+    public sealed class MemoryManager : MemoryManagerBase, ICpuMemoryManager, IVirtualMemoryManagerTracked, IWritableBlock
     {
         public const int PageBits = 12;
         public const int PageSize = 1 << PageBits;
@@ -124,6 +124,11 @@ namespace Ryujinx.Cpu.Jit
                 va += PageSize;
                 remainingSize -= PageSize;
             }
+        }
+
+        /// <inheritdoc/>
+        public void Reprotect(ulong va, ulong size, MemoryPermission permission)
+        {
         }
 
         /// <inheritdoc/>

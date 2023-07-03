@@ -93,7 +93,7 @@ namespace ARMeilleure.Signal
             JitCache.Initialize(allocator);
         }
 
-        public static void InitializeSignalHandler(ulong pageSize, Func<IntPtr, IntPtr, IntPtr> customSignalHandlerFactory = null)
+        public static void InitializeSignalHandler(ulong pageSize, Func<IntPtr, IntPtr, IntPtr> customSignalHandlerFactory = null, int userSignal = -1)
         {
             if (_initialized)
             {
@@ -127,7 +127,7 @@ namespace ARMeilleure.Signal
                         _signalHandlerPtr = customSignalHandlerFactory(UnixSignalHandlerRegistration.GetSegfaultExceptionHandler().sa_handler, _signalHandlerPtr);
                     }
 
-                    var old = UnixSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr);
+                    var old = UnixSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr, userSignal);
 
                     config.UnixOldSigaction = (nuint)(ulong)old.sa_handler;
                     config.UnixOldSigaction3Arg = old.sa_flags & 4;
