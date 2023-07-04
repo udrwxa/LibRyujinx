@@ -148,20 +148,20 @@ namespace Ryujinx.Cpu.Signal
                         throw new InvalidOperationException($"Could not register SIGBUS sigaction. Error: {result}");
                     }
                 }
-            }
 
-            if (userSignal != -1)
-            {
-                result = sigaction(userSignal, ref sig, out SigAction oldu);
-
-                if (oldu.sa_handler != IntPtr.Zero)
+                if (userSignal != -1)
                 {
-                    throw new InvalidOperationException($"SIG{userSignal} is already in use.");
-                }
+                    result = sigaction(userSignal, ref sig, out SigAction oldu);
 
-                if (result != 0)
-                {
-                    throw new InvalidOperationException($"Could not register SIG{userSignal} sigaction. Error: {result}");
+                    if (oldu.sa_handler != IntPtr.Zero)
+                    {
+                        throw new InvalidOperationException($"SIG{userSignal} is already in use.");
+                    }
+
+                    if (result != 0)
+                    {
+                        throw new InvalidOperationException($"Could not register SIG{userSignal} sigaction. Error: {result}");
+                    }
                 }
             }
 
