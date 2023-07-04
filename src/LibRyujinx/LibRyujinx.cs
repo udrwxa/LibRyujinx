@@ -83,7 +83,7 @@ namespace LibRyujinx
                 Logger.SetEnable(LogLevel.AccessLog, false); 
                 
                 Logger.AddTarget(new AsyncLogTargetWrapper(
-                    new FileLogTarget(ReleaseInformation.GetBaseApplicationDirectory(), "file"),
+                    new FileLogTarget(basePath, "file"),
                     1000,
                     AsyncLogTargetOverflowAction.Block
                 ));
@@ -113,6 +113,14 @@ namespace LibRyujinx
                 GameFps = context.Statistics.GetGameFrameRate(),
                 GameTime = context.Statistics.GetGameFrameTime()
             };
+        }
+
+
+        public static GameInfo GetGameInfo(string file)
+        {
+            using var stream = File.Open(file, FileMode.Open);
+
+            return GetGameInfo(stream, file.ToLower().EndsWith("xci"));
         }
 
         public static GameInfo GetGameInfo(Stream gameStream, bool isXci)
@@ -530,7 +538,7 @@ namespace LibRyujinx
             UserChannelPersistence = new UserChannelPersistence();
         }
 
-        public bool InitializeContext(bool isHostMapped)
+        public bool InitializeContext(bool isHostMapped, bool useNce)
         {
             if(LibRyujinx.Renderer == null)
             {

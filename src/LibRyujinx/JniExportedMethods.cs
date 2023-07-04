@@ -20,6 +20,7 @@ using System.IO;
 using Microsoft.Win32.SafeHandles;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
+using LibHac.Tools.Fs;
 
 namespace LibRyujinx
 {
@@ -89,9 +90,9 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceInitialize")]
-        public static JBoolean JniInitializeDeviceNative(JEnvRef jEnv, JObjectLocalRef jObj, JBoolean isHostMapped)
+        public static JBoolean JniInitializeDeviceNative(JEnvRef jEnv, JObjectLocalRef jObj, JBoolean isHostMapped, JBoolean useNce)
         {
-            return InitializeDevice(isHostMapped);
+            return InitializeDevice(isHostMapped, useNce);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameStats")]
@@ -235,10 +236,10 @@ namespace LibRyujinx
 
             var count = getArrayLength(jEnv, extensionsArray);
 
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 var obj = getObjectArrayElement(jEnv, extensionsArray, i);
-                var ext = obj.Transform<JObjectLocalRef,JStringLocalRef>();
+                var ext = obj.Transform<JObjectLocalRef, JStringLocalRef>();
 
                 extensions.Add(GetString(jEnv, ext));
             }
@@ -284,13 +285,26 @@ namespace LibRyujinx
             RunLoop();
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameInfoFromPath")]
+        public static JObjectLocalRef JniGetGameInfo(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef path)
+        {
+            var info = GetGameInfo(GetString(jEnv, path)) ?? new GameInfo();
+            SHA256 sha;
+            return GetInfo(jEnv, info, out sha);
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameInfo")]
         public static JObjectLocalRef JniGetGameInfo(JEnvRef jEnv, JObjectLocalRef jObj, JInt fileDescriptor, JBoolean isXci)
         {
             using var stream = OpenFile(fileDescriptor);
 
             var info = GetGameInfo(stream, isXci) ?? new GameInfo();
+            SHA256 sha;
+            return GetInfo(jEnv, info, out sha);
+        }
 
+        private static JObjectLocalRef GetInfo(JEnvRef jEnv, GameInfo info, out SHA256 sha)
+        {
             var javaClassName = GetCCharSequence("org/ryujinx/android/viewmodels/GameInfo");
 
             JEnvValue value = jEnv.Environment;
@@ -305,7 +319,7 @@ namespace LibRyujinx
 
 
             var findClass = findClassPtr.GetUnsafeDelegate<FindClassDelegate>();
-            var newGlobalRef = newGlobalRefPtr.GetUnsafeDelegate <NewGlobalRefDelegate>();
+            var newGlobalRef = newGlobalRefPtr.GetUnsafeDelegate<NewGlobalRefDelegate>();
             var getFieldId = getFieldIdPtr.GetUnsafeDelegate<GetFieldIdDelegate>();
             var getMethod = getMethodPtr.GetUnsafeDelegate<GetMethodIdDelegate>();
             var newObject = newObjectPtr.GetUnsafeDelegate<NewObjectDelegate>();
@@ -316,9 +330,7 @@ namespace LibRyujinx
             var newGlobal = newGlobalRef(jEnv, javaClass._value);
             var constructor = getMethod(jEnv, javaClass, GetCCharSequence("<init>"), GetCCharSequence("()V"));
             var newObj = newObject(jEnv, javaClass, constructor, 0);
-
-            using var sha = SHA256.Create();
-
+            sha = SHA256.Create();
             var iconCacheByte = sha.ComputeHash(info.Icon ?? new byte[0]);
             var iconCache = BitConverter.ToString(iconCacheByte).Replace("-", "");
 
