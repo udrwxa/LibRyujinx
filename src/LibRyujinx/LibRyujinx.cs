@@ -538,9 +538,18 @@ namespace LibRyujinx
             UserChannelPersistence = new UserChannelPersistence();
         }
 
-        public bool InitializeContext(bool isHostMapped, bool useNce)
+        public bool InitializeContext(bool isHostMapped,
+                                      bool useNce,
+                                      SystemLanguage systemLanguage,
+                                      RegionCode regionCode,
+                                      bool enableVsync,
+                                      bool enableDockedMode,
+                                      bool enablePtc,
+                                      bool enableInternetAccess,
+                                      string timeZone,
+                                      bool ignoreMissingServices)
         {
-            if(LibRyujinx.Renderer == null)
+            if (LibRyujinx.Renderer == null)
             {
                 return false;
             }
@@ -564,21 +573,21 @@ namespace LibRyujinx
                                                                   LibRyujinx.AudioDriver, //Audio
                                                                   MemoryConfiguration.MemoryConfiguration4GiB,
                                                                   null,
-                                                                  SystemLanguage.AmericanEnglish,
-                                                                  RegionCode.USA,
-                                                                  true,
-                                                                  true,
-                                                                  true,
-                                                                  false,
+                                                                  systemLanguage,
+                                                                  regionCode,
+                                                                  enableVsync,
+                                                                  enableDockedMode,
+                                                                  enablePtc,
+                                                                  enableInternetAccess,
                                                                   IntegrityCheckLevel.None,
                                                                   0,
                                                                   0,
-                                                                  "UTC",
+                                                                  timeZone,
                                                                   isHostMapped ? MemoryManagerMode.HostMappedUnsafe : MemoryManagerMode.SoftwarePageTable,
-                                                                  false,
+                                                                  ignoreMissingServices,
                                                                    LibRyujinx.GraphicsConfiguration.AspectRatio,
                                                                   100,
-                                                                  true,
+                                                                  useNce,
                                                                   "");
 
             EmulationContext = new Switch(configuration);

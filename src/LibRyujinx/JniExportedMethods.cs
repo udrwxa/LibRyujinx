@@ -21,6 +21,7 @@ using Microsoft.Win32.SafeHandles;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 using LibHac.Tools.Fs;
+using Ryujinx.HLE.HOS.SystemState;
 
 namespace LibRyujinx
 {
@@ -90,9 +91,29 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceInitialize")]
-        public static JBoolean JniInitializeDeviceNative(JEnvRef jEnv, JObjectLocalRef jObj, JBoolean isHostMapped, JBoolean useNce)
+        public static JBoolean JniInitializeDeviceNative(JEnvRef jEnv,
+                                                         JObjectLocalRef jObj,
+                                                         JBoolean isHostMapped,
+                                                         JBoolean useNce,
+                                                         JInt systemLanguage,
+                                                         JInt regionCode,
+                                                         JBoolean enableVsync,
+                                                         JBoolean enableDockedMode,
+                                                         JBoolean enablePtc,
+                                                         JBoolean enableInternetAccess,
+                                                         JStringLocalRef timeZone,
+                                                         JBoolean ignoreMissingServices)
         {
-            return InitializeDevice(isHostMapped, useNce);
+            return InitializeDevice(isHostMapped,
+                                    useNce,
+                                    (SystemLanguage)(int)systemLanguage,
+                                    (RegionCode)(int)regionCode,
+                                    enableVsync,
+                                    enableDockedMode,
+                                    enablePtc,
+                                    enableInternetAccess,
+                                    GetString(jEnv, timeZone),
+                                    ignoreMissingServices);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameStats")]

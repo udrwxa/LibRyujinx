@@ -1,5 +1,6 @@
 ﻿using ARMeilleure.Translation;
 using Ryujinx.Common.Logging;
+using Ryujinx.HLE.HOS.SystemState;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,17 +16,35 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "device_initialize")]
         public static bool InitializeDeviceNative()
         {
-            return InitializeDevice(true, false);
+            return InitializeDevice(true, false, SystemLanguage.AmericanEnglish, RegionCode.USA, true, true, true, false, "UTC", false);
         }
 
-        public static bool InitializeDevice(bool isHostMapped, bool useNce)
+        public static bool InitializeDevice(bool isHostMapped,
+                                            bool useNce,
+                                            SystemLanguage systemLanguage,
+                                            RegionCode regionCode,
+                                            bool enableVsync,
+                                            bool enableDockedMode,
+                                            bool enablePtc,
+                                            bool enableInternetAccess,
+                                            string timeZone,
+                                            bool ignoreMissingServices)
         {
             if (SwitchDevice == null)
             {
                 return false;
             }
 
-            return SwitchDevice.InitializeContext(isHostMapped, useNce);
+            return SwitchDevice.InitializeContext(isHostMapped,
+                                                  useNce,
+                                                  systemLanguage,
+                                                  regionCode,
+                                                  enableVsync,
+                                                  enableDockedMode,
+                                                  enablePtc,
+                                                  enableInternetAccess,
+                                                  timeZone,
+                                                  ignoreMissingServices);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "device_load")]
