@@ -1,6 +1,7 @@
 package org.ryujinx.android.views
 
 import android.content.res.Resources
+import android.view.Gravity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Card
@@ -36,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -47,10 +50,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.R
@@ -65,48 +75,98 @@ class HomeViews {
 
         @OptIn(ExperimentalMaterial3Api::class)
         @Composable
-        fun MainTopBar() {
-            TopAppBar(
-                modifier = Modifier
-                    .zIndex(1f)
-                    .padding(top = 10.dp),
-                title = {
-                    DockedSearchBar(
-                        shape = SearchBarDefaults.inputFieldShape,
-                        query = "",
-                        onQueryChange = {},
-                        onSearch = {},
-                        active = false,
-                        onActiveChange = {},
-                        leadingIcon = {
-                            Icon(
-                                Icons.Filled.Search,
-                                contentDescription = "Search Games"
-                            )
+        fun MainTopBar(navController: NavHostController) {
+            var topBarSize = remember {
+                mutableStateOf(0)
+            }
+            Column {
+                var showOptionsPopup = remember {
+                    mutableStateOf(false)
+                }
+                TopAppBar(
+                    modifier = Modifier
+                        .zIndex(1f)
+                        .padding(top = 16.dp)
+                        .onSizeChanged {
+                            topBarSize.value = it.height
                         },
-                        placeholder = {
-                            Text(text = "Search Games")
-                        }
-                    ) {
+                    title = {
+                        DockedSearchBar(
+                            shape = SearchBarDefaults.inputFieldShape,
+                            query = "",
+                            onQueryChange = {},
+                            onSearch = {},
+                            active = false,
+                            onActiveChange = {},
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = "Search Games"
+                                )
+                            },
+                            placeholder = {
+                                Text(text = "Search Games")
+                            }
+                        ) {
 
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                showOptionsPopup.value = true;
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "More"
+                            )
+                        }
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { }
-                    ) {
-                        Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = "More"
-                        )
+                )
+                Box {
+                    if(showOptionsPopup.value)
+                    {
+                        AlertDialog(
+                            modifier = Modifier.padding(top = (topBarSize.value / Resources.getSystem().displayMetrics.density + 10).dp,
+                            start = 16.dp, end = 16.dp),
+                            onDismissRequest = {
+                                showOptionsPopup.value = false
+                            }) {
+                            val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
+                            dialogWindowProvider.window.setGravity(Gravity.TOP)
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .padding(16.dp),
+                                shape = MaterialTheme.shapes.large,
+                                tonalElevation = AlertDialogDefaults.TonalElevation
+                            ) {
+                                Column {
+                                    TextButton(onClick = {
+                                                         navController.navigate("settings")
+                                    }, modifier = Modifier.fillMaxWidth()
+                                        .align(Alignment.Start),
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Settings,
+                                            contentDescription = "Settings"
+                                        )
+                                        Text(text = "Settings", modifier = Modifier.padding(16.dp)
+                                            .align(Alignment.CenterVertically))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            )
+            }
         }
 
         @OptIn(ExperimentalMaterial3Api::class)
         @Composable
-        fun Home(viewModel: HomeViewModel = HomeViewModel()) {
+        fun Home(viewModel: HomeViewModel = HomeViewModel(), navController: NavHostController? = null) {
             val sheetState = rememberModalBottomSheetState()
             val scope = rememberCoroutineScope()
             var showBottomSheet = remember { mutableStateOf(false) }
@@ -114,7 +174,9 @@ class HomeViews {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    MainTopBar()
+                    navController?.apply {
+                        MainTopBar(navController)
+                    }
                 },
                 floatingActionButtonPosition = FabPosition.End,
                 floatingActionButton = {
@@ -168,7 +230,7 @@ class HomeViews {
                             }
                         }
                         Surface(color =  MaterialTheme.colorScheme.surface,
-                        modifier = Modifier.padding(10.dp)) {
+                        modifier = Modifier.padding(16.dp)) {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                                     Card(
@@ -176,7 +238,7 @@ class HomeViews {
                                             openDialog.value = true
                                         }
                                     ) {
-                                        Column(modifier = Modifier.padding(10.dp)) {
+                                        Column(modifier = Modifier.padding(16.dp)) {
                                             Icon(
                                                 painter = painterResource(R.drawable.app_update),
                                                 contentDescription = "More",
@@ -206,7 +268,7 @@ class HomeViews {
             Card(shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp)
+                    .padding(16.dp)
                     .combinedClickable(
                         onClick = {
                             if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000") {
@@ -219,7 +281,7 @@ class HomeViews {
                         })) {
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp),
+                    .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     Row {
                         if(!gameModel.titleId.isNullOrEmpty() && gameModel.titleId != "0000000000000000")
@@ -231,7 +293,7 @@ class HomeViews {
                                 AsyncImage(model = imageFile,
                                     contentDescription = gameModel.titleName + " icon",
                                 modifier = Modifier
-                                    .padding(end = 5.dp)
+                                    .padding(end = 8.dp)
                                     .width(size.roundToInt().dp)
                                     .height(size.roundToInt().dp))
                             }
@@ -258,7 +320,7 @@ class HomeViews {
                 Icons.Filled.Add,
                 contentDescription = "Options",
                 modifier = Modifier
-                    .padding(end = 5.dp)
+                    .padding(end = 8.dp)
                     .width(size.roundToInt().dp)
                     .height(size.roundToInt().dp)
             )

@@ -46,7 +46,7 @@ class TitleUpdateViews {
                     Text(text = "Updates for ${name}", textAlign = TextAlign.Center)
                     Surface(
                         modifier = Modifier
-                            .padding(5.dp),
+                            .padding(8.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = MaterialTheme.shapes.medium
                     ) {
@@ -55,7 +55,7 @@ class TitleUpdateViews {
                                 .height(300.dp)
                                 .fillMaxWidth()
                         ) {
-                            Row(modifier = Modifier.padding(5.dp)) {
+                            Row(modifier = Modifier.padding(8.dp)) {
                                 RadioButton(
                                     selected = (selected.value == 0),
                                     onClick = { selected.value = 0
@@ -75,7 +75,7 @@ class TitleUpdateViews {
                             var index = 1
                             for (path in paths) {
                                 var i = index
-                                Row(modifier = Modifier.padding(5.dp)) {
+                                Row(modifier = Modifier.padding(8.dp)) {
                                     RadioButton(
                                         selected = (selected.value == i),
                                         onClick = { selected.value = i })
@@ -115,7 +115,7 @@ class TitleUpdateViews {
                     }
 
                 }
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(18.dp))
                 TextButton(
                     modifier = Modifier.align(Alignment.End),
                     onClick = {
