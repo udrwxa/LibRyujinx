@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.MainViewModel
+import org.ryujinx.android.viewmodels.QuickSettings
 import kotlin.concurrent.thread
 import kotlin.math.roundToInt
 
@@ -105,16 +106,22 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         success = _nativeRyujinx.graphicsInitializeRenderer(
             nativeInterop!!.VkRequiredExtensions!!,
             window
+        )
+
+        var settings = QuickSettings(mainViewModel.activity)
+
+        success = _nativeRyujinx.deviceInitialize(
+            settings.isHostMapped,
+            settings.useNce,
+            SystemLanguage.AmericanEnglish.ordinal,
+            RegionCode.USA.ordinal,
+            settings.enableVsync,
+            settings.enableDocked,
+            settings.enablePtc,
+            false,
+            "UTC",
+            settings.ignoreMissingServices
         );
-        success = _nativeRyujinx.deviceInitialize(true, true,
-        SystemLanguage.AmericanEnglish.ordinal,
-        RegionCode.USA.ordinal,
-        true,
-        true,
-        true,
-        false,
-        "UTC",
-        false);
 
         success = _nativeRyujinx.deviceLoad(path)
 

@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.viewmodels.MainViewModel
+import org.ryujinx.android.viewmodels.SettingsViewModel
 
 class MainView {
     companion object {
@@ -29,8 +30,9 @@ class MainView {
             mainViewModel.setNavController(navController)
 
             NavHost(navController = navController, startDestination = "home") {
-                composable("home") {HomeViews.Home(mainViewModel.homeViewModel)}
-                composable("game") { GameView(mainViewModel)}
+                composable("home") { HomeViews.Home(mainViewModel.homeViewModel, navController) }
+                composable("game") { GameView(mainViewModel) }
+                composable("settings") { SettingViews.Main(SettingsViewModel(navController, mainViewModel.activity)) }
             }
         }
 
@@ -61,7 +63,7 @@ class MainView {
                 mutableStateOf(0.0)
             }
 
-            Surface(modifier = Modifier.padding(10.dp),
+            Surface(modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.surface.copy(0.4f)) {
                 Column {
                     var gameTimeVal = 0.0;
