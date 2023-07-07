@@ -91,7 +91,13 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
 
         var surface = surfaceHolder.surface;
 
-        var success = _nativeRyujinx.graphicsInitialize(GraphicsConfiguration())
+        var settings = QuickSettings(mainViewModel.activity)
+
+        var success = _nativeRyujinx.graphicsInitialize(GraphicsConfiguration().apply {
+            EnableShaderCache = settings.enableShaderCache
+            EnableTextureRecompression = settings.enableTextureRecompression
+            ResScale = settings.resScale
+        })
 
 
         var nativeHelpers = NativeHelpers()
@@ -108,7 +114,6 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
             window
         )
 
-        var settings = QuickSettings(mainViewModel.activity)
 
         success = _nativeRyujinx.deviceInitialize(
             settings.isHostMapped,
@@ -135,12 +140,6 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         );
 
         _guestThread = thread(start = true) {
-            runBlocking {
-                this.launch {
-                    delay(5000)
-                    _nativeRyujinx.graphicsRendererSetVsync(false);
-                }
-            }
             runGame()
         }
         _isStarted = success;
