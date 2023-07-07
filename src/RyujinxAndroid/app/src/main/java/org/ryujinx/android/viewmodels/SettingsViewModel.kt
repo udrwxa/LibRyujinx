@@ -17,12 +17,17 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         return PreferenceManager.getDefaultSharedPreferences(activity)
     }
 
-    fun initializeState(isHostMapped : MutableState<Boolean>,
-                        useNce : MutableState<Boolean>,
-                        enableVsync : MutableState<Boolean>,
-                        enableDocked : MutableState<Boolean>,
-                        enablePtc : MutableState<Boolean>,
-                        ignoreMissingServices : MutableState<Boolean>)
+    fun initializeState(
+        isHostMapped: MutableState<Boolean>,
+        useNce: MutableState<Boolean>,
+        enableVsync: MutableState<Boolean>,
+        enableDocked: MutableState<Boolean>,
+        enablePtc: MutableState<Boolean>,
+        ignoreMissingServices: MutableState<Boolean>,
+        enableShaderCache: MutableState<Boolean>,
+        enableTextureRecompression: MutableState<Boolean>,
+        resScale: MutableState<Float>
+    )
     {
 
         isHostMapped.value = sharedPref.getBoolean("isHostMapped", true)
@@ -31,14 +36,22 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableDocked.value = sharedPref.getBoolean("enableDocked", true)
         enablePtc.value = sharedPref.getBoolean("enablePtc", true)
         ignoreMissingServices.value = sharedPref.getBoolean("ignoreMissingServices", false)
+        enableShaderCache.value = sharedPref.getBoolean("enableShaderCache", true)
+        enableTextureRecompression.value = sharedPref.getBoolean("enableTextureRecompression", false)
+        resScale.value = sharedPref.getFloat("resScale", 1f)
     }
 
-    fun save(isHostMapped : MutableState<Boolean>,
-             useNce : MutableState<Boolean>,
-             enableVsync : MutableState<Boolean>,
-             enableDocked : MutableState<Boolean>,
-             enablePtc : MutableState<Boolean>,
-             ignoreMissingServices : MutableState<Boolean>){
+    fun save(
+        isHostMapped: MutableState<Boolean>,
+        useNce: MutableState<Boolean>,
+        enableVsync: MutableState<Boolean>,
+        enableDocked: MutableState<Boolean>,
+        enablePtc: MutableState<Boolean>,
+        ignoreMissingServices: MutableState<Boolean>,
+        enableShaderCache: MutableState<Boolean>,
+        enableTextureRecompression: MutableState<Boolean>,
+        resScale: MutableState<Float>
+    ){
         var editor = sharedPref.edit()
 
         editor.putBoolean("isHostMapped", isHostMapped?.value ?: true)
@@ -47,6 +60,9 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putBoolean("enableDocked", enableDocked?.value ?: true)
         editor.putBoolean("enablePtc", enablePtc?.value ?: true)
         editor.putBoolean("ignoreMissingServices", ignoreMissingServices?.value ?: false)
+        editor.putBoolean("enableShaderCache", enableShaderCache?.value ?: true)
+        editor.putBoolean("enableTextureRecompression", enableTextureRecompression?.value ?: false)
+        editor.putFloat("resScale", resScale?.value ?: 1f)
 
         editor.apply()
     }

@@ -3,7 +3,6 @@ package org.ryujinx.android.views
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDp
@@ -15,13 +14,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -32,9 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,12 +72,24 @@ class SettingViews {
             var ignoreMissingServices = remember {
                 mutableStateOf(false)
             }
+            var enableShaderCache = remember {
+                mutableStateOf(false)
+            }
+            var enableTextureRecompression = remember {
+                mutableStateOf(false)
+            }
+            var resScale = remember {
+                mutableStateOf(1f)
+            }
 
             if (!loaded.value) {
                 settingsViewModel.initializeState(
                     isHostMapped,
                     useNce,
-                    enableVsync, enableDocked, enablePtc, ignoreMissingServices
+                    enableVsync, enableDocked, enablePtc, ignoreMissingServices,
+                    enableShaderCache,
+                    enableTextureRecompression,
+                    resScale
                 )
                 loaded.value = true
             }
@@ -99,7 +107,10 @@ class SettingViews {
                                     enableVsync,
                                     enableDocked,
                                     enablePtc,
-                                    ignoreMissingServices
+                                    ignoreMissingServices,
+                                    enableShaderCache,
+                                    enableTextureRecompression,
+                                    resScale
                                 )
                                 settingsViewModel.navController.popBackStack()
                             }) {
@@ -111,7 +122,10 @@ class SettingViews {
                     BackHandler {
                         settingsViewModel.save(
                             isHostMapped,
-                            useNce, enableVsync, enableDocked, enablePtc, ignoreMissingServices
+                            useNce, enableVsync, enableDocked, enablePtc, ignoreMissingServices,
+                            enableShaderCache,
+                            enableTextureRecompression,
+                            resScale
                         )
                     }
                     ExpandableView(onCardArrowClick = { }, title = "System") {
@@ -208,6 +222,59 @@ class SettingViews {
                             }
                         }
                     }
+                    ExpandableView(onCardArrowClick = { }, title = "Graphics") {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Shader Cache",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableShaderCache.value, onCheckedChange = {
+                                    enableShaderCache.value = !enableShaderCache.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Resolution Scale",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Text(text = resScale.value.toString() +"x")
+                            }
+                            Slider(value = resScale.value,
+                                valueRange = 0.5f..4f,
+                                steps = 6,
+                                onValueChange = { it ->
+                                    resScale.value = it
+                                } )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Texture Recompression",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableTextureRecompression.value, onCheckedChange = {
+                                    enableTextureRecompression.value = !enableTextureRecompression.value
+                                })
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -293,7 +360,9 @@ class SettingViews {
             Icon(
                 Icons.Filled.KeyboardArrowUp,
                 contentDescription = "Expandable Arrow",
-                modifier = Modifier.padding(8.dp).rotate(degrees),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .rotate(degrees),
             )
         }
 
