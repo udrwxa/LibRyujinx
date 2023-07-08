@@ -152,8 +152,7 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
                 c++
                 if (c >= 1000) {
                     c = 0
-                    var stats = _nativeRyujinx.deviceGetGameStats()
-                    mainViewModel.updateStats(stats.Fifo, stats.GameFps, stats.GameTime)
+                    mainViewModel.updateStats(_nativeRyujinx.deviceGetGameFifo(), _nativeRyujinx.deviceGetGameFrameRate(), _nativeRyujinx.deviceGetGameFrameTime())
                 }
             }
         }
