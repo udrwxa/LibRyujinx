@@ -87,6 +87,8 @@ class TitleUpdateViewModel(val titleId: String) {
     init {
         jsonPath = (MainActivity.AppPath
             ?: "") + "/games/" + titleId.toLowerCase(Locale.current) + "/updates.json"
+
+        data = TitleUpdateMetadata()
         if (File(jsonPath).exists()) {
             var gson = Gson()
             data = gson.fromJson(File(jsonPath).readText(), TitleUpdateMetadata::class.java)
