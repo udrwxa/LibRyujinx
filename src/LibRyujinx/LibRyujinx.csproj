@@ -30,10 +30,10 @@
         <RdXmlFile Include="rd.xml" />
     </ItemGroup>
     <ItemGroup>
-		  <PackageReference Include="Rxmxnx.PInvoke.Extensions"/>        
+		  <PackageReference Include="Rxmxnx.PInvoke.Extensions" />        
       <PackageReference Include="Silk.NET.Vulkan" />
       <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" />
-      <LinkerArg  Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'" Include="-llog" />
+      <LinkerArg Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'" Include="-llog" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Jni\" />
