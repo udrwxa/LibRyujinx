@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-      <LinkerFlavor>lld</LinkerFlavor>
+      <LinkerFlavor Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'">lld</LinkerFlavor>
+      <DefineConstants>$(DefineConstants);FORCE_EXTERNAL_BASE_DIR</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PublishAot>true</PublishAot>
@@ -32,7 +33,7 @@
 		  <PackageReference Include="Rxmxnx.PInvoke.Extensions"/>        
       <PackageReference Include="Silk.NET.Vulkan" />
       <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" />
-      <LinkerArg Include="-llog" />
+      <LinkerArg  Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'" Include="-llog" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Jni\" />

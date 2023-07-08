@@ -35,7 +35,20 @@ namespace Ryujinx.Common
                 return BuildVersion;
             }
 
-            return Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            if (SystemInfo.SystemInfo.IsBionic)
+            {
+                return "Android_1.0";
+            }
+
+            try
+            {
+                return Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            }
+            catch (Exception _)
+            {
+                return "Native";
+            }
+
         }
 
 #if FORCE_EXTERNAL_BASE_DIR
@@ -46,7 +59,7 @@ namespace Ryujinx.Common
 #else
         public static string GetBaseApplicationDirectory()
         {
-            if (IsFlatHubBuild() || OperatingSystem.IsMacOS())
+            if (IsFlatHubBuild() || OperatingSystem.IsMacOS() || SystemInfo.SystemInfo.IsBionic)
             {
                 return AppDataManager.BaseDirPath;
             }
