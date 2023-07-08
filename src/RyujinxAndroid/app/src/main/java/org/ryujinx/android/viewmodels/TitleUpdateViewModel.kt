@@ -31,6 +31,29 @@ class TitleUpdateViewModel(val titleId: String) {
     }
 
     fun Add() {
+        var callBack = storageHelper.onFileSelected
+
+        storageHelper.onFileSelected = { requestCode, files ->
+            run {
+                storageHelper.onFileSelected = callBack
+                if(requestCode == UpdateRequestCode)
+                {
+                    var file = files.firstOrNull()
+                    file?.apply {
+                        var path = Helpers.getPath(storageHelper.storage.context, file.uri)
+                        if(!path.isNullOrEmpty()){
+                            data?.apply {
+                                if(!paths.contains(path)) {
+                                    paths.add(path)
+                                    pathsState?.clear()
+                                    pathsState?.addAll(paths)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         storageHelper.openFilePicker(UpdateRequestCode)
     }
 
@@ -86,27 +109,6 @@ class TitleUpdateViewModel(val titleId: String) {
         }
 
         storageHelper = MainActivity.StorageHelper!!
-
-        storageHelper.onFileSelected = { requestCode, files ->
-            run {
-                if(requestCode == UpdateRequestCode)
-                {
-                    var file = files.firstOrNull()
-                    file?.apply {
-                        var path = Helpers.getPath(storageHelper.storage.context, file.uri)
-                        if(!path.isNullOrEmpty()){
-                            data?.apply {
-                                if(!paths.contains(path)) {
-                                    paths.add(path)
-                                    pathsState?.clear()
-                                    pathsState?.addAll(paths)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
