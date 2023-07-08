@@ -116,41 +116,28 @@ namespace LibRyujinx
                                     ignoreMissingServices);
         }
 
-        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameStats")]
-        public static JObjectLocalRef JniGetGameStats(JEnvRef jEnv, JObjectLocalRef jObj)
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameFifo")]
+        public static JDouble JniGetGameFifo(JEnvRef jEnv, JObjectLocalRef jObj)
         {
-            var stats = GetGameStats();
+            var stats = SwitchDevice.EmulationContext?.Statistics.GetFifoPercent() ?? 0;
 
-            var javaClassName = GetCCharSequence("org/ryujinx/android/viewmodels/GameStats");
+            return stats;
+        }
 
-            JEnvValue value = jEnv.Environment;
-            ref JNativeInterface jInterface = ref value.Functions;
-            IntPtr findClassPtr = jInterface.FindClassPointer;
-            IntPtr newGlobalRefPtr = jInterface.NewGlobalRefPointer;
-            IntPtr getFieldIdPtr = jInterface.GetFieldIdPointer;
-            IntPtr getMethodPtr = jInterface.GetMethodIdPointer;
-            IntPtr newObjectPtr = jInterface.NewObjectPointer;
-            IntPtr setDoubleFieldPtr = jInterface.SetDoubleFieldPointer;
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameFrameTime")]
+        public static JDouble JniGetGameFrameTime(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            var stats = SwitchDevice.EmulationContext?.Statistics.GetGameFrameTime() ?? 0;
 
+            return stats;
+        }
 
-            var findClass = findClassPtr.GetUnsafeDelegate<FindClassDelegate>();
-            var newGlobalRef = newGlobalRefPtr.GetUnsafeDelegate<NewGlobalRefDelegate>();
-            var getFieldId = getFieldIdPtr.GetUnsafeDelegate<GetFieldIdDelegate>();
-            var getMethod = getMethodPtr.GetUnsafeDelegate<GetMethodIdDelegate>();
-            var newObject = newObjectPtr.GetUnsafeDelegate<NewObjectDelegate>();
-            var setDoubleField = setDoubleFieldPtr.GetUnsafeDelegate<SetDoubleFieldDelegate>();
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameFrameRate")]
+        public static JDouble JniGetGameFrameRate(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            var stats = SwitchDevice.EmulationContext?.Statistics.GetGameFrameRate() ?? 0;
 
-            var javaClass = findClass(jEnv, javaClassName);
-            var newGlobal = newGlobalRef(jEnv, javaClass._value);
-            var constructor = getMethod(jEnv, javaClass, GetCCharSequence("<init>"), GetCCharSequence("()V"));
-            var newObj = newObject(jEnv, javaClass, constructor, 0);
-
-
-            setDoubleField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Fifo"), GetCCharSequence("D")), stats.Fifo);
-            setDoubleField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("GameFps"), GetCCharSequence("D")), stats.GameFps);
-            setDoubleField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("GameTime"), GetCCharSequence("D")), stats.GameTime);
-
-            return newObj;
+            return stats;
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceLoad")]

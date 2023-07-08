@@ -2,7 +2,6 @@ package org.ryujinx.android
 
 import android.view.Surface
 import org.ryujinx.android.viewmodels.GameInfo
-import org.ryujinx.android.viewmodels.GameStats
 import java.io.FileDescriptor
 
 class RyujinxNative {
@@ -31,7 +30,9 @@ class RyujinxNative {
     ): Boolean
 
     external fun deviceLoad(game: String): Boolean
-    external fun deviceGetGameStats(): GameStats
+    external fun deviceGetGameFrameRate(): Double
+    external fun deviceGetGameFrameTime(): Double
+    external fun deviceGetGameFifo(): Double
     external fun deviceGetGameInfo(fileDescriptor: Int,  isXci:Boolean): GameInfo
     external fun deviceGetGameInfoFromPath(path: String): GameInfo
     external fun deviceLoadDescriptor(fileDescriptor: Int,  isXci:Boolean): Boolean
