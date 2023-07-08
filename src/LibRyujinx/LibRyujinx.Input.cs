@@ -73,22 +73,22 @@ namespace LibRyujinx
             _virtualTouchScreen?.ReleaseTouch();
         }
 
-        public static void SetButtonPressed(GamepadButtonInputId button, string id)
+        public static void SetButtonPressed(GamepadButtonInputId button, int id)
         {
             _gamepadDriver?.SetButtonPressed(button, id);
         }
 
-        public static void SetButtonReleased(GamepadButtonInputId button, string id)
+        public static void SetButtonReleased(GamepadButtonInputId button, int id)
         {
             _gamepadDriver?.SetButtonReleased(button, id);
         }
 
-        public static void SetStickAxis(StickInputId stick, Vector2 axes, string deviceId)
+        public static void SetStickAxis(StickInputId stick, Vector2 axes, int deviceId)
         {
             _gamepadDriver?.SetStickAxis(stick, axes, deviceId);
         }
 
-        public static string ConnectGamepad(int index)
+        public static int ConnectGamepad(int index)
         {
             var gamepad = _gamepadDriver?.GetGamepad(index);
             if (gamepad != null)
@@ -103,7 +103,7 @@ namespace LibRyujinx
 
             _npadManager?.ReloadConfiguration(_configs.Where(x => x != null).ToList(), false, false);
 
-            return gamepad?.Id ?? string.Empty;
+            return int.TryParse(gamepad?.Id, out var idInt) ? idInt : -1;
         }
 
         private static InputConfig CreateDefaultInputConfig()
@@ -223,32 +223,27 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "input_set_button_pressed")]
-        public static void SetButtonPressedNative(GamepadButtonInputId button, IntPtr idPtr)
+        public static void SetButtonPressedNative(GamepadButtonInputId button, int id)
         {
-            var id = Marshal.PtrToStringAnsi(idPtr);
             SetButtonPressed(button, id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "input_set_button_released")]
-        public static void SetButtonReleased(GamepadButtonInputId button, IntPtr idPtr)
+        public static void SetButtonReleasedNative(GamepadButtonInputId button, int id)
         {
-            var id = Marshal.PtrToStringAnsi(idPtr);
             SetButtonReleased(button, id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "input_set_stick_axis")]
-        public static void SetStickAxisNative(StickInputId stick, Vector2 axes, IntPtr idPtr)
+        public static void SetStickAxisNative(StickInputId stick, Vector2 axes, int id)
         {
-            var id = Marshal.PtrToStringAnsi(idPtr);
             SetStickAxis(stick, axes, id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "input_connect_gamepad")]
         public static IntPtr ConnectGamepadNative(int index)
         {
-            var id = ConnectGamepad(index);
-
-            return Marshal.StringToHGlobalAnsi(id);
+            return ConnectGamepad(index);
         }
 
     }
@@ -386,18 +381,18 @@ namespace LibRyujinx
     {
         private readonly int _controllerCount;
 
-        public ReadOnlySpan<string> GamepadsIds => _gamePads.Keys.ToArray();
+        public ReadOnlySpan<string> GamepadsIds => _gamePads.Keys.Select(x => x.ToString()).ToArray();
 
-        public string DriverName => "SDL2";
+        public string DriverName => "Virtual";
 
         public event Action<string> OnGamepadConnected;
         public event Action<string> OnGamepadDisconnected;
 
-        private Dictionary<string, VirtualGamepad> _gamePads;
+        private Dictionary<int, VirtualGamepad> _gamePads;
 
         public VirtualGamepadDriver(int controllerCount)
         {
-            _gamePads = new Dictionary<string, VirtualGamepad>();
+            _gamePads = new Dictionary<int, VirtualGamepad>();
             for (int joystickIndex = 0; joystickIndex < controllerCount; joystickIndex++)
             {
                 HandleJoyStickConnected(joystickIndex);
@@ -406,16 +401,10 @@ namespace LibRyujinx
             _controllerCount = controllerCount;
         }
 
-        private string GenerateGamepadId(int joystickIndex)
-        {
-            return "VirtualGamePad-" + joystickIndex;
-        }
-
         private void HandleJoyStickConnected(int joystickDeviceId)
         {
-            string id = GenerateGamepadId(joystickDeviceId);
-            _gamePads[id] = new VirtualGamepad(this, id);
-            OnGamepadConnected?.Invoke(id);
+            _gamePads[joystickDeviceId] = new VirtualGamepad(this, joystickDeviceId);
+            OnGamepadConnected?.Invoke(joystickDeviceId.ToString());
         }
 
         protected virtual void Dispose(bool disposing)
@@ -440,16 +429,15 @@ namespace LibRyujinx
 
         public IGamepad GetGamepad(string id)
         {
-            return _gamePads[id];
+            return _gamePads[int.Parse(id)];
         }
 
         public IGamepad GetGamepad(int index)
         {
-            string id = GenerateGamepadId(index);
-            return _gamePads[id];
+            return _gamePads[index];
         }
 
-        public void SetStickAxis(StickInputId stick, Vector2 axes, string deviceId)
+        public void SetStickAxis(StickInputId stick, Vector2 axes, int deviceId)
         {
             if(_gamePads.TryGetValue(deviceId, out var gamePad))
             {
@@ -457,7 +445,7 @@ namespace LibRyujinx
             }
         }
 
-        public void SetButtonPressed(GamepadButtonInputId button, string deviceId)
+        public void SetButtonPressed(GamepadButtonInputId button, int deviceId)
         {
             if (_gamePads.TryGetValue(deviceId, out var gamePad))
             {
@@ -465,7 +453,7 @@ namespace LibRyujinx
             }
         }
 
-        public void SetButtonReleased(GamepadButtonInputId button, string deviceId)
+        public void SetButtonReleased(GamepadButtonInputId button, int deviceId)
         {
             if (_gamePads.TryGetValue(deviceId, out var gamePad))
             {
@@ -482,18 +470,21 @@ namespace LibRyujinx
 
         private Vector2[] _stickInputs;
 
-        public VirtualGamepad(VirtualGamepadDriver driver, string id)
+        public VirtualGamepad(VirtualGamepadDriver driver, int id)
         {
             _buttonInputs = new bool[(int)GamepadButtonInputId.Count];
             _stickInputs = new Vector2[(int)StickInputId.Count];
             _driver = driver;
-            Id = id;
+            Id = id.ToString();
+            IdInt = id;
         }
 
         public void Dispose() { }
 
         public GamepadFeaturesFlag Features { get; }
         public string Id { get; }
+
+        internal readonly int IdInt;
 
         public string Name => Id;
         public bool IsConnected { get; }
