@@ -47,7 +47,7 @@ typealias GamePadConfig = RadialGamePadConfig
 class GameController(var activity: Activity, var ryujinxNative: RyujinxNative = RyujinxNative()) {
     var leftGamePad: GamePad
     var rightGamePad: GamePad
-    var controllerId: String? = null
+    var controllerId: Int = -1
 
     init {
         leftGamePad = GamePad(generateConfig(true), 16f, activity)
@@ -92,12 +92,12 @@ class GameController(var activity: Activity, var ryujinxNative: RyujinxNative = 
     }
 
     fun connect(){
-        if(controllerId.isNullOrEmpty())
+        if(controllerId == -1)
             controllerId = ryujinxNative.inputConnectGamepad(0)
     }
 
     private fun handleEvent(ev: Event) {
-        if(controllerId.isNullOrEmpty())
+        if(controllerId == -1)
             controllerId = ryujinxNative.inputConnectGamepad(0)
 
         controllerId?.apply {

@@ -43,9 +43,9 @@ class RyujinxNative {
     external fun inputSetTouchPoint(x: Int, y: Int): Unit
     external fun inputReleaseTouchPoint(): Unit
     external fun inputUpdate(): Unit
-    external fun inputSetButtonPressed(button: Int, id: String): Unit
-    external fun inputSetButtonReleased(button: Int, id: String): Unit
-    external fun inputConnectGamepad(index: Int): String
-    external fun inputSetStickAxis(stick: Int, x: Float, y: Float, id: String): Unit
+    external fun inputSetButtonPressed(button: Int, id: Int): Unit
+    external fun inputSetButtonReleased(button: Int, id: Int): Unit
+    external fun inputConnectGamepad(index: Int): Int
+    external fun inputSetStickAxis(stick: Int, x: Float, y: Float, id: Int): Unit
     external fun graphicsSetSurface(surface: Long): String
 }
