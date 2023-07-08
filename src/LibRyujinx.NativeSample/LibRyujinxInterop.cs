@@ -10,7 +10,7 @@ namespace LibRyujinx.Sample
 {
     internal static class LibRyujinxInterop
     {
-        private const string dll = "LibRyujinx.Shared.dll";
+        private const string dll = "LibRyujinx.dll";
 
         [DllImport(dll, EntryPoint = "initialize")]
         public extern static bool Initialize(IntPtr path);

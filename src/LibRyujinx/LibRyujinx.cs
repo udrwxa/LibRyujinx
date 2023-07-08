@@ -83,7 +83,7 @@ namespace LibRyujinx
                 Logger.SetEnable(LogLevel.AccessLog, false); 
                 
                 Logger.AddTarget(new AsyncLogTargetWrapper(
-                    new FileLogTarget(basePath, "file"),
+                    new FileLogTarget(AppDataManager.BaseDirPath, "file"),
                     1000,
                     AsyncLogTargetOverflowAction.Block
                 ));
