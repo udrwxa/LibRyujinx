@@ -417,29 +417,27 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetButtonPressed")]
-        public static void JniSetButtonPressed(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JStringLocalRef id)
+        public static void JniSetButtonPressed(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JInt id)
         {
-            SetButtonPressed((Ryujinx.Input.GamepadButtonInputId)(int)button, GetString(jEnv, id));
+            SetButtonPressed((Ryujinx.Input.GamepadButtonInputId)(int)button, id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetButtonReleased")]
-        public static void JniSetButtonReleased(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JStringLocalRef id)
+        public static void JniSetButtonReleased(JEnvRef jEnv, JObjectLocalRef jObj, JInt button, JInt id)
         {
-            SetButtonReleased((Ryujinx.Input.GamepadButtonInputId)(int)button, GetString(jEnv, id));
+            SetButtonReleased((Ryujinx.Input.GamepadButtonInputId)(int)button, id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetStickAxis")]
-        public static void JniSetStickAxis(JEnvRef jEnv, JObjectLocalRef jObj, JInt stick, JFloat x, JFloat y, JStringLocalRef id)
+        public static void JniSetStickAxis(JEnvRef jEnv, JObjectLocalRef jObj, JInt stick, JFloat x, JFloat y, JInt id)
         {
-            SetStickAxis((Ryujinx.Input.StickInputId)(int)stick, new System.Numerics.Vector2(x, y), GetString(jEnv, id));
+            SetStickAxis((Ryujinx.Input.StickInputId)(int)stick, new System.Numerics.Vector2(x, y), id);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputConnectGamepad")]
-        public static JStringLocalRef JniConnectGamepad(JEnvRef jEnv, JObjectLocalRef jObj, JInt index)
+        public static JInt JniConnectGamepad(JEnvRef jEnv, JObjectLocalRef jObj, JInt index)
         {
-            var id = ConnectGamepad(index);
-
-            return (id ?? "").AsSpan().WithSafeFixed(jEnv, CreateString);
+            return ConnectGamepad(index);
         }
 
         private static Stream OpenFile(int descriptor)
