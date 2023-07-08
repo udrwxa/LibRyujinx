@@ -230,7 +230,10 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsInitializeRenderer")]
-        public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv, JObjectLocalRef jObj, JArrayLocalRef extensionsArray, JLong surfacePtr)
+        public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv,
+                                                                          JObjectLocalRef jObj,
+                                                                          JArrayLocalRef extensionsArray,
+                                                                          JLong surfacePtr)
         {
             if (Renderer != null)
             {
