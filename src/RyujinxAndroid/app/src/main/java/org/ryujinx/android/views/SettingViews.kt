@@ -13,24 +13,34 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +52,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ryujinx.android.viewmodels.SettingsViewModel
+import org.ryujinx.android.viewmodels.VulkanDriverViewModel
 
 class SettingViews {
     companion object {
@@ -273,6 +284,151 @@ class SettingViews {
                                     enableTextureRecompression.value = !enableTextureRecompression.value
                                 })
                             }
+                            /*Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                var isDriverSelectorOpen = remember {
+                                    mutableStateOf(false)
+                                }
+                                var driverViewModel = VulkanDriverViewModel(settingsViewModel.activity)
+                                var isChanged = remember {
+                                    mutableStateOf(false)
+                                }
+                                var refresh = remember {
+                                    mutableStateOf(false)
+                                }
+                                var drivers = driverViewModel.getAvailableDrivers()
+                                var selectedDriver = remember {
+                                    mutableStateOf(0)
+                                }
+
+                                if(refresh.value) {
+                                    isChanged.value = true
+                                    refresh.value = false
+                                }
+
+                                if(isDriverSelectorOpen.value){
+                                    AlertDialog(onDismissRequest = {
+                                        isDriverSelectorOpen.value = false
+
+                                        if(isChanged.value){
+                                            driverViewModel.saveSelected()
+                                        }
+                                    }) {
+                                        Column {
+                                            Surface(
+                                                modifier = Modifier
+                                                    .wrapContentWidth()
+                                                    .wrapContentHeight(),
+                                                shape = MaterialTheme.shapes.large,
+                                                tonalElevation = AlertDialogDefaults.TonalElevation
+                                            ) {
+                                                if (!isChanged.value) {
+                                                    selectedDriver.value =
+                                                        drivers.indexOfFirst { it.driverPath == driverViewModel.selected } + 1
+                                                    isChanged.value = true
+                                                }
+                                                Column {
+                                                    Column (modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(300.dp)) {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            RadioButton(
+                                                                selected = selectedDriver.value == 0 || driverViewModel.selected.isEmpty(),
+                                                                onClick = {
+                                                                    selectedDriver.value = 0
+                                                                    isChanged.value = true
+                                                                    driverViewModel.selected = ""
+                                                                })
+                                                            Column {
+                                                                Text(text = "Default",
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .clickable {
+                                                                            selectedDriver.value = 0
+                                                                            isChanged.value = true
+                                                                            driverViewModel.selected =
+                                                                                ""
+                                                                        })
+                                                            }
+                                                        }
+                                                        var driverIndex = 1
+                                                        for (driver in drivers) {
+                                                            var ind = driverIndex
+                                                            Row(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                RadioButton(
+                                                                    selected = selectedDriver.value == ind,
+                                                                    onClick = {
+                                                                        selectedDriver.value = ind
+                                                                        isChanged.value = true
+                                                                        driverViewModel.selected =
+                                                                            driver.driverPath
+                                                                    })
+                                                                Column {
+                                                                    Text(text = driver.libraryName,
+                                                                        modifier = Modifier
+                                                                            .fillMaxWidth()
+                                                                            .clickable {
+                                                                                selectedDriver.value =
+                                                                                    ind
+                                                                                isChanged.value =
+                                                                                    true
+                                                                                driverViewModel.selected =
+                                                                                    driver.driverPath
+                                                                            })
+                                                                }
+                                                            }
+
+                                                            driverIndex++
+                                                        }
+                                                    }
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.End,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(16.dp)
+                                                    ) {
+                                                        Button(onClick = {
+                                                            driverViewModel.removeSelected()
+                                                            refresh.value = true
+                                                        }, modifier = Modifier.padding(8.dp)) {
+                                                            Text(text = "Remove")
+                                                        }
+
+                                                        Button(onClick = {
+                                                            driverViewModel.add(refresh)
+                                                            refresh.value = true
+                                                        }, modifier = Modifier.padding(8.dp)) {
+                                                            Text(text = "Add")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                TextButton(
+                                    {
+                                        isChanged.value = false
+                                        isDriverSelectorOpen.value = !isDriverSelectorOpen.value
+                                    },
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                ){
+                                    Text(text = "Drivers")
+                                }
+                            }
+                            */
                         }
                     }
                 }
