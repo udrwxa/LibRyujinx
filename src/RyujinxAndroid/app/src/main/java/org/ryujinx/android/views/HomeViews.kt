@@ -268,7 +268,7 @@ class HomeViews {
             Card(shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .combinedClickable(
                         onClick = {
                             if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000") {
@@ -281,7 +281,7 @@ class HomeViews {
                         })) {
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween) {
                     Row {
                         if(!gameModel.titleId.isNullOrEmpty() && gameModel.titleId != "0000000000000000")
