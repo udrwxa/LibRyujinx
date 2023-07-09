@@ -68,8 +68,9 @@ class TitleUpdateViewModel(val titleId: String) {
             var gson = Gson()
             var json = gson.toJson(this)
             jsonPath = (MainActivity.AppPath
-                ?: "") + "/games/" + titleId.toLowerCase(Locale.current) + "/updates.json"
-            File(jsonPath).writeText(json)
+                ?: "") + "/games/" + titleId.toLowerCase(Locale.current)
+            File(jsonPath).mkdirs()
+            File(jsonPath + "/updates.json").writeText(json)
         }
     }
 
