@@ -93,7 +93,7 @@ namespace ARMeilleure.Signal
             JitCache.Initialize(allocator);
         }
 
-        public static void InitializeSignalHandler(ulong pageSize, Func<IntPtr, IntPtr, IntPtr> customSignalHandlerFactory = null, int userSignal = -1)
+        public static void InitializeSignalHandler(ulong pageSize, Func<IntPtr, IntPtr, IntPtr> customSignalHandlerFactory = null)
         {
             if (_initialized)
             {
@@ -131,14 +131,14 @@ namespace ARMeilleure.Signal
 
                     if (Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
                     {
-                        var old = AndroidSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr, userSignal);
+                        var old = AndroidSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr);
 
                         config.UnixOldSigaction = (nuint)(ulong)old.sa_handler;
                         config.UnixOldSigaction3Arg = old.sa_flags & 4;
                     }
                     else
                     {
-                        var old = UnixSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr, userSignal);
+                        var old = UnixSignalHandlerRegistration.RegisterExceptionHandler(_signalHandlerPtr);
 
                         config.UnixOldSigaction = (nuint)(ulong)old.sa_handler;
                         config.UnixOldSigaction3Arg = old.sa_flags & 4;
@@ -161,6 +161,21 @@ namespace ARMeilleure.Signal
 
                 _initialized = true;
             }
+        }
+
+        public static void InstallUnixAlternateStackForCurrentThread(IntPtr stackPtr, ulong stackSize)
+        {
+            UnixSignalHandlerRegistration.RegisterAlternateStack(stackPtr, stackSize);
+        }
+
+        public static void UninstallUnixAlternateStackForCurrentThread()
+        {
+            UnixSignalHandlerRegistration.UnregisterAlternateStack();
+        }
+
+        public static void InstallUnixSignalHandler(int sigNum, IntPtr action)
+        {
+            UnixSignalHandlerRegistration.RegisterExceptionHandler(sigNum, action);
         }
 
         private static unsafe ref SignalHandlerConfig GetConfigRef()
