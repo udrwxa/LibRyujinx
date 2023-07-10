@@ -33,6 +33,9 @@ namespace LibRyujinx
         [DllImport("libryujinxjni")]
         private extern static IntPtr getStringPointer(JEnvRef jEnv, JStringLocalRef s);
 
+        [DllImport("libryujinxjni")]
+        private extern static JStringLocalRef createString(JEnvRef jEnv, IntPtr ch);
+
         public delegate IntPtr JniCreateSurface(IntPtr native_surface, IntPtr instance);
 
         [UnmanagedCallersOnly(EntryPoint = "JNI_OnLoad")]
@@ -71,23 +74,6 @@ namespace LibRyujinx
             var s = Marshal.PtrToStringAnsi(stringPtr);
             Marshal.FreeHGlobal(stringPtr);
             return s;
-        }
-
-        private static JStringLocalRef CreateString(string str, JEnvRef jEnv)
-        {
-            return str.AsSpan().WithSafeFixed(jEnv, CreateString);
-        }
-
-
-        private static JStringLocalRef CreateString(in IReadOnlyFixedContext<Char> ctx, JEnvRef jEnv)
-        {
-            JEnvValue value = jEnv.Environment;
-            ref JNativeInterface jInterface = ref value.Functions;
-
-            IntPtr newStringPtr = jInterface.NewStringPointer;
-            NewStringDelegate newString = newStringPtr.GetUnsafeDelegate<NewStringDelegate>();
-
-            return newString(jEnv, ctx.Pointer, ctx.Values.Length);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceInitialize")]
@@ -354,14 +340,25 @@ namespace LibRyujinx
                 File.WriteAllBytes(cachePath, info.Icon ?? new byte[0]);
             }
 
-            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleName"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.TitleName, jEnv)._value);
-            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleId"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.TitleId, jEnv)._value);
-            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Developer"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.Developer, jEnv)._value);
-            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Version"), GetCCharSequence("Ljava/lang/String;")), CreateString(info.Version, jEnv)._value);
-            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("IconCache"), GetCCharSequence("Ljava/lang/String;")), CreateString(iconCache, jEnv)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleName"), GetCCharSequence("Ljava/lang/String;")), CreateString(jEnv, info.TitleName)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("TitleId"), GetCCharSequence("Ljava/lang/String;")), CreateString(jEnv, info.TitleId)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Developer"), GetCCharSequence("Ljava/lang/String;")), CreateString(jEnv, info.Developer)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("Version"), GetCCharSequence("Ljava/lang/String;")), CreateString(jEnv, info.Version)._value);
+            setObjectField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("IconCache"), GetCCharSequence("Ljava/lang/String;")), CreateString(jEnv, iconCache)._value);
             setDoubleField(jEnv, newObj, getFieldId(jEnv, javaClass, GetCCharSequence("FileSize"), GetCCharSequence("D")), info.FileSize);
 
             return newObj;
+        }
+
+        private static JStringLocalRef CreateString(JEnvRef jEnv, string s)
+        {
+            var ptr = Marshal.StringToHGlobalAnsi(s);
+
+            var str = createString(jEnv, ptr);
+
+            Marshal.FreeHGlobal(ptr);
+
+            return str;
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsRendererSetVsync")]

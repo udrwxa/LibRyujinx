@@ -199,7 +199,10 @@ class HomeViews {
                     viewModel.setViewList(list)
                     LazyColumn(Modifier.fillMaxSize()) {
                         items(list) {
-                            GameItem(it, viewModel, showBottomSheet)
+                            it.titleName?.apply {
+                                if (this.isNotEmpty())
+                                    GameItem(it, viewModel, showBottomSheet)
+                            }
                         }
                     }
                 }
