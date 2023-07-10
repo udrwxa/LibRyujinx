@@ -119,5 +119,13 @@ char* getStringPointer(
     return s;
 }
 
+jstring createString(
+        JNIEnv *env,
+        char* ch) {
+    auto str = env->NewStringUTF(ch);
+
+    return str;
+}
+
 
 }
