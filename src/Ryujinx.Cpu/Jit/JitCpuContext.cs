@@ -1,5 +1,6 @@
 using ARMeilleure.Memory;
 using ARMeilleure.Translation;
+using System;
 
 namespace Ryujinx.Cpu.Jit
 {
@@ -36,11 +37,6 @@ namespace Ryujinx.Cpu.Jit
         public void InvalidateCacheRegion(ulong address, ulong size)
         {
             _translator.InvalidateJitCacheRegion(address, size);
-        }
-
-        /// <inheritdoc/>
-        public void PatchCodeForNce(ulong textAddress, ulong textSize, ulong patchRegionAddress, ulong patchRegionSize)
-        {
         }
 
         /// <inheritdoc/>

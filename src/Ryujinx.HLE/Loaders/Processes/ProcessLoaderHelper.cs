@@ -11,6 +11,7 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common;
 using Ryujinx.Common.Logging;
+using Ryujinx.Cpu.Nce;
 using Ryujinx.HLE.HOS;
 using Ryujinx.HLE.HOS.Kernel;
 using Ryujinx.HLE.HOS.Kernel.Common;
@@ -133,8 +134,6 @@ namespace Ryujinx.HLE.Loaders.Processes
             return resultCode;
         }
 
-        private const int ReservedPatchSize = 0x100000;
-
         public static bool LoadKip(KernelContext context, KipExecutable kip)
         {
             uint endOffset = kip.DataOffset + (uint)kip.Data.Length;
@@ -200,7 +199,7 @@ namespace Ryujinx.HLE.Loaders.Processes
             }
 
             // TODO: Support NCE of KIPs too.
-            result = LoadIntoMemory(process, kip, codeBaseAddress, 0UL);
+            result = LoadIntoMemory(process, kip, codeBaseAddress);
 
             if (result != Result.Success)
             {
@@ -261,7 +260,7 @@ namespace Ryujinx.HLE.Loaders.Processes
                 _ => "",
             }).ToUpper());
 
-            ulong[] nsoPatch = new ulong[executables.Length];
+            NceCpuCodePatch[] nsoPatch = new NceCpuCodePatch[executables.Length];
             ulong[] nsoBase = new ulong[executables.Length];
 
             for (int index = 0; index < executables.Length; index++)
@@ -286,9 +285,15 @@ namespace Ryujinx.HLE.Loaders.Processes
 
                 nsoSize = BitUtils.AlignUp<uint>(nsoSize, KPageTableBase.PageSize);
 
-                nsoPatch[index] = codeStart + codeSize;
+                bool for64Bit = ((ProcessCreationFlags)meta.Flags).HasFlag(ProcessCreationFlags.Is64Bit);
 
-                codeSize += ReservedPatchSize;
+                NceCpuCodePatch codePatch = ArmProcessContextFactory.CreateCodePatchForNce(context, for64Bit, nso.Text);
+                nsoPatch[index] = codePatch;
+
+                if (codePatch != null)
+                {
+                    codeSize += codePatch.Size;
+                }
 
                 nsoBase[index] = codeStart + codeSize;
 
@@ -380,7 +385,7 @@ namespace Ryujinx.HLE.Loaders.Processes
                 resourceLimit,
                 memoryRegion,
                 processContextFactory,
-                entrypointOffset: ReservedPatchSize);
+                entrypointOffset: nsoPatch[0]?.Size ?? 0UL);
 
             if (result != Result.Success)
             {
@@ -391,12 +396,11 @@ namespace Ryujinx.HLE.Loaders.Processes
 
             for (int index = 0; index < executables.Length; index++)
             {
-                ulong nsoPatchAddress = process.Context.ReservedSize + nsoPatch[index];
                 ulong nsoBaseAddress = process.Context.ReservedSize + nsoBase[index];
 
                 Logger.Info?.Print(LogClass.Loader, $"Loading image {index} at 0x{nsoBaseAddress:x16}...");
 
-                result = LoadIntoMemory(process, executables[index], nsoBaseAddress, nsoPatchAddress);
+                result = LoadIntoMemory(process, executables[index], nsoBaseAddress, nsoPatch[index]);
 
                 if (result != Result.Success)
                 {
@@ -436,7 +440,7 @@ namespace Ryujinx.HLE.Loaders.Processes
                 device.System.State.DesiredTitleLanguage);
         }
 
-        private static Result LoadIntoMemory(KProcess process, IExecutable image, ulong baseAddress, ulong patchAddress)
+        private static Result LoadIntoMemory(KProcess process, IExecutable image, ulong baseAddress, NceCpuCodePatch codePatch = null)
         {
             ulong textStart = baseAddress + image.TextOffset;
             ulong roStart = baseAddress + image.RoOffset;
@@ -456,7 +460,10 @@ namespace Ryujinx.HLE.Loaders.Processes
 
             process.CpuMemory.Fill(bssStart, image.BssSize, 0);
 
-            process.Context.PatchCodeForNce(textStart, (ulong)image.Text.Length, patchAddress, ReservedPatchSize);
+            if (codePatch != null)
+            {
+                codePatch.Write(process.CpuMemory, baseAddress - codePatch.Size, textStart);
+            }
 
             Result SetProcessMemoryPermission(ulong address, ulong size, KMemoryPermission permission)
             {
