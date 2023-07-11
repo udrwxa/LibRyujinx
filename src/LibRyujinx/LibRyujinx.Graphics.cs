@@ -91,7 +91,7 @@ namespace LibRyujinx
             }
             else if (graphicsBackend == GraphicsBackend.Vulkan)
             {
-                Renderer = new VulkanRenderer(Vk.GetApi(), (instance, vk) => new SurfaceKHR((ulong?)createSurfaceFunc(instance.Handle)),
+                Renderer = new VulkanRenderer(VulkanLoader?.GetApi() ?? Vk.GetApi(), (instance, vk) => new SurfaceKHR((ulong?)createSurfaceFunc(instance.Handle)),
                     () => requiredExtensions,
                     null);
             }

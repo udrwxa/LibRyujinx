@@ -25,8 +25,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import org.ryujinx.android.ui.theme.RyujinxAndroidTheme
 import org.ryujinx.android.viewmodels.MainViewModel
+import org.ryujinx.android.viewmodels.VulkanDriverViewModel
 import org.ryujinx.android.views.HomeViews
 import org.ryujinx.android.views.MainView
+import java.io.File
 
 
 class MainActivity : ComponentActivity() {
