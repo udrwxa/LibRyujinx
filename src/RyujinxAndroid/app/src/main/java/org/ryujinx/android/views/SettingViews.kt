@@ -279,7 +279,7 @@ class SettingViews {
                                     enableTextureRecompression.value = !enableTextureRecompression.value
                                 })
                             }
-                            /*Row(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),
@@ -423,7 +423,7 @@ class SettingViews {
                                     Text(text = "Drivers")
                                 }
                             }
-                            */
+
                         }
                     }
                     ExpandableView(onCardArrowClick = { }, title = "Input") {

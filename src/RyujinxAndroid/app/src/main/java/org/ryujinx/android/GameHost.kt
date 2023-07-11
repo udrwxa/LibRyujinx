@@ -7,6 +7,8 @@ import android.view.SurfaceView
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.QuickSettings
+import org.ryujinx.android.viewmodels.VulkanDriverViewModel
+import java.io.File
 import kotlin.concurrent.thread
 
 class GameHost(context: Context?, val controller: GameController, val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
@@ -85,9 +87,23 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         nativeInterop!!.VkCreateSurface = nativeHelpers.getCreateSurfacePtr()
         nativeInterop!!.SurfaceHandle = window
 
+        var driverViewModel = VulkanDriverViewModel(mainViewModel.activity);
+        driverViewModel.getAvailableDrivers()
+
+        var driverHandle = 0L;
+
+        if(driverViewModel.selected.isNotEmpty()) {
+            var privatePath = mainViewModel.activity.filesDir;
+            var privateDriverPath = privatePath.absolutePath + "/driver/"
+            var driver = File(driverViewModel.selected)
+            driver.copyTo(File(privateDriverPath + driver.name), true)
+            driverHandle = NativeHelpers().loadDriver(driverViewModel.selected, mainViewModel.activity.applicationInfo.nativeLibraryDir!!, privateDriverPath, mainViewModel.activity.getExternalFilesDir(null)!!.absolutePath, driver.name)
+        }
+
         success = _nativeRyujinx.graphicsInitializeRenderer(
             nativeInterop!!.VkRequiredExtensions!!,
-            window
+            window,
+            driverHandle
         )
 
 
