@@ -25,7 +25,8 @@ class RyujinxNative {
     external fun graphicsInitialize(configuration: GraphicsConfiguration): Boolean
     external fun graphicsInitializeRenderer(
         extensions: Array<String>,
-        surface: Long
+        surface: Long,
+        driver: Long
     ): Boolean
 
     external fun deviceLoad(game: String): Boolean

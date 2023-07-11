@@ -31,6 +31,8 @@ namespace LibRyujinx
         private static ManualResetEvent _surfaceEvent;
         private static long _surfacePtr;
 
+        public static VulkanLoader? VulkanLoader { get; private set; }
+
         [DllImport("libryujinxjni")]
         private extern static IntPtr getStringPointer(JEnvRef jEnv, JStringLocalRef s);
 
@@ -213,7 +215,8 @@ namespace LibRyujinx
         public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv,
                                                                           JObjectLocalRef jObj,
                                                                           JArrayLocalRef extensionsArray,
-                                                                          JLong surfacePtr)
+                                                                          JLong surfacePtr,
+                                                                          JLong driverHandle)
         {
             if (Renderer != null)
             {
@@ -252,12 +255,17 @@ namespace LibRyujinx
 
             _surfacePtr = surfacePtr;
 
+            if((long)driverHandle != 0)
+            {
+                VulkanLoader = new VulkanLoader((IntPtr)(long)driverHandle);
+            }
+
             CreateSurface createSurfaceFunc = instance =>
             {
                 _surfaceEvent.WaitOne();
                 _surfaceEvent.Reset();
 
-                var api = Vk.GetApi();
+                var api = VulkanLoader?.GetApi() ?? Vk.GetApi();
                 if (api.TryGetInstanceExtension(new Instance(instance), out KhrAndroidSurface surfaceExtension))
                 {
                     var createInfo = new AndroidSurfaceCreateInfoKHR
