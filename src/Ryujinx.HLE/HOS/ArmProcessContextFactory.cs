@@ -56,7 +56,6 @@ namespace Ryujinx.HLE.HOS
         public IProcessContext Create(KernelContext context, ulong pid, ulong addressSpaceSize, InvalidAccessHandler invalidAccessHandler, bool for64Bit)
         {
             IArmProcessContext processContext;
-            AddressSpace addressSpace = null;
 
             if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64 && for64Bit && context.Device.Configuration.UseHypervisor)
             {
@@ -68,16 +67,16 @@ namespace Ryujinx.HLE.HOS
                 }
                 else
                 {
-                    if (!AddressSpace.TryCreate(context.Memory, addressSpaceSize, MemoryBlock.GetPageSize() == MemoryManagerHostMapped.PageSize, out addressSpace))
+                    if (!AddressSpace.TryCreateWithoutMirror(addressSpaceSize, out var addressSpace))
                     {
                         throw new Exception("Address space creation failed");
                     }
 
-                    Logger.Info?.Print(LogClass.Cpu, $"NCE Base AS Address: 0x{addressSpace.Base.Pointer.ToInt64():X} Size: 0x{addressSpace.AddressSpaceSize:X}");
+                    Logger.Info?.Print(LogClass.Cpu, $"NCE Base AS Address: 0x{addressSpace.Pointer.ToInt64():X} Size: 0x{addressSpace.Size:X}");
 
                     var cpuEngine = new NceEngine(_tickSource);
                     var memoryManager = new MemoryManagerNative(addressSpace, context.Memory, addressSpaceSize, invalidAccessHandler);
-                    processContext = new ArmProcessContext<MemoryManagerNative>(pid, cpuEngine, _gpu, memoryManager, addressSpace.AddressSpaceSize, for64Bit, memoryManager.ReservedSize);
+                    processContext = new ArmProcessContext<MemoryManagerNative>(pid, cpuEngine, _gpu, memoryManager, addressSpace.Size, for64Bit, memoryManager.ReservedSize);
                 }
             }
             else
@@ -93,9 +92,13 @@ namespace Ryujinx.HLE.HOS
 
                 var cpuEngine = new JitEngine(_tickSource);
 
+                AddressSpace addressSpace = null;
+                MemoryBlock asNoMirror = null;
+
                 if (mode == MemoryManagerMode.HostMapped || mode == MemoryManagerMode.HostMappedUnsafe)
                 {
-                    if (!AddressSpace.TryCreate(context.Memory, addressSpaceSize, MemoryBlock.GetPageSize() == MemoryManagerHostMapped.PageSize, out addressSpace))
+                    if (!AddressSpace.TryCreate(context.Memory, addressSpaceSize, MemoryBlock.GetPageSize() == MemoryManagerHostMapped.PageSize, out addressSpace) &&
+                        !AddressSpace.TryCreateWithoutMirror(addressSpaceSize, out asNoMirror))
                     {
                         Logger.Warning?.Print(LogClass.Cpu, "Address space creation failed, falling back to software page table");
 
@@ -106,23 +109,35 @@ namespace Ryujinx.HLE.HOS
                 switch (mode)
                 {
                     case MemoryManagerMode.SoftwarePageTable:
-                        var memoryManager = new MemoryManager(context.Memory, addressSpaceSize, invalidAccessHandler);
-                        processContext = new ArmProcessContext<MemoryManager>(pid, cpuEngine, _gpu, memoryManager, addressSpaceSize, for64Bit);
+                        {
+                            var mm = new MemoryManager(context.Memory, addressSpaceSize, invalidAccessHandler);
+                            processContext = new ArmProcessContext<MemoryManager>(pid, cpuEngine, _gpu, mm, addressSpaceSize, for64Bit);
+                        }
                         break;
 
                     case MemoryManagerMode.HostMapped:
                     case MemoryManagerMode.HostMappedUnsafe:
-                        if (addressSpaceSize != addressSpace.AddressSpaceSize)
-                        {
-                            Logger.Warning?.Print(LogClass.Emulation, $"Allocated address space (0x{addressSpace.AddressSpaceSize:X}) is smaller than guest application requirements (0x{addressSpaceSize:X})");
-                        }
+                        bool unsafeMode = mode == MemoryManagerMode.HostMappedUnsafe;
 
-                        var memoryManagerHostMapped = new MemoryManagerHostMapped(addressSpace, mode == MemoryManagerMode.HostMappedUnsafe, invalidAccessHandler);
-                        processContext = new ArmProcessContext<MemoryManagerHostMapped>(pid, cpuEngine, _gpu, memoryManagerHostMapped, addressSpace.AddressSpaceSize, for64Bit);
+                        if (addressSpace != null)
+                        {
+                            var mm = new MemoryManagerHostMapped(addressSpace, unsafeMode, invalidAccessHandler);
+                            processContext = new ArmProcessContext<MemoryManagerHostMapped>(pid, cpuEngine, _gpu, mm, addressSpace.AddressSpaceSize, for64Bit);
+                        }
+                        else
+                        {
+                            var mm = new MemoryManagerHostNoMirror(asNoMirror, context.Memory, unsafeMode, invalidAccessHandler);
+                            processContext = new ArmProcessContext<MemoryManagerHostNoMirror>(pid, cpuEngine, _gpu, mm, asNoMirror.Size, for64Bit);
+                        }
                         break;
 
                     default:
                         throw new InvalidOperationException($"{nameof(mode)} contains an invalid value: {mode}");
+                }
+
+                if (addressSpaceSize != processContext.AddressSpaceSize)
+                {
+                    Logger.Warning?.Print(LogClass.Emulation, $"Allocated address space (0x{processContext.AddressSpaceSize:X}) is smaller than guest application requirements (0x{addressSpaceSize:X})");
                 }
             }
 

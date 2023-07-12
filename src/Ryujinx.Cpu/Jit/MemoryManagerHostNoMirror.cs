@@ -1,55 +1,58 @@
-﻿using ARMeilleure.Memory;
+using ARMeilleure.Memory;
 using Ryujinx.Memory;
 using Ryujinx.Memory.Tracking;
 using System;
 
-namespace Ryujinx.Cpu.Nce
+namespace Ryujinx.Cpu.Jit
 {
     /// <summary>
     /// Represents a CPU memory manager which maps guest virtual memory directly onto a host virtual region.
     /// </summary>
-    public sealed class MemoryManagerNative : MemoryManagerSoftware, ICpuMemoryManager, IVirtualMemoryManagerTracked, IWritableBlock
+    public sealed class MemoryManagerHostNoMirror : MemoryManagerSoftware, ICpuMemoryManager, IVirtualMemoryManagerTracked, IWritableBlock
     {
         private readonly InvalidAccessHandler _invalidAccessHandler;
+        private readonly bool _unsafeMode;
 
         private readonly MemoryBlock _addressSpace;
-        private readonly ulong _addressSpaceSize;
-
         private readonly MemoryBlock _backingMemory;
 
+        public ulong AddressSpaceSize { get; }
+
         private readonly MemoryEhMeilleure _memoryEh;
+
+        private readonly ulong[] _pageBitmap;
 
         /// <inheritdoc/>
         public bool Supports4KBPages => MemoryBlock.GetPageSize() == PageSize;
 
-        public IntPtr PageTablePointer => IntPtr.Zero;
+        public IntPtr PageTablePointer => _addressSpace.Pointer;
 
-        public ulong ReservedSize => (ulong)_addressSpace.Pointer.ToInt64();
-
-        public MemoryManagerType Type => MemoryManagerType.HostMappedUnsafe;
+        public MemoryManagerType Type => _unsafeMode ? MemoryManagerType.HostMappedUnsafe : MemoryManagerType.HostMapped;
 
         public event Action<ulong, ulong> UnmapEvent;
 
         /// <summary>
         /// Creates a new instance of the host mapped memory manager.
         /// </summary>
-        /// <param name="addressSpace">Address space memory block</param>
-        /// <param name="backingMemory">Physical backing memory where virtual memory will be mapped to</param>
-        /// <param name="addressSpaceSize">Size of the address space</param>
+        /// <param name="addressSpace">Address space instance to use</param>
+        /// <param name="unsafeMode">True if unmanaged access should not be masked (unsafe), false otherwise.</param>
         /// <param name="invalidAccessHandler">Optional function to handle invalid memory accesses</param>
-        public MemoryManagerNative(
+        public MemoryManagerHostNoMirror(
             MemoryBlock addressSpace,
             MemoryBlock backingMemory,
-            ulong addressSpaceSize,
-            InvalidAccessHandler invalidAccessHandler = null) : base(backingMemory, addressSpaceSize, invalidAccessHandler)
+            bool unsafeMode,
+            InvalidAccessHandler invalidAccessHandler) : base(backingMemory, addressSpace.Size, invalidAccessHandler)
         {
+            _addressSpace = addressSpace;
             _backingMemory = backingMemory;
             _invalidAccessHandler = invalidAccessHandler;
-            _addressSpaceSize = addressSpaceSize;
-            _addressSpace = addressSpace;
+            _unsafeMode = unsafeMode;
+            AddressSpaceSize = addressSpace.Size;
 
-            Tracking = new MemoryTracking(this, PageSize, invalidAccessHandler);
-            _memoryEh = new MemoryEhMeilleure(addressSpaceSize, Tracking);
+            _pageBitmap = new ulong[1 << (AddressSpaceBits - (PageBits + PageToPteShift))];
+
+            Tracking = new MemoryTracking(this, (int)MemoryBlock.GetPageSize(), invalidAccessHandler);
+            _memoryEh = new MemoryEhMeilleure(addressSpace, null, Tracking);
         }
 
         /// <inheritdoc/>
@@ -57,7 +60,7 @@ namespace Ryujinx.Cpu.Nce
         {
             AssertValidAddressAndSize(va, size);
 
-            _addressSpace.MapView(_backingMemory, pa, AddressToOffset(va), size);
+            _addressSpace.MapView(_backingMemory, pa, va, size);
             AddMapping(va, size);
             PtMap(va, pa, size);
 
@@ -80,13 +83,12 @@ namespace Ryujinx.Cpu.Nce
 
             RemoveMapping(va, size);
             PtUnmap(va, size);
-            _addressSpace.UnmapView(_backingMemory, AddressToOffset(va), size);
+            _addressSpace.UnmapView(_backingMemory, va, size);
         }
 
         /// <inheritdoc/>
         public void Reprotect(ulong va, ulong size, MemoryPermission permission)
         {
-            _addressSpace.Reprotect(AddressToOffset(va), size, permission);
         }
 
         /// <inheritdoc/>
@@ -94,17 +96,7 @@ namespace Ryujinx.Cpu.Nce
         {
             base.TrackingReprotect(va, size, protection);
 
-            _addressSpace.Reprotect(AddressToOffset(va), size, protection, false);
-        }
-
-        private ulong AddressToOffset(ulong address)
-        {
-            if (address < ReservedSize)
-            {
-                throw new ArgumentException($"Invalid address 0x{address:x16}");
-            }
-
-            return address - ReservedSize;
+            _addressSpace.Reprotect(va, size, protection, false);
         }
 
         /// <summary>
