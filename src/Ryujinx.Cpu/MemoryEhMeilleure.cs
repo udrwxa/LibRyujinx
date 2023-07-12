@@ -28,7 +28,7 @@ namespace Ryujinx.Cpu
                 throw new InvalidOperationException("Number of allowed tracked regions exceeded.");
             }
 
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows() && addressSpaceMirror != null)
             {
                 // Add a tracking event with no signal handler for the mirror on Windows.
                 // The native handler has its own code to check for the partial overlap race when regions are protected by accident,
