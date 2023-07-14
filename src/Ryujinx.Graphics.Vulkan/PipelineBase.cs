@@ -1584,8 +1584,6 @@ namespace Ryujinx.Graphics.Vulkan
                 Gd.FlushAllCommands();
             }
 
-            DynamicState.ReplayIfDirty(Gd.Api, CommandBuffer);
-
             // Setting graphics state with a compute pipeline bound crashes the Adreno driver.
             if (pbp == PipelineBindPoint.Graphics)
             {
