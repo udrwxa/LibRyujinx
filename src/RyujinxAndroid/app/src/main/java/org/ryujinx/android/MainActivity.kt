@@ -1,5 +1,6 @@
 package org.ryujinx.android
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -8,6 +9,8 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +32,7 @@ import org.ryujinx.android.views.MainView
 
 
 class MainActivity : ComponentActivity() {
+    var physicalControllerManager: PhysicalControllerManager
     private var mainViewModel: MainViewModel? = null
     private var _isInit: Boolean = false
     var storageHelper: SimpleStorageHelper? = null
@@ -41,6 +45,7 @@ class MainActivity : ComponentActivity() {
     }
 
     init {
+        physicalControllerManager = PhysicalControllerManager(this)
         storageHelper = SimpleStorageHelper(this)
         StorageHelper = storageHelper
     }
@@ -77,6 +82,21 @@ class MainActivity : ComponentActivity() {
                 return  speaker.id
             devices.first().id
         }
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        event?.apply {
+            return physicalControllerManager.onKeyEvent(this)
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchGenericMotionEvent(ev: MotionEvent?): Boolean {
+        ev?.apply {
+            physicalControllerManager.onMotionEvent(this)
+        }
+        return super.dispatchGenericMotionEvent(ev)
     }
 
     private fun initialize() : Unit

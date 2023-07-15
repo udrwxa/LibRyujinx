@@ -132,7 +132,16 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
 
         _nativeRyujinx.inputInitialize(width, height)
 
-        controller.connect()
+        if(!settings.useVirtualController){
+            controller.setVisible(false)
+        }
+        else{
+            controller.connect()
+        }
+
+        mainViewModel.activity.physicalControllerManager.connect()
+
+        //
 
         _nativeRyujinx.graphicsRendererSetSize(
             surfaceHolder.surfaceFrame.width(),
