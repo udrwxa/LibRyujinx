@@ -14,13 +14,21 @@ def publishDirectory = providers.gradleProperty("org.ryujinx.publish.path").getO
 // Should the symbols be stripped from the published library?
 // Per default the symbols will be stripped for release builds, but not for debug builds.
 // This can be overridden using this property.
-// Valid values are: ["true", "1", "false", "0"]
-def stripSymbols = false
-if (project.hasProperty("org.ryujinx.symbols.strip")) {
-    stripSymbols = project.property("org.ryujinx.symbols.strip") == "true" || project.property("org.ryujinx.symbols.strip") == "1"
-}
-else {
-    stripSymbols = configuration == "release"
+// Valid values are: ["auto", "-1", "true", "1", "false", "0"]
+def stripSymbols = providers.gradleProperty("org.ryujinx.symbols.strip").getOrElse("")
+//noinspection GroovyFallthrough
+switch (stripSymbols) {
+    case "true":
+    case "1":
+        stripSymbols = true
+        break
+    case "false":
+    case "0":
+        stripSymbols = false
+        break
+    default:
+        stripSymbols = configuration == "release"
+        break
 }
 // Additional arguments for the dotnet publish command.
 def additionalArgs = project.hasProperty("org.ryujinx.args") ? project.property("org.ryujinx.args") : ""
@@ -55,6 +63,13 @@ tasks.register('compileLibRyujinx', Exec) {
         environment "PATH", "${toolchainPath}:${providers.environmentVariable("PATH").get()}"
     }
 
+    doFirst {
+        println "Building LibRyujinx in ${configuration} mode."
+        println "Configuration:"
+        println "\tStripSymbols: ${stripSymbols}"
+        println "\tadditional args: ${additionalArgs.split(" ")}"
+    }
+
     executable 'dotnet'
     args 'publish',
             '-r', 'linux-bionic-arm64',
@@ -72,6 +87,7 @@ tasks.register('compileLibRyujinx', Exec) {
             include '*.so'
             into publishDirectory
             rename (String originalName) -> originalName.toLowerCase()
+            duplicatesStrategy 'include'
             preserve {
                 include '.*'
             }
