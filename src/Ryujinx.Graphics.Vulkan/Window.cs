@@ -477,6 +477,9 @@ namespace Ryujinx.Graphics.Vulkan
             {
                 _gd.SwapchainApi.QueuePresent(_gd.Queue, presentInfo);
             }
+
+            //While this does nothing in most cases, it's useful to notify the end of the frame.
+            swapBuffersCallback?.Invoke();
         }
 
         public override void SetAntiAliasing(AntiAliasing effect)
