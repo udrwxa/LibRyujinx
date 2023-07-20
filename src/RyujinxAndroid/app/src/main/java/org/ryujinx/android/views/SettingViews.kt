@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
@@ -108,7 +109,8 @@ class SettingViews {
                 )
                 loaded.value = true
             }
-            Scaffold(modifier = Modifier.fillMaxSize(),
+            Scaffold(modifier = Modifier.fillMaxSize()
+                .safeContentPadding(),
                 topBar = {
                     TopAppBar(title = {
                         Text(text = "Settings")
