@@ -50,6 +50,14 @@ class GameController(var activity: Activity, var ryujinxNative: RyujinxNative = 
     var leftGamePad: GamePad
     var rightGamePad: GamePad
     var controllerId: Int = -1
+    val isVisible : Boolean
+        get() {
+            controllerView?.apply {
+                return this.isVisible
+            }
+
+            return false;
+        }
 
     init {
         leftGamePad = GamePad(generateConfig(true), 16f, activity)
@@ -97,6 +105,9 @@ class GameController(var activity: Activity, var ryujinxNative: RyujinxNative = 
     fun setVisible(isVisible: Boolean){
         controllerView?.apply {
             this.isVisible = isVisible
+
+            if(isVisible)
+                connect()
         }
     }
 
