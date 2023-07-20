@@ -1,0 +1,88 @@
+plugins {
+    id 'base'
+}
+
+// Configurable properties
+
+// Path to the LLVM toolchain to use. This should be configured in your global gradle.properties
+// See: https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
+def toolchainPath = providers.gradleProperty("org.ryujinx.llvm.toolchain.path").getOrNull()
+// Build configuration
+def configuration = providers.gradleProperty("org.ryujinx.config").getOrElse("debug").toLowerCase()
+// Publish directory
+def publishDirectory = providers.gradleProperty("org.ryujinx.publish.path").getOrNull()
+// Should the symbols be stripped from the published library?
+// Per default the symbols will be stripped for release builds, but not for debug builds.
+// This can be overridden using this property.
+// Valid values are: ["true", "1", "false", "0"]
+def stripSymbols = false
+if (project.hasProperty("org.ryujinx.symbols.strip")) {
+    stripSymbols = project.property("org.ryujinx.symbols.strip") == "true" || project.property("org.ryujinx.symbols.strip") == "1"
+}
+else {
+    stripSymbols = configuration == "release"
+}
+// Additional arguments for the dotnet publish command.
+def additionalArgs = project.hasProperty("org.ryujinx.args") ? project.property("org.ryujinx.args") : ""
+
+configuration = configuration.substring(0, 1).toUpperCase() + configuration.substring(1)
+
+if (publishDirectory != null) {
+    publishDirectory = "${rootProject.projectDir}/${publishDirectory}"
+}
+else {
+    publishDirectory = libsDirectory.get().toString()
+}
+
+// Trees
+
+ext.outputTree = fileTree("${buildDir}/publish") {
+    include '**/*'
+    builtBy 'compileLibRyujinx'
+}
+
+ext.publishTree = fileTree(publishDirectory) {
+    include '**/*.so'
+    builtBy 'compileLibRyujinx'
+}
+
+// Tasks
+
+tasks.register('compileLibRyujinx', Exec) {
+    workingDir '../../LibRyujinx'
+
+    if (toolchainPath != null) {
+        environment "PATH", "${toolchainPath}:${providers.environmentVariable("PATH").get()}"
+    }
+
+    executable 'dotnet'
+    args 'publish',
+            '-r', 'linux-bionic-arm64',
+            '-c', configuration,
+            "-p:DisableUnsupportedError=true",
+            "-p:PublishAotUsingRuntimePack=true",
+            "-p:StripSymbols=${stripSymbols}",
+            "--artifacts-path", buildDir
+
+    args additionalArgs.split(" ")
+
+    doLast {
+        project.sync {
+            from project.ext.outputTree.getFiles()
+            include '*.so'
+            into publishDirectory
+            rename (String originalName) -> originalName.toLowerCase()
+            preserve {
+                include '.*'
+            }
+        }
+    }
+}
+
+tasks.register("cleanLibRyujinx", Delete) {
+    delete project.ext.publishTree.getFiles()
+}
+
+// Register tasks as standard lifecycle tasks
+assemble.dependsOn("compileLibRyujinx")
+clean.dependsOn("cleanLibRyujinx")
