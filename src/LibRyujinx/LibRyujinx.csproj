@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-      <LinkerFlavor Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'">lld</LinkerFlavor>
-      <DefineConstants>$(DefineConstants);FORCE_EXTERNAL_BASE_DIR</DefineConstants>
+    <LinkerFlavor Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'">lld</LinkerFlavor>
+    <DefineConstants>$(DefineConstants);FORCE_EXTERNAL_BASE_DIR</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-      <InvariantGlobalization>true</InvariantGlobalization>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
       <OptimizationPreference>Speed</OptimizationPreference>
@@ -30,7 +30,7 @@
         <RdXmlFile Include="rd.xml" />
     </ItemGroup>
     <ItemGroup>
-		  <PackageReference Include="Rxmxnx.PInvoke.Extensions" />        
+      <PackageReference Include="Rxmxnx.PInvoke.Extensions" />
       <PackageReference Include="Silk.NET.Vulkan" />
       <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" />
       <LinkerArg Condition="'$(RuntimeIdentifier)'=='linux-bionic-arm64'" Include="-llog" />
