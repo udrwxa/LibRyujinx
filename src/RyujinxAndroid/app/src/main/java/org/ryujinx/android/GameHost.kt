@@ -33,26 +33,6 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         holder.addCallback(this)
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (_isStarted)
-            return  when (event!!.actionMasked) {
-                MotionEvent.ACTION_MOVE -> {
-                    _nativeRyujinx.inputSetTouchPoint(event.x.roundToInt(), event.y.roundToInt())
-                    true
-                }
-                MotionEvent.ACTION_DOWN -> {
-                    _nativeRyujinx.inputSetTouchPoint(event.x.roundToInt(), event.y.roundToInt())
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    _nativeRyujinx.inputReleaseTouchPoint()
-                    true
-                }
-                else -> super.onTouchEvent(event)
-            }
-        return super.onTouchEvent(event)
-    }
-
     override fun surfaceCreated(holder: SurfaceHolder) {
     }
 
