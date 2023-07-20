@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
@@ -38,8 +39,11 @@ class MainView {
 
         @Composable
         fun GameView(mainViewModel: MainViewModel){
-            Box {
+            Box(modifier = Modifier.fillMaxSize()) {
                 var controller = GameController(mainViewModel.activity)
+                Surface(color = Color.Green, modifier = Modifier.fillMaxSize()) {
+                    
+                }
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { context ->
@@ -50,7 +54,7 @@ class MainView {
                 controller.Compose(mainViewModel.activity.lifecycleScope, mainViewModel.activity.lifecycle)
             }
         }
-
+        
         @Composable
         fun GameStats(mainViewModel: MainViewModel){
             var fifo = remember {

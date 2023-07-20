@@ -68,10 +68,7 @@ class MainActivity : ComponentActivity() {
 
     fun setFullScreen() :Unit {
         requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-
-        WindowCompat.setDecorFitsSystemWindows(window,false)
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         var insets = WindowCompat.getInsetsController(window, window.decorView)
 
@@ -129,6 +126,9 @@ class MainActivity : ComponentActivity() {
         AppPath = this.getExternalFilesDir(null)!!.absolutePath
 
         initialize()
+
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        WindowCompat.setDecorFitsSystemWindows(window,false)
 
         if(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 !Environment.isExternalStorageManager()
