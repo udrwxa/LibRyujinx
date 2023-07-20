@@ -33,14 +33,25 @@ import org.ryujinx.android.views.MainView
 
 class MainActivity : ComponentActivity() {
     var physicalControllerManager: PhysicalControllerManager
-    private var mainViewModel: MainViewModel? = null
     private var _isInit: Boolean = false
     var storageHelper: SimpleStorageHelper? = null
     companion object {
+        var mainViewModel: MainViewModel? = null
         var AppPath : String?
         var StorageHelper: SimpleStorageHelper? = null
         init {
             AppPath = ""
+        }
+
+        @JvmStatic
+        fun updateRenderSessionPerformance(gameTime : Long)
+        {
+            if(gameTime <= 0)
+                return
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                mainViewModel?.performanceManager?.updateRenderingSessionTime(gameTime)
+            }
         }
     }
 
@@ -48,7 +59,12 @@ class MainActivity : ComponentActivity() {
         physicalControllerManager = PhysicalControllerManager(this)
         storageHelper = SimpleStorageHelper(this)
         StorageHelper = storageHelper
+        System.loadLibrary("ryujinxjni")
+        initVm()
     }
+
+    external fun getRenderingThreadId() : Long
+    external fun initVm()
 
     fun setFullScreen() :Unit {
         requestedOrientation =

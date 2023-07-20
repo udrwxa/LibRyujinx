@@ -165,6 +165,11 @@ namespace LibRyujinx
                         return;
                     }
 
+                    if (Ryujinx.Common.SystemInfo.SystemInfo.IsBionic)
+                    {
+                        setRenderingThread();
+                    }
+
                     if (device.WaitFifo())
                     {
                         device.Statistics.RecordFifoStart();
