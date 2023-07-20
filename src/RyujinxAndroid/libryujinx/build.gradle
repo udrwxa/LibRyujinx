@@ -90,6 +90,7 @@ tasks.register('compileLibRyujinx', Exec) {
             duplicatesStrategy 'include'
             preserve {
                 include '.*'
+                include '*.so'
             }
         }
     }
