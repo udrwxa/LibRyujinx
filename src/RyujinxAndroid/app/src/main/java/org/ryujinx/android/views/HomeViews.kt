@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -173,8 +174,7 @@ class HomeViews {
             var showBottomSheet = remember { mutableStateOf(false) }
 
             Scaffold(
-                modifier = Modifier.fillMaxSize()
-                    .safeContentPadding(),
+                modifier = Modifier.fillMaxSize(),
                 topBar = {
                     navController?.apply {
                         MainTopBar(navController)
