@@ -53,6 +53,9 @@ android {
         kotlinCompilerExtensionVersion '1.3.2'
     }
     packagingOptions {
+        jniLibs {
+            keepDebugSymbols += '**/libryujinx.so'
+        }
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
