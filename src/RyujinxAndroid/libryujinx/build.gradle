@@ -60,7 +60,12 @@ tasks.register('compileLibRyujinx', Exec) {
     workingDir '../../LibRyujinx'
 
     if (toolchainPath != null) {
-        environment "PATH", "${toolchainPath}:${providers.environmentVariable("PATH").get()}"
+        if (OperatingSystem.getName() == "windows") {
+            environment "PATH", "${toolchainPath};${providers.environmentVariable("PATH").get()}"
+        }
+        else {
+            environment "PATH", "${toolchainPath}:${providers.environmentVariable("PATH").get()}"
+        }
     }
 
     doFirst {
