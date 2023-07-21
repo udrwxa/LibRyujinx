@@ -62,7 +62,24 @@ ext.publishTree = fileTree(publishDirectory) {
 // Tasks
 
 tasks.register('compileLibRyujinx', Exec) {
-    workingDir '../../LibRyujinx'
+    def projectName = "LibRyujinx"
+
+    workingDir "../../${projectName}"
+
+    def solutionFiles = fileTree("../../") {
+        include '**/*.cs'
+        include '**/*.csproj'
+        exclude '**/bin/**'
+        exclude '**/obj/**'
+        exclude '**/RyujinxAndroid/**'
+    }
+
+    inputs.files(solutionFiles)
+            .withPropertyName('sourceFiles')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+            .ignoreEmptyDirectories()
+
+    outputs.file("${publishDirectory}/${projectName.toLowerCase()}.so")
 
     OperatingSystem os = DefaultNativePlatform.currentOperatingSystem
     if (toolchainPath != null) {
@@ -75,7 +92,7 @@ tasks.register('compileLibRyujinx', Exec) {
     }
 
     doFirst {
-        println "Building LibRyujinx in ${configuration} mode."
+        println "Building ${projectName} in ${configuration} mode."
         println "Configuration:"
         println "\tusing: ${dotnetExecutable}"
         println "\tStripSymbols: ${stripSymbols}"
