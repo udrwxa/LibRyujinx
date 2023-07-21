@@ -50,7 +50,7 @@ ext.outputTree = fileTree("${buildDir}/publish") {
 }
 
 ext.publishTree = fileTree(publishDirectory) {
-    include '**/*.so'
+    include ext.outputTree.getFiles().collect { it.getName().toLowerCase() }.findAll { it.endsWith(".so") }
     builtBy 'compileLibRyujinx'
 }
 
@@ -87,10 +87,13 @@ tasks.register('compileLibRyujinx', Exec) {
             include '*.so'
             into publishDirectory
             rename (String originalName) -> originalName.toLowerCase()
-            duplicatesStrategy 'include'
+            duplicatesStrategy 'fail'
             preserve {
-                include '.*'
+                include '.gitkeep'
                 include '*.so'
+                exclude {
+                    project.ext.publishTree
+                }
             }
         }
     }
