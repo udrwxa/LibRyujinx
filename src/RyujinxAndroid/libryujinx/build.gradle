@@ -84,7 +84,8 @@ tasks.register('compileLibRyujinx', Exec) {
     OperatingSystem os = DefaultNativePlatform.currentOperatingSystem
     if (toolchainPath != null) {
         if (os.isWindows()) {
-            environment "PATH", "${toolchainPath};${providers.environmentVariable("PATH").get()}"
+            // NOTE: This is not a typo. dotnet.exe actually uses Path instead of PATH.
+            environment "Path", "${toolchainPath};${providers.environmentVariable("PATH").get()}"
         }
         else {
             environment "PATH", "${toolchainPath}:${providers.environmentVariable("PATH").get()}"
