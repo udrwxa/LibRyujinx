@@ -97,6 +97,7 @@ tasks.register('compileLibRyujinx', Exec) {
         println "\tusing: ${dotnetExecutable}"
         println "\tStripSymbols: ${stripSymbols}"
         println "\tadditional args: ${additionalArgs.split(" ")}"
+        println "\tcustom LLVM toolchain path: ${toolchainPath}"
     }
 
     executable dotnetExecutable
