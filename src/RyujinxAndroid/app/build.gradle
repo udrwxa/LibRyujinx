@@ -68,6 +68,10 @@ android {
     }
 }
 
+tasks.named("preBuild") {
+    dependsOn ':libryujinx:assemble'
+}
+
 dependencies {
     runtimeOnly project(":libryujinx")
     implementation 'androidx.core:core-ktx:1.10.1'
