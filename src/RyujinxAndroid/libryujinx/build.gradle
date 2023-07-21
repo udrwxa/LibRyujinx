@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins {
     id 'base'
 }
@@ -62,8 +64,9 @@ ext.publishTree = fileTree(publishDirectory) {
 tasks.register('compileLibRyujinx', Exec) {
     workingDir '../../LibRyujinx'
 
+    OperatingSystem os = DefaultNativePlatform.currentOperatingSystem
     if (toolchainPath != null) {
-        if (OperatingSystem.getName() == "windows") {
+        if (os.isWindows()) {
             environment "PATH", "${toolchainPath};${providers.environmentVariable("PATH").get()}"
         }
         else {
