@@ -7,6 +7,9 @@ plugins {
 // Path to the LLVM toolchain to use. This should be configured in your global gradle.properties
 // See: https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
 def toolchainPath = providers.gradleProperty("org.ryujinx.llvm.toolchain.path").getOrNull()
+// Path to the dotnet executable This should be configured in your global gradle.properties
+// See: https://docs.gradle.org/current/userguide/directory_layout.html#dir:gradle_user_home
+def dotnetExecutable = providers.gradleProperty("org.ryujinx.dotnet.bin").getOrElse("dotnet")
 // Build configuration
 def configuration = providers.gradleProperty("org.ryujinx.config").getOrElse("debug").toLowerCase()
 // Publish directory
@@ -71,11 +74,12 @@ tasks.register('compileLibRyujinx', Exec) {
     doFirst {
         println "Building LibRyujinx in ${configuration} mode."
         println "Configuration:"
+        println "\tusing: ${dotnetExecutable}"
         println "\tStripSymbols: ${stripSymbols}"
         println "\tadditional args: ${additionalArgs.split(" ")}"
     }
 
-    executable 'dotnet'
+    executable dotnetExecutable
     args 'publish',
             '-r', 'linux-bionic-arm64',
             '-c', configuration,
