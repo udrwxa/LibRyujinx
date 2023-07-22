@@ -16,5 +16,5 @@ class NativeHelpers {
     external fun attachCurrentThread() : Unit
     external fun detachCurrentThread() : Unit
 
-    external fun loadDriver(driverPath:String, nativeLibPath:String, privateAppsPath:String, publicAppsPath:String, driverName:String) : Long
+    external fun loadDriver(nativeLibPath:String, privateAppsPath:String, driverName:String) : Long
 }

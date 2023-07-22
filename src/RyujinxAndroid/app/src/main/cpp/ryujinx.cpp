@@ -194,20 +194,12 @@ void onFrameEnd(double time) {
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_org_ryujinx_android_NativeHelpers_loadDriver(JNIEnv *env, jobject thiz,
-                                                  jstring driver_path,
                                                   jstring native_lib_path,
                                                   jstring private_apps_path,
-                                                  jstring public_apps_path,
                                                   jstring driver_name) {
-    auto driverPath = getStringPointer(env, driver_path);
     auto libPath = getStringPointer(env, native_lib_path);
     auto privateAppsPath = getStringPointer(env, private_apps_path);
     auto driverName = getStringPointer(env, driver_name);
-    auto publicPath = getStringPointer(env, public_apps_path);
-
-    std::string redirectPath = publicPath;
-
-    redirectPath += "gpu/vk_file_redirect/";
 
     auto handle = adrenotools_open_libvulkan(
             RTLD_NOW,
@@ -216,15 +208,13 @@ Java_org_ryujinx_android_NativeHelpers_loadDriver(JNIEnv *env, jobject thiz,
             libPath,
             privateAppsPath,
             driverName,
-            nullptr,//redirectPath.c_str(),
+            nullptr,
             nullptr
             );
 
-    delete driverPath;
     delete libPath;
     delete privateAppsPath;
     delete driverName;
-    delete publicPath;
 
     return (jlong)handle;
 }
