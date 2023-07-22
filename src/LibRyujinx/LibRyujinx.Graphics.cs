@@ -78,7 +78,7 @@ namespace LibRyujinx
             return InitializeGraphicsRenderer(graphicsBackend, createSurfaceFunc, extensions.ToArray());
         }
 
-        public static bool InitializeGraphicsRenderer(GraphicsBackend graphicsBackend, CreateSurface createSurfaceFunc, string[] requiredExtensions)
+        public static bool InitializeGraphicsRenderer(GraphicsBackend graphicsBackend, CreateSurface createSurfaceFunc, string?[] requiredExtensions)
         {
             if (Renderer != null)
             {
