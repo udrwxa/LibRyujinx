@@ -21,9 +21,6 @@ using LibHac.Common;
 using LibHac.Ns;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem.NcaUtils;
-using Ryujinx.Ui.App.Common;
-using System.Text;
-using System.Threading;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
 using LibHac.Fs;
@@ -34,7 +31,6 @@ using Ryujinx.Common.Utilities;
 using System.Globalization;
 using Ryujinx.Ui.Common.Configuration.System;
 using Ryujinx.Common.Logging.Targets;
-using Ryujinx.Common;
 
 namespace LibRyujinx
 {
@@ -42,7 +38,7 @@ namespace LibRyujinx
     {
         internal static IHardwareDeviceDriver AudioDriver { get; set; } = new DummyHardwareDeviceDriver();
 
-        private static readonly TitleUpdateMetadataJsonSerializerContext TitleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
+        private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
         public static SwitchDevice? SwitchDevice { get; set; }
 
         [UnmanagedCallersOnly(EntryPoint = "initialize")]
@@ -71,8 +67,6 @@ namespace LibRyujinx
                 ConfigurationState.Initialize();
                 LoggerModule.Initialize();
 
-                SwitchDevice = new SwitchDevice();
-
                 Logger.SetEnable(LogLevel.Debug, enableDebugLogs);
                 Logger.SetEnable(LogLevel.Stub, false);
                 Logger.SetEnable(LogLevel.Info, true);
@@ -80,18 +74,27 @@ namespace LibRyujinx
                 Logger.SetEnable(LogLevel.Error, true);
                 Logger.SetEnable(LogLevel.Trace, false);
                 Logger.SetEnable(LogLevel.Guest, true);
-                Logger.SetEnable(LogLevel.AccessLog, false); 
-                
+                Logger.SetEnable(LogLevel.AccessLog, false);
+
                 Logger.AddTarget(new AsyncLogTargetWrapper(
                     new FileLogTarget(AppDataManager.BaseDirPath, "file"),
                     1000,
                     AsyncLogTargetOverflowAction.Block
                 ));
+
+                Logger.Notice.Print(LogClass.Application, "Initializing...");
+                Logger.Notice.Print(LogClass.Application, $"Using base path: {AppDataManager.BaseDirPath}");
+
+                SwitchDevice = new SwitchDevice();
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return false;
             }
+
+            Logger.Notice.Print(LogClass.Application, "RyujinxAndroid is ready!");
+
             return true;
         }
 
@@ -107,7 +110,7 @@ namespace LibRyujinx
 
             var context = SwitchDevice.EmulationContext;
 
-            return new GameStats()
+            return new GameStats
             {
                 Fifo = context.Statistics.GetFifoPercent(),
                 GameFps = context.Statistics.GetGameFrameRate(),
@@ -116,24 +119,37 @@ namespace LibRyujinx
         }
 
 
-        public static GameInfo GetGameInfo(string file)
+        public static GameInfo? GetGameInfo(string? file)
         {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return new GameInfo();
+            }
+
+            Logger.Info?.Print(LogClass.Application, $"Getting game info for file: {file}");
+
             using var stream = File.Open(file, FileMode.Open);
 
             return GetGameInfo(stream, file.ToLower().EndsWith("xci"));
         }
 
-        public static GameInfo GetGameInfo(Stream gameStream, bool isXci)
+        public static GameInfo? GetGameInfo(Stream gameStream, bool isXci)
         {
-            var gameInfo = new GameInfo();
-            gameInfo.FileSize = gameStream.Length * 0.000000000931;
-            gameInfo.TitleName = "Unknown";
-            gameInfo.TitleId = "0000000000000000";
-            gameInfo.Developer = "Unknown";
-            gameInfo.Version = "0";
-            gameInfo.Icon = null;
+            if (SwitchDevice == null)
+            {
+                Logger.Error?.Print(LogClass.Application, "SwitchDevice is not initialized.");
+                return null;
+            }
 
-            Language titleLanguage = Language.AmericanEnglish;
+            var gameInfo = new GameInfo
+                {
+                    FileSize = gameStream.Length * 0.000000000931, TitleName = "Unknown", TitleId = "0000000000000000",
+                    Developer = "Unknown",
+                    Version = "0",
+                    Icon = null,
+                };
+
+            const Language TitleLanguage = Language.AmericanEnglish;
 
             BlitStruct<ApplicationControlProperty> controlHolder = new(1);
 
@@ -205,13 +221,12 @@ namespace LibRyujinx
                     }
                     else
                     {
-                        var id = gameInfo.TitleId;
-                        GetControlFsAndTitleId(pfs, out IFileSystem controlFs, out id);
+                        GetControlFsAndTitleId(pfs, out IFileSystem? controlFs, out string? id);
 
                         gameInfo.TitleId = id;
 
                         // Check if there is an update available.
-                        if (IsUpdateApplied(gameInfo.TitleId, out IFileSystem updatedControlFs))
+                        if (IsUpdateApplied(gameInfo.TitleId, out IFileSystem? updatedControlFs))
                         {
                             // Replace the original ControlFs by the updated one.
                             controlFs = updatedControlFs;
@@ -226,7 +241,7 @@ namespace LibRyujinx
                         {
                             using UniqueRef<IFile> icon = new();
 
-                            controlFs.OpenFile(ref icon.Ref, $"/icon_{titleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                            controlFs?.OpenFile(ref icon.Ref, $"/icon_{TitleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
                             using MemoryStream stream = new();
 
@@ -244,7 +259,7 @@ namespace LibRyujinx
 
                                 using var icon = new UniqueRef<IFile>();
 
-                                controlFs.OpenFile(ref icon.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                                controlFs?.OpenFile(ref icon.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
                                 using MemoryStream stream = new();
 
@@ -264,10 +279,9 @@ namespace LibRyujinx
                 {
                     Logger.Warning?.Print(LogClass.Application, $"Your key set is missing a key with the name: {exception.Name}");
                 }
-                catch (InvalidDataException)
+                catch (InvalidDataException exception)
                 {
-
-                    Logger.Warning?.Print(LogClass.Application, $"The header key is incorrect or missing and therefore the NCA header content type check has failed. ");
+                    Logger.Warning?.Print(LogClass.Application, $"The header key is incorrect or missing and therefore the NCA header content type check has failed. {exception}");
                 }
                 catch (Exception exception)
                 {
@@ -281,17 +295,17 @@ namespace LibRyujinx
                 Logger.Warning?.Print(LogClass.Application, exception.Message);
             }
 
-            void ReadControlData(IFileSystem controlFs, Span<byte> outProperty)
+            void ReadControlData(IFileSystem? controlFs, Span<byte> outProperty)
             {
                 using UniqueRef<IFile> controlFile = new();
 
-                controlFs.OpenFile(ref controlFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                controlFs?.OpenFile(ref controlFile.Ref, "/control.nacp".ToU8Span(), OpenMode.Read).ThrowIfFailure();
                 controlFile.Get.Read(out _, 0, outProperty, ReadOption.None).ThrowIfFailure();
             }
 
-            void GetGameInformation(ref ApplicationControlProperty controlData, out string titleName, out string titleId, out string publisher, out string version)
+            void GetGameInformation(ref ApplicationControlProperty controlData, out string? titleName, out string titleId, out string? publisher, out string? version)
             {
-                _ = Enum.TryParse(titleLanguage.ToString(), out TitleLanguage desiredTitleLanguage);
+                _ = Enum.TryParse(TitleLanguage.ToString(), out TitleLanguage desiredTitleLanguage);
 
                 if (controlData.Title.ItemsRo.Length > (int)desiredTitleLanguage)
                 {
@@ -350,20 +364,28 @@ namespace LibRyujinx
                 version = controlData.DisplayVersionString.ToString();
             }
 
-            void GetControlFsAndTitleId(PartitionFileSystem pfs, out IFileSystem controlFs, out string titleId)
+            void GetControlFsAndTitleId(PartitionFileSystem pfs, out IFileSystem? controlFs, out string? titleId)
             {
-                (_, _, Nca controlNca) = GetGameData(SwitchDevice.VirtualFileSystem, pfs, 0);
+                if (SwitchDevice == null)
+                {
+                    Logger.Error?.Print(LogClass.Application, "SwitchDevice is not initialized.");
+
+                    controlFs = null;
+                    titleId = null;
+                    return;
+                }
+                (_, _, Nca? controlNca) = GetGameData(SwitchDevice.VirtualFileSystem, pfs, 0);
 
                 // Return the ControlFS
                 controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                 titleId = controlNca?.Header.TitleId.ToString("x16");
             }
 
-            (Nca main, Nca patch, Nca control) GetGameData(VirtualFileSystem fileSystem, PartitionFileSystem pfs, int programIndex)
+            (Nca? mainNca, Nca? patchNca, Nca? controlNca) GetGameData(VirtualFileSystem fileSystem, PartitionFileSystem pfs, int programIndex)
             {
-                Nca mainNca = null;
-                Nca patchNca = null;
-                Nca controlNca = null;
+                Nca? mainNca = null;
+                Nca? patchNca = null;
+                Nca? controlNca = null;
 
                 fileSystem.ImportTickets(pfs);
 
@@ -371,9 +393,11 @@ namespace LibRyujinx
                 {
                     using var ncaFile = new UniqueRef<IFile>();
 
+                    Logger.Info?.Print(LogClass.Application, $"Loading file from PFS: {fileEntry.FullPath}");
+
                     pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
-                    Nca nca = new Nca(fileSystem.KeySet, ncaFile.Release().AsStorage());
+                    Nca nca = new(fileSystem.KeySet, ncaFile.Release().AsStorage());
 
                     int ncaProgramIndex = (int)(nca.Header.TitleId & 0xF);
 
@@ -404,22 +428,28 @@ namespace LibRyujinx
                 return (mainNca, patchNca, controlNca);
             }
 
-            bool IsUpdateApplied(string titleId, out IFileSystem updatedControlFs)
+            bool IsUpdateApplied(string? titleId, out IFileSystem? updatedControlFs)
             {
                 updatedControlFs = null;
 
-                string updatePath = "(unknown)";
+                string? updatePath = "(unknown)";
+
+                if (SwitchDevice?.VirtualFileSystem == null)
+                {
+                    Logger.Error?.Print(LogClass.Application, "SwitchDevice was not initialized.");
+                    return false;
+                }
 
                 try
                 {
-                    (Nca patchNca, Nca controlNca) = GetGameUpdateData(SwitchDevice.VirtualFileSystem, titleId, 0, out updatePath);
+                    (Nca? patchNca, Nca? controlNca) = GetGameUpdateData(SwitchDevice.VirtualFileSystem, titleId, 0, out updatePath);
 
                     if (patchNca != null && controlNca != null)
                     {
-                        updatedControlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-
-                        return true;
+                        updatedControlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                     }
+
+                    return true;
                 }
                 catch (InvalidDataException)
                 {
@@ -433,7 +463,7 @@ namespace LibRyujinx
                 return false;
             }
 
-            (Nca patch, Nca control) GetGameUpdateData(VirtualFileSystem fileSystem, string titleId, int programIndex, out string updatePath)
+            (Nca? patch, Nca? control) GetGameUpdateData(VirtualFileSystem fileSystem, string? titleId, int programIndex, out string? updatePath)
             {
                 updatePath = null;
 
@@ -447,12 +477,12 @@ namespace LibRyujinx
 
                     if (File.Exists(titleUpdateMetadataPath))
                     {
-                        updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, TitleSerializerContext.TitleUpdateMetadata).Selected;
+                        updatePath = JsonHelper.DeserializeFromFile(titleUpdateMetadataPath, _titleSerializerContext.TitleUpdateMetadata).Selected;
 
                         if (File.Exists(updatePath))
                         {
-                            FileStream file = new FileStream(updatePath, FileMode.Open, FileAccess.Read);
-                            PartitionFileSystem nsp = new PartitionFileSystem(file.AsStorage());
+                            FileStream file = new(updatePath, FileMode.Open, FileAccess.Read);
+                            PartitionFileSystem nsp = new(file.AsStorage());
 
                             return GetGameUpdateDataFromPartition(fileSystem, nsp, titleIdBase.ToString("x16"), programIndex);
                         }
@@ -462,10 +492,10 @@ namespace LibRyujinx
                 return (null, null);
             }
 
-            (Nca patch, Nca control) GetGameUpdateDataFromPartition(VirtualFileSystem fileSystem, PartitionFileSystem pfs, string titleId, int programIndex)
+            (Nca? patchNca, Nca? controlNca) GetGameUpdateDataFromPartition(VirtualFileSystem fileSystem, PartitionFileSystem pfs, string titleId, int programIndex)
             {
-                Nca patchNca = null;
-                Nca controlNca = null;
+                Nca? patchNca = null;
+                Nca? controlNca = null;
 
                 fileSystem.ImportTickets(pfs);
 
@@ -475,7 +505,7 @@ namespace LibRyujinx
 
                     pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
-                    Nca nca = new Nca(fileSystem.KeySet, ncaFile.Release().AsStorage());
+                    Nca nca = new(fileSystem.KeySet, ncaFile.Release().AsStorage());
 
                     int ncaProgramIndex = (int)(nca.Header.TitleId & 0xF);
 
@@ -518,7 +548,9 @@ namespace LibRyujinx
 
         public void Dispose()
         {
-            VirtualFileSystem?.Dispose();
+            GC.SuppressFinalize(this);
+
+            VirtualFileSystem.Dispose();
             InputManager?.Dispose();
             EmulationContext?.Dispose();
         }
@@ -546,7 +578,7 @@ namespace LibRyujinx
                                       bool enableDockedMode,
                                       bool enablePtc,
                                       bool enableInternetAccess,
-                                      string timeZone,
+                                      string? timeZone,
                                       bool ignoreMissingServices)
         {
             if (LibRyujinx.Renderer == null)
@@ -605,11 +637,11 @@ namespace LibRyujinx
     public class GameInfo
     {
         public double FileSize;
-        public string TitleName;
-        public string TitleId;
-        public string Developer;
-        public string Version;
-        public byte[] Icon;
+        public string? TitleName;
+        public string? TitleId;
+        public string? Developer;
+        public string? Version;
+        public byte[]? Icon;
     }
 
     public class GameStats

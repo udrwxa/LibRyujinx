@@ -2,12 +2,8 @@
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.SystemState;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibRyujinx
 {
@@ -27,7 +23,7 @@ namespace LibRyujinx
                                             bool enableDockedMode,
                                             bool enablePtc,
                                             bool enableInternetAccess,
-                                            string timeZone,
+                                            string? timeZone,
                                             bool ignoreMissingServices)
         {
             if (SwitchDevice == null)
@@ -66,7 +62,7 @@ namespace LibRyujinx
             return (isXci ? emulationContext?.LoadXci(stream) : emulationContext.LoadNsp(stream)) ?? false;
         }
 
-        public static bool LoadApplication(string path)
+        public static bool LoadApplication(string? path)
         {
             var emulationContext = SwitchDevice.EmulationContext;
 
