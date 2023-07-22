@@ -142,12 +142,12 @@ namespace LibRyujinx
             }
 
             var gameInfo = new GameInfo
-                {
-                    FileSize = gameStream.Length * 0.000000000931, TitleName = "Unknown", TitleId = "0000000000000000",
-                    Developer = "Unknown",
-                    Version = "0",
-                    Icon = null,
-                };
+            {
+                FileSize = gameStream.Length * 0.000000000931, TitleName = "Unknown", TitleId = "0000000000000000",
+                Developer = "Unknown",
+                Version = "0",
+                Icon = null,
+            };
 
             const Language TitleLanguage = Language.AmericanEnglish;
 
@@ -224,6 +224,12 @@ namespace LibRyujinx
                         GetControlFsAndTitleId(pfs, out IFileSystem? controlFs, out string? id);
 
                         gameInfo.TitleId = id;
+
+                        if (controlFs == null)
+                        {
+                            Logger.Error?.Print(LogClass.Application, $"No control FS was returned. Unable to process game any further: {gameInfo.TitleName}");
+                            return null;
+                        }
 
                         // Check if there is an update available.
                         if (IsUpdateApplied(gameInfo.TitleId, out IFileSystem? updatedControlFs))
@@ -376,6 +382,11 @@ namespace LibRyujinx
                 }
                 (_, _, Nca? controlNca) = GetGameData(SwitchDevice.VirtualFileSystem, pfs, 0);
 
+                if (controlNca == null)
+                {
+                    Logger.Warning?.Print(LogClass.Application, "Control NCA is null. Unable to load control FS.");
+                }
+
                 // Return the ControlFS
                 controlFs = controlNca?.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
                 titleId = controlNca?.Header.TitleId.ToString("x16");
@@ -447,9 +458,9 @@ namespace LibRyujinx
                     if (patchNca != null && controlNca != null)
                     {
                         updatedControlFs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-                    }
 
-                    return true;
+                        return true;
+                    }
                 }
                 catch (InvalidDataException)
                 {
