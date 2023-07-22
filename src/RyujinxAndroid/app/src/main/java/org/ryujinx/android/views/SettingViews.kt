@@ -380,18 +380,23 @@ class SettingViews {
                                                                         driverViewModel.selected =
                                                                             driver.driverPath
                                                                     })
-                                                                Column {
+                                                                Column(modifier = Modifier.clickable {
+                                                                    selectedDriver.value =
+                                                                        ind
+                                                                    isChanged.value =
+                                                                        true
+                                                                    driverViewModel.selected =
+                                                                        driver.driverPath
+                                                                }) {
                                                                     Text(text = driver.libraryName,
                                                                         modifier = Modifier
-                                                                            .fillMaxWidth()
-                                                                            .clickable {
-                                                                                selectedDriver.value =
-                                                                                    ind
-                                                                                isChanged.value =
-                                                                                    true
-                                                                                driverViewModel.selected =
-                                                                                    driver.driverPath
-                                                                            })
+                                                                            .fillMaxWidth())
+                                                                    Text(text = driver.driverVersion,
+                                                                        modifier = Modifier
+                                                                            .fillMaxWidth())
+                                                                    Text(text = driver.description,
+                                                                        modifier = Modifier
+                                                                            .fillMaxWidth())
                                                                 }
                                                             }
 

@@ -95,9 +95,20 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         if(driverViewModel.selected.isNotEmpty()) {
             var privatePath = mainViewModel.activity.filesDir;
             var privateDriverPath = privatePath.absolutePath + "/driver/"
+            val pD = File(privateDriverPath)
+            if(pD.exists())
+                pD.deleteRecursively()
+
+            pD.mkdirs()
+
             var driver = File(driverViewModel.selected)
-            driver.copyTo(File(privateDriverPath + driver.name), true)
-            driverHandle = NativeHelpers().loadDriver(driverViewModel.selected, mainViewModel.activity.applicationInfo.nativeLibraryDir!!, privateDriverPath, mainViewModel.activity.getExternalFilesDir(null)!!.absolutePath, driver.name)
+            var parent = driver.parentFile
+            for (file in parent.walkTopDown()){
+                if(file.absolutePath == parent.absolutePath)
+                    continue
+                file.copyTo(File(privateDriverPath + file.name), true)
+            }
+            driverHandle = NativeHelpers().loadDriver(mainViewModel.activity.applicationInfo.nativeLibraryDir!! + "/", privateDriverPath, driver.name)
         }
 
         success = _nativeRyujinx.graphicsInitializeRenderer(
