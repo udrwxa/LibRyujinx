@@ -127,7 +127,7 @@ namespace Ryujinx.Common.Configuration
         }
 
         // Check if existing old baseDirPath is a symlink, to prevent possible errors.
-        // Should be removed, when the existance of the old directory isn't checked anymore.
+        // Should be removed, when the existence of the old directory isn't checked anymore.
         private static bool IsPathSymlink(string path)
         {
             FileAttributes attributes = File.GetAttributes(path);
