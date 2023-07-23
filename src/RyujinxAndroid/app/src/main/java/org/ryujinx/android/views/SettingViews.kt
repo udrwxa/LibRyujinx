@@ -343,7 +343,7 @@ class SettingViews {
                                                         .fillMaxWidth()
                                                         .height(300.dp)) {
                                                         Row(
-                                                            modifier = Modifier.fillMaxWidth(),
+                                                            modifier = Modifier.fillMaxWidth().padding(8.dp),
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
                                                             RadioButton(
@@ -369,7 +369,7 @@ class SettingViews {
                                                         for (driver in drivers) {
                                                             var ind = driverIndex
                                                             Row(
-                                                                modifier = Modifier.fillMaxWidth(),
+                                                                modifier = Modifier.fillMaxWidth().padding(8.dp),
                                                                 verticalAlignment = Alignment.CenterVertically
                                                             ) {
                                                                 RadioButton(
