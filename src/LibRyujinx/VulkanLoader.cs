@@ -3,6 +3,7 @@ using Silk.NET.Core.Contexts;
 using Silk.NET.Vulkan;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -33,7 +34,7 @@ namespace LibRyujinx
         {
             _loadedLibrary = driver;
 
-            if(_loadedLibrary != IntPtr.Zero)
+            if (_loadedLibrary != IntPtr.Zero)
             {
                 var instanceGetProc = NativeLibrary.GetExport(_loadedLibrary, "vkGetInstanceProcAddr");
                 var deviceProc = NativeLibrary.GetExport(_loadedLibrary, "vkGetDeviceProcAddr");
@@ -43,7 +44,7 @@ namespace LibRyujinx
             }
         }
 
-        public Vk GetApi()
+        public unsafe Vk GetApi()
         {
 
             if (_loadedLibrary == IntPtr.Zero)
@@ -57,6 +58,8 @@ namespace LibRyujinx
                 x =>
                 {
                     var xPtr = Marshal.StringToHGlobalAnsi(x);
+                    byte* xp = (byte*)xPtr;
+                    LibRyujinx.debug_break(0);
                     try
                     {
                         nint ptr = default;

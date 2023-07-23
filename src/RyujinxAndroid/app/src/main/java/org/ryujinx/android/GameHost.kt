@@ -88,27 +88,33 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         nativeInterop!!.SurfaceHandle = window
 
         var driverViewModel = VulkanDriverViewModel(mainViewModel.activity);
-        driverViewModel.getAvailableDrivers()
+        var drivers = driverViewModel.getAvailableDrivers()
 
         var driverHandle = 0L;
 
         if(driverViewModel.selected.isNotEmpty()) {
-            var privatePath = mainViewModel.activity.filesDir;
-            var privateDriverPath = privatePath.absolutePath + "/driver/"
-            val pD = File(privateDriverPath)
-            if(pD.exists())
-                pD.deleteRecursively()
+            var metaData = drivers.find { it.driverPath == driverViewModel.selected }
 
-            pD.mkdirs()
+            metaData?.apply {
+                var privatePath = mainViewModel.activity.filesDir;
+                var privateDriverPath = privatePath.canonicalPath + "/driver/"
+                val pD = File(privateDriverPath)
+                if(pD.exists())
+                    pD.deleteRecursively()
 
-            var driver = File(driverViewModel.selected)
-            var parent = driver.parentFile
-            for (file in parent.walkTopDown()){
-                if(file.absolutePath == parent.absolutePath)
-                    continue
-                file.copyTo(File(privateDriverPath + file.name), true)
+                pD.mkdirs()
+
+                var driver = File(driverViewModel.selected)
+                var parent = driver.parentFile
+                for (file in parent.walkTopDown()){
+                    if(file.absolutePath == parent.absolutePath)
+                        continue
+                    file.copyTo(File(privateDriverPath + file.name), true)
+                }
+
+                driverHandle = NativeHelpers().loadDriver(mainViewModel.activity.applicationInfo.nativeLibraryDir!! + "/", privateDriverPath, this.libraryName)
             }
-            driverHandle = NativeHelpers().loadDriver(mainViewModel.activity.applicationInfo.nativeLibraryDir!! + "/", privateDriverPath, driver.name)
+
         }
 
         success = _nativeRyujinx.graphicsInitializeRenderer(

@@ -19,6 +19,7 @@
 #include "ryuijnx.h"
 #include "pthread.h"
 #include <chrono>
+#include <csignal>
 
 jmethodID _updateFrameTime;
 JNIEnv* _rendererEnv = nullptr;
@@ -217,4 +218,9 @@ Java_org_ryujinx_android_NativeHelpers_loadDriver(JNIEnv *env, jobject thiz,
     delete driverName;
 
     return (jlong)handle;
+}
+
+extern "C"
+void debug_break(int code){
+    int r = 0;
 }
