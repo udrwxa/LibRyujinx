@@ -43,6 +43,9 @@ namespace LibRyujinx
         internal extern static void setRenderingThread();
 
         [DllImport("libryujinxjni")]
+        internal extern static void debug_break(int code);
+
+        [DllImport("libryujinxjni")]
         internal extern static void onFrameEnd(double time);
 
         public delegate IntPtr JniCreateSurface(IntPtr native_surface, IntPtr instance);
