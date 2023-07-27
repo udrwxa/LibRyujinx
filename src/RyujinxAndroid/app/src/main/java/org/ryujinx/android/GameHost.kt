@@ -11,7 +11,7 @@ import org.ryujinx.android.viewmodels.VulkanDriverViewModel
 import java.io.File
 import kotlin.concurrent.thread
 
-class GameHost(context: Context?, val controller: GameController, val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
+class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
     private var _renderingThreadWatcher: Thread? = null
     private var _height: Int = 0
     private var _width: Int = 0
@@ -142,15 +142,13 @@ class GameHost(context: Context?, val controller: GameController, val mainViewMo
         _nativeRyujinx.inputInitialize(width, height)
 
         if(!settings.useVirtualController){
-            controller.setVisible(false)
+            mainViewModel.controller?.setVisible(false)
         }
         else{
-            controller.connect()
+            mainViewModel.controller?.connect()
         }
 
         mainViewModel.activity.physicalControllerManager.connect()
-
-        //
 
         _nativeRyujinx.graphicsRendererSetSize(
             surfaceHolder.surfaceFrame.width(),

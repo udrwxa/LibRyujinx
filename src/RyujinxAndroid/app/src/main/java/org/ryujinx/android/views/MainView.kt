@@ -40,35 +40,39 @@ import kotlin.math.roundToInt
 class MainView {
     companion object {
         @Composable
-        fun Main(mainViewModel: MainViewModel){
+        fun Main(mainViewModel: MainViewModel) {
             val navController = rememberNavController()
             mainViewModel.setNavController(navController)
 
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeViews.Home(mainViewModel.homeViewModel, navController) }
                 composable("game") { GameView(mainViewModel) }
-                composable("settings") { SettingViews.Main(SettingsViewModel(navController, mainViewModel.activity)) }
+                composable("settings") {
+                    SettingViews.Main(
+                        SettingsViewModel(
+                            navController,
+                            mainViewModel.activity
+                        )
+                    )
+                }
             }
         }
 
         @Composable
-        fun GameView(mainViewModel: MainViewModel){
+        fun GameView(mainViewModel: MainViewModel) {
             Box(modifier = Modifier.fillMaxSize()) {
-                val controller = remember {
-                    GameController(mainViewModel.activity)
-                }
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { context ->
-                        GameHost(context, controller, mainViewModel)
+                        GameHost(context, mainViewModel)
                     }
                 )
-                GameOverlay(mainViewModel, controller)
+                GameOverlay(mainViewModel)
             }
         }
 
         @Composable
-        fun GameOverlay(mainViewModel: MainViewModel, controller: GameController){
+        fun GameOverlay(mainViewModel: MainViewModel) {
             Box(modifier = Modifier.fillMaxSize()) {
                 GameStats(mainViewModel)
 
@@ -84,9 +88,6 @@ class MainView {
                                 Thread.sleep(2)
                                 val event = awaitPointerEvent()
 
-                                if(controller.isVisible)
-                                    continue
-
                                 val change = event
                                     .component1()
                                     .firstOrNull()
@@ -100,10 +101,12 @@ class MainView {
                                                 position.y.roundToInt()
                                             )
                                         }
+
                                         PointerEventType.Release -> {
                                             ryujinxNative.inputReleaseTouchPoint()
 
                                         }
+
                                         PointerEventType.Move -> {
                                             ryujinxNative.inputSetTouchPoint(
                                                 position.x.roundToInt(),
@@ -117,18 +120,24 @@ class MainView {
                         }
                     }) {
                 }
-                controller.Compose(mainViewModel.activity.lifecycleScope, mainViewModel.activity.lifecycle)
-                Row(modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(8.dp)) {
-                    IconButton(modifier = Modifier.padding(4.dp),onClick = {
-                        controller.setVisible(!controller.isVisible)
+                GameController.Compose(mainViewModel)
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(8.dp)
+                ) {
+                    IconButton(modifier = Modifier.padding(4.dp), onClick = {
+                        mainViewModel.controller?.setVisible(!mainViewModel.controller!!.isVisible)
                     }) {
-                        Icon(imageVector = rememberVideogameAsset(), contentDescription = "Toggle Virtual Pad")
+                        Icon(
+                            imageVector = rememberVideogameAsset(),
+                            contentDescription = "Toggle Virtual Pad"
+                        )
                     }
                 }
             }
         }
+
         @Composable
         fun rememberVideogameAsset(): ImageVector {
             val primaryColor = MaterialTheme.colorScheme.primary
@@ -226,7 +235,7 @@ class MainView {
         }
 
         @Composable
-        fun GameStats(mainViewModel: MainViewModel){
+        fun GameStats(mainViewModel: MainViewModel) {
             val fifo = remember {
                 mutableStateOf(0.0)
             }
@@ -237,8 +246,10 @@ class MainView {
                 mutableStateOf(0.0)
             }
 
-            Surface(modifier = Modifier.padding(16.dp),
-            color = MaterialTheme.colorScheme.surface.copy(0.4f)) {
+            Surface(
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.surface.copy(0.4f)
+            ) {
                 Column {
                     var gameTimeVal = 0.0
                     if (!gameTime.value.isInfinite())

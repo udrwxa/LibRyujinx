@@ -6,12 +6,14 @@ import android.os.Build
 import android.os.PerformanceHintManager
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
+import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.PerformanceManager
 
 @SuppressLint("WrongConstant")
 class MainViewModel(val activity: MainActivity) {
+    var controller: GameController? = null
     var performanceManager: PerformanceManager? = null
     var selected: GameModel? = null
     private var gameTimeState: MutableState<Double>? = null
@@ -64,5 +66,9 @@ class MainViewModel(val activity: MainActivity) {
         gameTimeState?.apply {
             this.value = gameTime
         }
+    }
+
+    fun setGameController(controller: GameController) {
+        this.controller = controller
     }
 }
