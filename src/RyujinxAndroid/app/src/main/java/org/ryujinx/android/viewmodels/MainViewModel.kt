@@ -6,10 +6,21 @@ import android.os.Build
 import android.os.PerformanceHintManager
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
+import com.anggrayudi.storage.extension.launchOnUiThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
+import org.ryujinx.android.GraphicsConfiguration
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.NativeGraphicsInterop
+import org.ryujinx.android.NativeHelpers
 import org.ryujinx.android.PerformanceManager
+import org.ryujinx.android.RegionCode
+import org.ryujinx.android.RyujinxNative
+import org.ryujinx.android.SystemLanguage
+import java.io.File
 
 @SuppressLint("WrongConstant")
 class MainViewModel(val activity: MainActivity) {
@@ -19,7 +30,7 @@ class MainViewModel(val activity: MainActivity) {
     private var gameTimeState: MutableState<Double>? = null
     private var gameFpsState: MutableState<Double>? = null
     private var fifoState: MutableState<Double>? = null
-    private var navController : NavHostController? = null
+    var navController : NavHostController? = null
 
     var homeViewModel: HomeViewModel = HomeViewModel(activity, this)
 
@@ -31,15 +42,96 @@ class MainViewModel(val activity: MainActivity) {
         }
     }
 
-    fun loadGame(game:GameModel) {
-        val controller = navController?: return
-        activity.setFullScreen()
+    suspend fun loadGame(game:GameModel) : Boolean {
         GameHost.gameModel = game
-        controller.navigate("game")
-    }
 
-    fun setNavController(controller: NavHostController) {
-        navController = controller
+        var nativeRyujinx = RyujinxNative()
+
+        val path = game.getPath() ?: return false
+
+        val settings = QuickSettings(activity)
+
+        var success = nativeRyujinx.graphicsInitialize(GraphicsConfiguration().apply {
+            EnableShaderCache = settings.enableShaderCache
+            EnableTextureRecompression = settings.enableTextureRecompression
+            ResScale = settings.resScale
+        })
+
+        if(!success)
+            return false
+
+        val nativeHelpers = NativeHelpers()
+        var nativeInterop = NativeGraphicsInterop()
+        nativeInterop!!.VkRequiredExtensions = arrayOf(
+            "VK_KHR_surface", "VK_KHR_android_surface"
+        )
+        nativeInterop!!.VkCreateSurface = nativeHelpers.getCreateSurfacePtr()
+        nativeInterop!!.SurfaceHandle = 0
+
+        var driverViewModel = VulkanDriverViewModel(activity);
+        var drivers = driverViewModel.getAvailableDrivers()
+
+        var driverHandle = 0L;
+
+        if (driverViewModel.selected.isNotEmpty()) {
+            var metaData = drivers.find { it.driverPath == driverViewModel.selected }
+
+            metaData?.apply {
+                var privatePath = activity.filesDir;
+                var privateDriverPath = privatePath.canonicalPath + "/driver/"
+                val pD = File(privateDriverPath)
+                if (pD.exists())
+                    pD.deleteRecursively()
+
+                pD.mkdirs()
+
+                var driver = File(driverViewModel.selected)
+                var parent = driver.parentFile
+                for (file in parent.walkTopDown()) {
+                    if (file.absolutePath == parent.absolutePath)
+                        continue
+                    file.copyTo(File(privateDriverPath + file.name), true)
+                }
+
+                driverHandle = NativeHelpers().loadDriver(
+                    activity.applicationInfo.nativeLibraryDir!! + "/",
+                    privateDriverPath,
+                    this.libraryName
+                )
+            }
+
+        }
+
+        success = nativeRyujinx.graphicsInitializeRenderer(
+            nativeInterop!!.VkRequiredExtensions!!,
+            driverHandle
+        )
+        if(!success)
+            return false
+
+        success = nativeRyujinx.deviceInitialize(
+            settings.isHostMapped,
+            settings.useNce,
+            SystemLanguage.AmericanEnglish.ordinal,
+            RegionCode.USA.ordinal,
+            settings.enableVsync,
+            settings.enableDocked,
+            settings.enablePtc,
+            false,
+            "UTC",
+            settings.ignoreMissingServices
+        )
+        if(!success)
+            return false
+
+        success = nativeRyujinx.deviceLoad(path)
+
+        if(!success)
+            return false
+
+        activity.physicalControllerManager.connect()
+
+        return true
     }
 
     fun setStatStates(

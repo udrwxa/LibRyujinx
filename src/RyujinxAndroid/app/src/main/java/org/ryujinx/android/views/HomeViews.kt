@@ -32,6 +32,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -55,10 +56,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.anggrayudi.storage.extension.launchOnUiThread
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.R
 import org.ryujinx.android.viewmodels.GameModel
@@ -143,14 +148,16 @@ class HomeViews {
                                 Column {
                                     TextButton(onClick = {
                                                          navController.navigate("settings")
-                                    }, modifier = Modifier.fillMaxWidth()
+                                    }, modifier = Modifier
+                                        .fillMaxWidth()
                                         .align(Alignment.Start),
                                     ) {
                                         Icon(
                                             Icons.Filled.Settings,
                                             contentDescription = "Settings"
                                         )
-                                        Text(text = "Settings", modifier = Modifier.padding(16.dp)
+                                        Text(text = "Settings", modifier = Modifier
+                                            .padding(16.dp)
                                             .align(Alignment.CenterVertically))
                                     }
                                 }
@@ -167,6 +174,7 @@ class HomeViews {
             val sheetState = rememberModalBottomSheetState()
             val scope = rememberCoroutineScope()
             val showBottomSheet = remember { mutableStateOf(false) }
+            val showLoading = remember { mutableStateOf(false) }
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -198,8 +206,27 @@ class HomeViews {
                         items(list) {
                             it.titleName?.apply {
                                 if (this.isNotEmpty())
-                                    GameItem(it, viewModel, showBottomSheet)
+                                    GameItem(it, viewModel, showBottomSheet, showLoading)
                             }
+                        }
+                    }
+                }
+
+                if(showLoading.value){
+                    AlertDialog(onDismissRequest = {  }) {
+                        Card(modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium) {
+                            Column(modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()) {
+                                Text(text = "Loading")
+                                LinearProgressIndicator(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp))
+                            }
+
                         }
                     }
                 }
@@ -264,15 +291,32 @@ class HomeViews {
 
         @OptIn(ExperimentalFoundationApi::class)
         @Composable
-        fun GameItem(gameModel: GameModel, viewModel: HomeViewModel, showSheet : MutableState<Boolean>) {
-            Card(shape = MaterialTheme.shapes.medium,
+        fun GameItem(
+            gameModel: GameModel,
+            viewModel: HomeViewModel,
+            showSheet: MutableState<Boolean>,
+            showLoading: MutableState<Boolean>
+        ) {
+            Surface(shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
                     .combinedClickable(
                         onClick = {
                             if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000") {
-                                viewModel.mainViewModel?.loadGame(gameModel)
+                                runBlocking {
+                                    launch {
+                                        showLoading.value = true
+                                        val success = viewModel.mainViewModel?.loadGame(gameModel) ?: false
+                                        if(success) {
+                                            launchOnUiThread {
+                                                viewModel.mainViewModel?.activity?.setFullScreen()
+                                                viewModel.mainViewModel?.navController?.navigate("game")
+                                            }
+                                        }
+                                        showLoading.value = false
+                                    }
+                                }
                             }
                         },
                         onLongClick = {

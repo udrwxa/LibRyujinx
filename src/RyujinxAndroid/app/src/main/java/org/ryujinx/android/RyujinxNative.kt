@@ -25,7 +25,6 @@ class RyujinxNative {
     external fun graphicsInitialize(configuration: GraphicsConfiguration): Boolean
     external fun graphicsInitializeRenderer(
         extensions: Array<String>,
-        surface: Long,
         driver: Long
     ): Boolean
 
@@ -48,5 +47,5 @@ class RyujinxNative {
     external fun inputSetButtonReleased(button: Int, id: Int): Unit
     external fun inputConnectGamepad(index: Int): Int
     external fun inputSetStickAxis(stick: Int, x: Float, y: Float, id: Int): Unit
-    external fun graphicsSetSurface(surface: Long): String
+    external fun graphicsSetSurface(surface: Long)
 }
