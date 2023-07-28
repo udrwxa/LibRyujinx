@@ -37,11 +37,9 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        val isStarted = _isStarted
-
         start(holder)
 
-        if(isStarted && (_width != width || _height != height))
+        if(_width != width || _height != height)
         {
             val nativeHelpers = NativeHelpers()
             val window = nativeHelpers.getNativeWindow(holder.surface)
@@ -62,84 +60,13 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
     }
 
     private fun start(surfaceHolder: SurfaceHolder) {
-        val game = gameModel ?: return
-        val path = game.getPath() ?: return
-        if (_isStarted)
-            return
 
-        var surface = surfaceHolder.surface
-
-        val settings = QuickSettings(mainViewModel.activity)
-
-        var success = _nativeRyujinx.graphicsInitialize(GraphicsConfiguration().apply {
-            EnableShaderCache = settings.enableShaderCache
-            EnableTextureRecompression = settings.enableTextureRecompression
-            ResScale = settings.resScale
-        })
-
-
-        val nativeHelpers = NativeHelpers()
-        val window = nativeHelpers.getNativeWindow(surfaceHolder.surface)
-        nativeInterop = NativeGraphicsInterop()
-        nativeInterop!!.VkRequiredExtensions = arrayOf(
-            "VK_KHR_surface", "VK_KHR_android_surface"
-        )
-        nativeInterop!!.VkCreateSurface = nativeHelpers.getCreateSurfacePtr()
-        nativeInterop!!.SurfaceHandle = window
-
-        var driverViewModel = VulkanDriverViewModel(mainViewModel.activity);
-        var drivers = driverViewModel.getAvailableDrivers()
-
-        var driverHandle = 0L;
-
-        if(driverViewModel.selected.isNotEmpty()) {
-            var metaData = drivers.find { it.driverPath == driverViewModel.selected }
-
-            metaData?.apply {
-                var privatePath = mainViewModel.activity.filesDir;
-                var privateDriverPath = privatePath.canonicalPath + "/driver/"
-                val pD = File(privateDriverPath)
-                if(pD.exists())
-                    pD.deleteRecursively()
-
-                pD.mkdirs()
-
-                var driver = File(driverViewModel.selected)
-                var parent = driver.parentFile
-                for (file in parent.walkTopDown()){
-                    if(file.absolutePath == parent.absolutePath)
-                        continue
-                    file.copyTo(File(privateDriverPath + file.name), true)
-                }
-
-                driverHandle = NativeHelpers().loadDriver(mainViewModel.activity.applicationInfo.nativeLibraryDir!! + "/", privateDriverPath, this.libraryName)
-            }
-
-        }
-
-        success = _nativeRyujinx.graphicsInitializeRenderer(
-            nativeInterop!!.VkRequiredExtensions!!,
-            window,
-            driverHandle
-        )
-
-
-        success = _nativeRyujinx.deviceInitialize(
-            settings.isHostMapped,
-            settings.useNce,
-            SystemLanguage.AmericanEnglish.ordinal,
-            RegionCode.USA.ordinal,
-            settings.enableVsync,
-            settings.enableDocked,
-            settings.enablePtc,
-            false,
-            "UTC",
-            settings.ignoreMissingServices
-        )
-
-        success = _nativeRyujinx.deviceLoad(path)
+        if(_isStarted)
+            return;
 
         _nativeRyujinx.inputInitialize(width, height)
+
+        val settings = QuickSettings(mainViewModel.activity)
 
         if(!settings.useVirtualController){
             mainViewModel.controller?.setVisible(false)
@@ -158,7 +85,7 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
         _guestThread = thread(start = true) {
             runGame()
         }
-        _isStarted = success
+        _isStarted = true
 
         _updateThread = thread(start = true) {
             var c = 0
