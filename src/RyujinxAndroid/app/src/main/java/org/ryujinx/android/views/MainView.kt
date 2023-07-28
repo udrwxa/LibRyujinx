@@ -42,7 +42,7 @@ class MainView {
         @Composable
         fun Main(mainViewModel: MainViewModel) {
             val navController = rememberNavController()
-            mainViewModel.setNavController(navController)
+            mainViewModel.navController = navController
 
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeViews.Home(mainViewModel.homeViewModel, navController) }

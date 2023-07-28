@@ -218,7 +218,6 @@ namespace LibRyujinx
         public unsafe static JBoolean JniInitializeGraphicsRendererNative(JEnvRef jEnv,
                                                                           JObjectLocalRef jObj,
                                                                           JArrayLocalRef extensionsArray,
-                                                                          JLong surfacePtr,
                                                                           JLong driverHandle)
         {
             if (Renderer != null)
@@ -253,10 +252,6 @@ namespace LibRyujinx
 
                 extensions.Add(GetString(jEnv, ext));
             }
-
-            _surfaceEvent.Set();
-
-            _surfacePtr = surfacePtr;
 
             if((long)driverHandle != 0)
             {
