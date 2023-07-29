@@ -310,7 +310,7 @@ class HomeViews {
                                         val success = viewModel.mainViewModel?.loadGame(gameModel) ?: false
                                         if(success) {
                                             launchOnUiThread {
-                                                viewModel.mainViewModel?.activity?.setFullScreen()
+                                                viewModel.mainViewModel?.activity?.setFullScreen(true)
                                                 viewModel.mainViewModel?.navController?.navigate("game")
                                             }
                                         }

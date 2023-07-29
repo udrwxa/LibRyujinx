@@ -222,5 +222,6 @@ Java_org_ryujinx_android_NativeHelpers_loadDriver(JNIEnv *env, jobject thiz,
 
 extern "C"
 void debug_break(int code){
+    if(code >= 3)
     int r = 0;
 }

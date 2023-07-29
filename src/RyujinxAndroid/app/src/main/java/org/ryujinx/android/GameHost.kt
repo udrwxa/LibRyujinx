@@ -12,6 +12,7 @@ import java.io.File
 import kotlin.concurrent.thread
 
 class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
+    private var _isClosed: Boolean = false
     private var _renderingThreadWatcher: Thread? = null
     private var _height: Int = 0
     private var _width: Int = 0
@@ -21,13 +22,8 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
     private var _isInit: Boolean = false
     private var _isStarted: Boolean = false
     private var _nativeWindow: Long = 0
-    private var _nativeHelper: NativeHelpers = NativeHelpers()
 
     private var _nativeRyujinx: RyujinxNative = RyujinxNative()
-
-    companion object {
-        var gameModel: GameModel? = null
-    }
 
     init {
         holder.addCallback(this)
@@ -37,6 +33,8 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+        if(_isClosed)
+            return
         start(holder)
 
         if(_width != width || _height != height)
@@ -59,8 +57,17 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
 
     }
 
-    private fun start(surfaceHolder: SurfaceHolder) {
+    fun close(){
+        _isClosed = true
+        _isInit = false
+        _isStarted = false
 
+        _updateThread?.join()
+        _renderingThreadWatcher?.join()
+    }
+
+    private fun start(surfaceHolder: SurfaceHolder) {
+        mainViewModel.gameHost = this
         if(_isStarted)
             return;
 
@@ -119,6 +126,7 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
                         mainViewModel.performanceManager?.initializeRenderingSession(threadId)
                     }
                 }
+                mainViewModel.performanceManager?.closeCurrentRenderingSession()
             }
         }
         _nativeRyujinx.graphicsRendererRunLoop()

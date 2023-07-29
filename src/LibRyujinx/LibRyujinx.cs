@@ -641,7 +641,9 @@ namespace LibRyujinx
         internal void DisposeContext()
         {
             EmulationContext?.Dispose();
+            EmulationContext?.DisposeGpu();
             EmulationContext = null;
+            LibRyujinx.Renderer = null;
         }
     }
 

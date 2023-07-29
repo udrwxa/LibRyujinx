@@ -135,16 +135,6 @@ class SettingViews {
                         })
                 }) { contentPadding ->
                 Column(modifier = Modifier.padding(contentPadding)) {
-                    BackHandler {
-                        settingsViewModel.save(
-                            isHostMapped,
-                            useNce, enableVsync, enableDocked, enablePtc, ignoreMissingServices,
-                            enableShaderCache,
-                            enableTextureRecompression,
-                            resScale,
-                            useVirtualController
-                        )
-                    }
                     ExpandableView(onCardArrowClick = { }, title = "System") {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Row(
@@ -461,6 +451,18 @@ class SettingViews {
                             }
                         }
                     }
+                }
+
+                BackHandler() {
+                    settingsViewModel.save(
+                        isHostMapped,
+                        useNce, enableVsync, enableDocked, enablePtc, ignoreMissingServices,
+                        enableShaderCache,
+                        enableTextureRecompression,
+                        resScale,
+                        useVirtualController
+                    )
+                    settingsViewModel.navController.popBackStack()
                 }
             }
         }
