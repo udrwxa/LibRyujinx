@@ -48,4 +48,6 @@ class RyujinxNative {
     external fun inputConnectGamepad(index: Int): Int
     external fun inputSetStickAxis(stick: Int, x: Float, y: Float, id: Int): Unit
     external fun graphicsSetSurface(surface: Long)
+    external fun deviceCloseEmulation()
+    external fun deviceSignalEmulationClose()
 }

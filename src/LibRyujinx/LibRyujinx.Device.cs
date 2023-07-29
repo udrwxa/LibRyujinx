@@ -1,6 +1,8 @@
 ﻿using ARMeilleure.Translation;
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.SystemState;
+using Ryujinx.Input.HLE;
+using Silk.NET.Vulkan;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -167,6 +169,42 @@ namespace LibRyujinx
             Translator.IsReadyForTranslation.Reset();
 
             return true;
+        }
+
+        public static void SignalEmulationClose()
+        {
+            _isStopped = true;
+            _isActive = false;
+
+            debug_break(2);
+        }
+
+        public static void CloseEmulation()
+        {
+            if (SwitchDevice == null)
+                return;
+
+            _npadManager?.Dispose();
+            _npadManager = null;
+
+            _touchScreenManager?.Dispose();
+            _touchScreenManager = null;
+
+            SwitchDevice?.InputManager?.Dispose();
+            SwitchDevice.InputManager = null;
+            _inputManager = null;
+
+
+            _surfaceEvent?.Set();
+
+            if (Renderer != null)
+            {
+                _gpuDoneEvent.WaitOne();
+                _gpuDoneEvent.Dispose();
+                _gpuDoneEvent = null;
+                SwitchDevice?.DisposeContext();
+                Renderer = null;
+            }
         }
     }
 }
