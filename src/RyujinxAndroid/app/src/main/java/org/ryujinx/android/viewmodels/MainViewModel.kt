@@ -6,10 +6,6 @@ import android.os.Build
 import android.os.PerformanceHintManager
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
-import com.anggrayudi.storage.extension.launchOnUiThread
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.GraphicsConfiguration
@@ -24,6 +20,7 @@ import java.io.File
 
 @SuppressLint("WrongConstant")
 class MainViewModel(val activity: MainActivity) {
+    var gameHost: GameHost? = null
     var controller: GameController? = null
     var performanceManager: PerformanceManager? = null
     var selected: GameModel? = null
@@ -42,9 +39,19 @@ class MainViewModel(val activity: MainActivity) {
         }
     }
 
-    suspend fun loadGame(game:GameModel) : Boolean {
-        GameHost.gameModel = game
+    fun closeGame() {
+        RyujinxNative().deviceSignalEmulationClose()
+        gameHost?.close()
+        RyujinxNative().deviceCloseEmulation()
+        goBack()
+        activity.setFullScreen(false)
+    }
 
+    fun goBack(){
+        navController?.popBackStack()
+    }
+
+    fun loadGame(game:GameModel) : Boolean {
         var nativeRyujinx = RyujinxNative()
 
         val path = game.getPath() ?: return false
@@ -129,8 +136,6 @@ class MainViewModel(val activity: MainActivity) {
         if(!success)
             return false
 
-        activity.physicalControllerManager.connect()
-
         return true
     }
 
@@ -162,5 +167,8 @@ class MainViewModel(val activity: MainActivity) {
 
     fun setGameController(controller: GameController) {
         this.controller = controller
+    }
+
+    fun backCalled() {
     }
 }

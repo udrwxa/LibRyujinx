@@ -30,7 +30,7 @@ namespace LibRyujinx
         private static VirtualTouchScreenDriver? _touchScreenDriver;
         private static TouchScreenManager? _touchScreenManager;
         private static InputManager? _inputManager;
-        private static NpadManager _npadManager;
+        private static NpadManager? _npadManager;
         private static InputConfig[] _configs;
 
         public static void InitializeInput(int width, int height)

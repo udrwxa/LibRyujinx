@@ -3,6 +3,7 @@ using LibRyujinx.Shared;
 using OpenTK.Graphics.OpenGL;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Graphics.GAL;
+using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
 using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Graphics.Vulkan;
@@ -21,6 +22,7 @@ namespace LibRyujinx
         private static CancellationTokenSource _gpuCancellationTokenSource;
         private static SwapBuffersCallback? _swapBuffersCallback;
         private static NativeGraphicsInterop _nativeGraphicsInterop;
+        private static ManualResetEvent _gpuDoneEvent;
 
         public delegate void SwapBuffersCallback();
         public delegate IntPtr GetProcAddress(string name);
@@ -146,12 +148,14 @@ namespace LibRyujinx
                 return;
             }
             var device = SwitchDevice!.EmulationContext!;
+            _gpuDoneEvent = new ManualResetEvent(true);
 
             device.Gpu.Renderer.Initialize(GraphicsDebugLevel.None);
             _gpuCancellationTokenSource = new CancellationTokenSource();
 
             device.Gpu.Renderer.RunLoop(() =>
             {
+                _gpuDoneEvent.Reset();
                 device.Gpu.SetGpuThread();
                 device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
                 Translator.IsReadyForTranslation.Set();
@@ -162,8 +166,10 @@ namespace LibRyujinx
                 {
                     if (_isStopped)
                     {
-                        return;
+                        break;
                     }
+
+                    debug_break(1);
 
                     if (Ryujinx.Common.SystemInfo.SystemInfo.IsBionic)
                     {
@@ -182,6 +188,13 @@ namespace LibRyujinx
                         device.PresentFrame(() => _swapBuffersCallback?.Invoke());
                     }
                 }
+
+                if (device.Gpu.Renderer is ThreadedRenderer threaded)
+                {
+                    threaded.FlushThreadedCommands();
+                }
+
+                _gpuDoneEvent.Set();
             });
         }
 

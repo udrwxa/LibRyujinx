@@ -72,7 +72,9 @@ namespace LibRyujinx
 
             var init = Initialize(path, enableDebugLogs);
 
-            AudioDriver = new OboeHardwareDeviceDriver();
+            // AudioDriver = new OboeHardwareDeviceDriver();
+
+            _surfaceEvent?.Set();
 
             _surfaceEvent = new ManualResetEvent(false);
 
@@ -149,6 +151,18 @@ namespace LibRyujinx
             var path = GetString(jEnv, pathPtr);
 
             return LoadApplication(path);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceSignalEmulationClose")]
+        public static void JniSignalEmulationCloseNative(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            SignalEmulationClose();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceCloseEmulation")]
+        public static void JniCloseEmulationNative(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            CloseEmulation();
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceLoadDescriptor")]
