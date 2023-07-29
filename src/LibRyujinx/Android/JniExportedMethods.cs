@@ -72,8 +72,6 @@ namespace LibRyujinx
 
             var init = Initialize(path, enableDebugLogs);
 
-            // AudioDriver = new OboeHardwareDeviceDriver();
-
             _surfaceEvent?.Set();
 
             _surfaceEvent = new ManualResetEvent(false);
@@ -104,6 +102,7 @@ namespace LibRyujinx
                                                          JStringLocalRef timeZone,
                                                          JBoolean ignoreMissingServices)
         {
+            AudioDriver = new OboeHardwareDeviceDriver();
             return InitializeDevice(isHostMapped,
                                     useNce,
                                     (SystemLanguage)(int)systemLanguage,
