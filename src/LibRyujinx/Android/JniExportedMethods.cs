@@ -152,6 +152,22 @@ namespace LibRyujinx
             return LoadApplication(path);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetDlcContentList")]
+        public static JArrayLocalRef JniGetDlcContentListNative(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef pathPtr, JLong titleId)
+        {
+            var list = GetDlcContentList(GetString(jEnv, pathPtr), (ulong)(long)titleId);
+
+            debug_break(4);
+
+            return CreateStringArray(jEnv, list);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetDlcTitleId")]
+        public static JStringLocalRef JniGetDlcTitleIdNative(JEnvRef jEnv, JObjectLocalRef jObj, JStringLocalRef pathPtr, JStringLocalRef ncaPath)
+        {
+            return CreateString(jEnv, GetDlcTitleId(GetString(jEnv, pathPtr), GetString(jEnv, ncaPath)));
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceSignalEmulationClose")]
         public static void JniSignalEmulationCloseNative(JEnvRef jEnv, JObjectLocalRef jObj)
         {
@@ -294,6 +310,27 @@ namespace LibRyujinx
             };
 
             return InitializeGraphicsRenderer(GraphicsBackend.Vulkan, createSurfaceFunc, extensions.ToArray());
+        }
+
+        private static JArrayLocalRef CreateStringArray(JEnvRef jEnv, List<string> strings)
+        {
+            JEnvValue value = jEnv.Environment;
+            ref JNativeInterface jInterface = ref value.Functions;
+            IntPtr newObjectArrayPtr = jInterface.NewObjectArrayPointer;
+            IntPtr findClassPtr = jInterface.FindClassPointer;
+            IntPtr setObjectArrayElementPtr = jInterface.SetObjectArrayElementPointer;
+
+            var newObjectArray = newObjectArrayPtr.GetUnsafeDelegate<NewObjectArrayDelegate>();
+            var findClass = findClassPtr.GetUnsafeDelegate<FindClassDelegate>();
+            var setObjectArrayElement = setObjectArrayElementPtr.GetUnsafeDelegate<SetObjectArrayElementDelegate>();
+            var array = newObjectArray(jEnv, strings.Count, findClass(jEnv, GetCCharSequence("java/lang/String")), CreateString(jEnv, "")._value);
+
+            for (int i = 0; i < strings.Count; i++)
+            {
+                setObjectArrayElement(jEnv, array, i, CreateString(jEnv, strings[i])._value);
+            }
+
+            return array;
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsRendererSetSize")]
