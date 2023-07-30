@@ -186,8 +186,8 @@ namespace Ryujinx.Cpu
 
             try
             {
-                baseMemory = new MemoryBlock(asSize, asFlags);
-                mirrorMemory = new MemoryBlock(asSize, asFlags);
+                baseMemory = new MemoryBlock(asSize, AsFlags);
+                mirrorMemory = new MemoryBlock(asSize, AsFlags);
                 addressSpace = new AddressSpace(backingMemory, baseMemory, mirrorMemory, asSize, supports4KBPages);
             }
             catch (SystemException)
@@ -203,7 +203,7 @@ namespace Ryujinx.Cpu
         {
             addressSpace = null;
 
-            MemoryAllocationFlags asFlags = MemoryAllocationFlags.Reserve | MemoryAllocationFlags.ViewCompatible;
+            MemoryAllocationFlags AsFlags = MemoryAllocationFlags.Reserve | MemoryAllocationFlags.ViewCompatible;
 
             ulong minAddressSpaceSize = Math.Min(asSize, 1UL << 36);
 
