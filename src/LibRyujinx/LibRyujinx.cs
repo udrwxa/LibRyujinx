@@ -31,6 +31,7 @@ using Ryujinx.Common.Utilities;
 using System.Globalization;
 using Ryujinx.Ui.Common.Configuration.System;
 using Ryujinx.Common.Logging.Targets;
+using System.Collections.Generic;
 
 namespace LibRyujinx
 {
@@ -544,6 +545,83 @@ namespace LibRyujinx
             }
 
             return gameInfo;
+        }
+
+        public static string GetDlcTitleId(string path, string ncaPath)
+        {
+            if (File.Exists(path))
+            {
+                using FileStream containerFile = File.OpenRead(path);
+
+                PartitionFileSystem partitionFileSystem = new(containerFile.AsStorage());
+
+                SwitchDevice.VirtualFileSystem.ImportTickets(partitionFileSystem);
+
+                using UniqueRef<IFile> ncaFile = new();
+
+                partitionFileSystem.OpenFile(ref ncaFile.Ref, ncaPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                Nca nca = TryOpenNca(ncaFile.Get.AsStorage(), ncaPath);
+                if (nca != null)
+                {
+                    return nca.Header.TitleId.ToString("X16");
+                }
+            }
+
+            return string.Empty;
+        }
+
+
+        private static Nca TryOpenNca(IStorage ncaStorage, string containerPath)
+        {
+            try
+            {
+                return new Nca(SwitchDevice.VirtualFileSystem.KeySet, ncaStorage);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return null;
+        }
+
+        public static List<string> GetDlcContentList(string path, ulong titleId)
+        {
+            if(!File.Exists(path))
+                return new List<string>();
+
+            using FileStream containerFile = File.OpenRead(path);
+
+            PartitionFileSystem partitionFileSystem = new(containerFile.AsStorage());
+            bool containsDownloadableContent = false;
+
+            SwitchDevice.VirtualFileSystem.ImportTickets(partitionFileSystem);
+            List<string> paths = new List<string>();
+
+            foreach (DirectoryEntryEx fileEntry in partitionFileSystem.EnumerateEntries("/", "*.nca"))
+            {
+                using var ncaFile = new UniqueRef<IFile>();
+
+                partitionFileSystem.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                Nca nca = TryOpenNca(ncaFile.Get.AsStorage(), path);
+                if (nca == null)
+                {
+                    continue;
+                }
+
+                if (nca.Header.ContentType == NcaContentType.PublicData)
+                {
+                    if ((nca.Header.TitleId & 0xFFFFFFFFFFFFE000) != titleId)
+                    {
+                        break;
+                    }
+
+                    paths.Add(fileEntry.FullPath);
+                }
+            }
+
+            return paths;
         }
     }
 

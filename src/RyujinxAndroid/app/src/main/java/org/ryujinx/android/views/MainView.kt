@@ -1,14 +1,12 @@
 package org.ryujinx.android.views
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -19,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,12 +35,12 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
+import org.ryujinx.android.Icons
 import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.SettingsViewModel
@@ -143,7 +140,7 @@ class MainView {
                         mainViewModel.controller?.setVisible(!mainViewModel.controller!!.isVisible)
                     }) {
                         Icon(
-                            imageVector = rememberVideogameAsset(),
+                            imageVector = Icons.VideoGame(),
                             contentDescription = "Toggle Virtual Pad"
                         )
                     }
@@ -201,103 +198,6 @@ class MainView {
                 }
             }
         }
-
-        @Composable
-        fun rememberVideogameAsset(): ImageVector {
-            val primaryColor = MaterialTheme.colorScheme.primary
-            return remember {
-                ImageVector.Builder(
-                    name = "videogame_asset",
-                    defaultWidth = 40.0.dp,
-                    defaultHeight = 40.0.dp,
-                    viewportWidth = 40.0f,
-                    viewportHeight = 40.0f
-                ).apply {
-                    path(
-                        fill = SolidColor(Color.Black.copy(alpha = 0.5f)),
-                        fillAlpha = 1f,
-                        stroke = SolidColor(primaryColor),
-                        strokeAlpha = 1f,
-                        strokeLineWidth = 1.0f,
-                        strokeLineCap = StrokeCap.Butt,
-                        strokeLineJoin = StrokeJoin.Miter,
-                        strokeLineMiter = 1f,
-                        pathFillType = PathFillType.NonZero
-                    ) {
-                        moveTo(6.25f, 29.792f)
-                        quadToRelative(-1.083f, 0f, -1.854f, -0.792f)
-                        quadToRelative(-0.771f, -0.792f, -0.771f, -1.833f)
-                        verticalLineTo(12.833f)
-                        quadToRelative(0f, -1.083f, 0.771f, -1.854f)
-                        quadToRelative(0.771f, -0.771f, 1.854f, -0.771f)
-                        horizontalLineToRelative(27.5f)
-                        quadToRelative(1.083f, 0f, 1.854f, 0.771f)
-                        quadToRelative(0.771f, 0.771f, 0.771f, 1.854f)
-                        verticalLineToRelative(14.334f)
-                        quadToRelative(0f, 1.041f, -0.771f, 1.833f)
-                        reflectiveQuadToRelative(-1.854f, 0.792f)
-                        close()
-                        moveToRelative(0f, -2.625f)
-                        horizontalLineToRelative(27.5f)
-                        verticalLineTo(12.833f)
-                        horizontalLineTo(6.25f)
-                        verticalLineToRelative(14.334f)
-                        close()
-                        moveToRelative(7.167f, -1.792f)
-                        quadToRelative(0.541f, 0f, 0.916f, -0.375f)
-                        reflectiveQuadToRelative(0.375f, -0.917f)
-                        verticalLineToRelative(-2.791f)
-                        horizontalLineToRelative(2.75f)
-                        quadToRelative(0.584f, 0f, 0.959f, -0.375f)
-                        reflectiveQuadToRelative(0.375f, -0.917f)
-                        quadToRelative(0f, -0.542f, -0.375f, -0.938f)
-                        quadToRelative(-0.375f, -0.395f, -0.959f, -0.395f)
-                        horizontalLineToRelative(-2.75f)
-                        verticalLineToRelative(-2.75f)
-                        quadToRelative(0f, -0.542f, -0.375f, -0.938f)
-                        quadToRelative(-0.375f, -0.396f, -0.916f, -0.396f)
-                        quadToRelative(-0.584f, 0f, -0.959f, 0.396f)
-                        reflectiveQuadToRelative(-0.375f, 0.938f)
-                        verticalLineToRelative(2.75f)
-                        horizontalLineToRelative(-2.75f)
-                        quadToRelative(-0.541f, 0f, -0.937f, 0.395f)
-                        quadTo(8f, 19.458f, 8f, 20f)
-                        quadToRelative(0f, 0.542f, 0.396f, 0.917f)
-                        reflectiveQuadToRelative(0.937f, 0.375f)
-                        horizontalLineToRelative(2.75f)
-                        verticalLineToRelative(2.791f)
-                        quadToRelative(0f, 0.542f, 0.396f, 0.917f)
-                        reflectiveQuadToRelative(0.938f, 0.375f)
-                        close()
-                        moveToRelative(11.125f, -0.5f)
-                        quadToRelative(0.791f, 0f, 1.396f, -0.583f)
-                        quadToRelative(0.604f, -0.584f, 0.604f, -1.375f)
-                        quadToRelative(0f, -0.834f, -0.604f, -1.417f)
-                        quadToRelative(-0.605f, -0.583f, -1.396f, -0.583f)
-                        quadToRelative(-0.834f, 0f, -1.417f, 0.583f)
-                        quadToRelative(-0.583f, 0.583f, -0.583f, 1.375f)
-                        quadToRelative(0f, 0.833f, 0.583f, 1.417f)
-                        quadToRelative(0.583f, 0.583f, 1.417f, 0.583f)
-                        close()
-                        moveToRelative(3.916f, -5.833f)
-                        quadToRelative(0.834f, 0f, 1.417f, -0.584f)
-                        quadToRelative(0.583f, -0.583f, 0.583f, -1.416f)
-                        quadToRelative(0f, -0.792f, -0.583f, -1.375f)
-                        quadToRelative(-0.583f, -0.584f, -1.417f, -0.584f)
-                        quadToRelative(-0.791f, 0f, -1.375f, 0.584f)
-                        quadToRelative(-0.583f, 0.583f, -0.583f, 1.375f)
-                        quadToRelative(0f, 0.833f, 0.583f, 1.416f)
-                        quadToRelative(0.584f, 0.584f, 1.375f, 0.584f)
-                        close()
-                        moveTo(6.25f, 27.167f)
-                        verticalLineTo(12.833f)
-                        verticalLineToRelative(14.334f)
-                        close()
-                    }
-                }.build()
-            }
-        }
-
         @Composable
         fun GameStats(mainViewModel: MainViewModel) {
             val fifo = remember {
