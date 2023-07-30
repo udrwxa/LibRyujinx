@@ -50,4 +50,6 @@ class RyujinxNative {
     external fun graphicsSetSurface(surface: Long)
     external fun deviceCloseEmulation()
     external fun deviceSignalEmulationClose()
+    external fun deviceGetDlcTitleId(path: String, ncaPath: String) : String
+    external fun deviceGetDlcContentList(path: String, titleId: Long) : Array<String>
 }

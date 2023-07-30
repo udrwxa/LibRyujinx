@@ -56,7 +56,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
@@ -236,11 +235,12 @@ class HomeViews {
                         showBottomSheet.value = false
                     },
                     sheetState = sheetState) {
-                        val openDialog = remember { mutableStateOf(false) }
+                        val openTitleUpdateDialog = remember { mutableStateOf(false) }
+                        val openDlcDialog = remember { mutableStateOf(false) }
 
-                        if(openDialog.value) {
+                        if(openTitleUpdateDialog.value) {
                             AlertDialog(onDismissRequest = { 
-                                openDialog.value = false
+                                openTitleUpdateDialog.value = false
                             }) {
                                 Surface(
                                     modifier = Modifier
@@ -251,24 +251,43 @@ class HomeViews {
                                 ) {
                                     val titleId = viewModel.mainViewModel?.selected?.titleId ?: ""
                                     val name = viewModel.mainViewModel?.selected?.titleName ?: ""
-                                    TitleUpdateViews.Main(titleId, name, openDialog)
+                                    TitleUpdateViews.Main(titleId, name, openTitleUpdateDialog)
                                 }
 
                             }
                         }
+                        if(openDlcDialog.value) {
+                        AlertDialog(onDismissRequest = {
+                            openDlcDialog.value = false
+                        }) {
+                            Surface(
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .wrapContentHeight(),
+                                shape = MaterialTheme.shapes.large,
+                                tonalElevation = AlertDialogDefaults.TonalElevation
+                            ) {
+                                val titleId = viewModel.mainViewModel?.selected?.titleId ?: ""
+                                val name = viewModel.mainViewModel?.selected?.titleName ?: ""
+                                DlcViews.Main(titleId, name, openDlcDialog)
+                            }
+
+                        }
+                    }
                         Surface(color =  MaterialTheme.colorScheme.surface,
                         modifier = Modifier.padding(16.dp)) {
                             Column(modifier = Modifier.fillMaxSize()) {
                                 Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                                     Card(
+                                        modifier = Modifier.padding(8.dp),
                                         onClick = {
-                                            openDialog.value = true
+                                            openTitleUpdateDialog.value = true
                                         }
                                     ) {
                                         Column(modifier = Modifier.padding(16.dp)) {
                                             Icon(
                                                 painter = painterResource(R.drawable.app_update),
-                                                contentDescription = "More",
+                                                contentDescription = "Game Updates",
                                                 tint = Color.Green,
                                                 modifier = Modifier
                                                     .width(48.dp)
@@ -278,6 +297,28 @@ class HomeViews {
                                             Text(text = "Game Updates",
                                                 modifier = Modifier.align(Alignment.CenterHorizontally),
                                             color = MaterialTheme.colorScheme.onSurface)
+
+                                        }
+                                    }
+                                    Card(
+                                        modifier = Modifier.padding(8.dp),
+                                        onClick = {
+                                            openDlcDialog.value = true
+                                        }
+                                    ) {
+                                        Column(modifier = Modifier.padding(16.dp)) {
+                                            Icon(
+                                                imageVector = org.ryujinx.android.Icons.Download(),
+                                                contentDescription = "Game Dlc",
+                                                tint = Color.Green,
+                                                modifier = Modifier
+                                                    .width(48.dp)
+                                                    .height(48.dp)
+                                                    .align(Alignment.CenterHorizontally)
+                                            )
+                                            Text(text = "Game DLC",
+                                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                                color = MaterialTheme.colorScheme.onSurface)
 
                                         }
                                     }
@@ -307,10 +348,13 @@ class HomeViews {
                                 runBlocking {
                                     launch {
                                         showLoading.value = true
-                                        val success = viewModel.mainViewModel?.loadGame(gameModel) ?: false
-                                        if(success) {
+                                        val success =
+                                            viewModel.mainViewModel?.loadGame(gameModel) ?: false
+                                        if (success) {
                                             launchOnUiThread {
-                                                viewModel.mainViewModel?.activity?.setFullScreen(true)
+                                                viewModel.mainViewModel?.activity?.setFullScreen(
+                                                    true
+                                                )
                                                 viewModel.mainViewModel?.navController?.navigate("game")
                                             }
                                         }
