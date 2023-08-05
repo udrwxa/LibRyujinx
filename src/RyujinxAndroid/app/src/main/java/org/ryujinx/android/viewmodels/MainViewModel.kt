@@ -20,6 +20,7 @@ import java.io.File
 
 @SuppressLint("WrongConstant")
 class MainViewModel(val activity: MainActivity) {
+    var gameModel: GameModel? = null
     var gameHost: GameHost? = null
     var controller: GameController? = null
     var performanceManager: PerformanceManager? = null
@@ -54,7 +55,12 @@ class MainViewModel(val activity: MainActivity) {
     fun loadGame(game:GameModel) : Boolean {
         var nativeRyujinx = RyujinxNative()
 
-        val path = game.getPath() ?: return false
+        val descriptor = game.open()
+
+        if(descriptor == 0)
+            return false
+
+        gameModel = game;
 
         val settings = QuickSettings(activity)
 
@@ -131,7 +137,7 @@ class MainViewModel(val activity: MainActivity) {
         if(!success)
             return false
 
-        success = nativeRyujinx.deviceLoad(path)
+        success = nativeRyujinx.deviceLoadDescriptor(descriptor, game.isXci())
 
         if(!success)
             return false

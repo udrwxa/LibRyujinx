@@ -358,6 +358,9 @@ class HomeViews {
                                                 viewModel.mainViewModel?.navController?.navigate("game")
                                             }
                                         }
+                                        else {
+                                            gameModel.close()
+                                        }
                                         showLoading.value = false
                                     }
                                 }
