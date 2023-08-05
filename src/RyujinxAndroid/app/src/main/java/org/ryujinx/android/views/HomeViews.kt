@@ -228,6 +228,7 @@ class HomeViews {
                         mutableStateListOf<GameModel>()
                     }
 
+
                     if(refresh.value) {
                         viewModel.setViewList(list)
                         refresh.value = false
@@ -342,7 +343,7 @@ class HomeViews {
                                     ) {
                                         Column(modifier = Modifier.padding(16.dp)) {
                                             Icon(
-                                                imageVector = org.ryujinx.android.Icons.Download(),
+                                                imageVector = org.ryujinx.android.Icons.download(),
                                                 contentDescription = "Game Dlc",
                                                 tint = Color.Green,
                                                 modifier = Modifier
