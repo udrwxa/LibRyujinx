@@ -12,6 +12,7 @@ import java.io.File
 import kotlin.concurrent.thread
 
 class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
+    private var game: GameModel? = null
     private var _isClosed: Boolean = false
     private var _renderingThreadWatcher: Thread? = null
     private var _height: Int = 0
@@ -70,6 +71,8 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
         mainViewModel.gameHost = this
         if(_isStarted)
             return;
+
+        game = mainViewModel.gameModel
 
         _nativeRyujinx.inputInitialize(width, height)
 
@@ -130,5 +133,7 @@ class GameHost(context: Context?, val mainViewModel: MainViewModel) : SurfaceVie
             }
         }
         _nativeRyujinx.graphicsRendererRunLoop()
+
+        game?.close()
     }
 }
