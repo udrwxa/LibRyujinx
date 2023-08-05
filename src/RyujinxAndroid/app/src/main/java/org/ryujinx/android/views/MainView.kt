@@ -25,24 +25,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Popup
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import compose.icons.CssGgIcons
+import compose.icons.cssggicons.ToolbarBottom
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.Icons
 import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.MainViewModel
+import org.ryujinx.android.viewmodels.QuickSettings
 import org.ryujinx.android.viewmodels.SettingsViewModel
 import kotlin.math.roundToInt
 
@@ -88,6 +86,16 @@ class MainView {
 
                 val ryujinxNative = RyujinxNative()
 
+                var showController = remember {
+                    mutableStateOf(QuickSettings(mainViewModel.activity).useVirtualController)
+                }
+                var enableVsync = remember {
+                    mutableStateOf(QuickSettings(mainViewModel.activity).enableVsync)
+                }
+                var showMore = remember {
+                    mutableStateOf(false)
+                }
+
                 // touch surface
                 Surface(color = Color.Transparent, modifier = Modifier
                     .fillMaxSize()
@@ -95,8 +103,9 @@ class MainView {
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
-                                Thread.sleep(2)
                                 val event = awaitPointerEvent()
+                                if (!showController.value)
+                                    continue
 
                                 val change = event
                                     .component1()
@@ -137,12 +146,43 @@ class MainView {
                         .padding(8.dp)
                 ) {
                     IconButton(modifier = Modifier.padding(4.dp), onClick = {
-                        mainViewModel.controller?.setVisible(!mainViewModel.controller!!.isVisible)
+                        showMore.value = true
                     }) {
                         Icon(
-                            imageVector = Icons.VideoGame(),
-                            contentDescription = "Toggle Virtual Pad"
+                            imageVector = CssGgIcons.ToolbarBottom,
+                            contentDescription = "Open Panel"
                         )
+                    }
+                }
+
+                if(showMore.value){
+                    Popup(alignment = Alignment.BottomCenter, onDismissRequest = {showMore.value = false}) {
+                        Surface(modifier = Modifier.padding(16.dp),
+                            shape = MaterialTheme.shapes.medium) {
+                            Row(modifier = Modifier.padding(8.dp)) {
+                                IconButton(modifier = Modifier.padding(4.dp), onClick = {
+                                    showMore.value = false
+                                    showController.value = !showController.value
+                                    mainViewModel.controller?.setVisible(showController.value)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.videoGame(),
+                                        contentDescription = "Toggle Virtual Pad"
+                                    )
+                                }
+                                IconButton(modifier = Modifier.padding(4.dp), onClick = {
+                                    showMore.value = false
+                                    enableVsync.value = !enableVsync.value
+                                    RyujinxNative().graphicsRendererSetVsync(enableVsync.value)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.vSync(),
+                                        tint = if(enableVsync.value) Color.Green else Color.Red,
+                                        contentDescription = "Toggle VSync"
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
