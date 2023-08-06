@@ -387,10 +387,7 @@ class HomeViews {
                                             viewModel.mainViewModel?.loadGame(gameModel) ?: false
                                         if (success) {
                                             launchOnUiThread {
-                                                viewModel.mainViewModel?.activity?.setFullScreen(
-                                                    true
-                                                )
-                                                viewModel.mainViewModel?.navController?.navigate("game")
+                                                viewModel.mainViewModel?.navigateToGame()
                                             }
                                         } else {
                                             gameModel.close()
