@@ -161,10 +161,10 @@ class GameActivity : ComponentActivity() {
             val ryujinxNative = RyujinxNative()
 
             val showController = remember {
-                mutableStateOf(QuickSettings(mainViewModel.activity).useVirtualController)
+                mutableStateOf(QuickSettings(this@GameActivity).useVirtualController)
             }
             val enableVsync = remember {
-                mutableStateOf(QuickSettings(mainViewModel.activity).enableVsync)
+                mutableStateOf(QuickSettings(this@GameActivity).enableVsync)
             }
             val showMore = remember {
                 mutableStateOf(false)
@@ -178,7 +178,7 @@ class GameActivity : ComponentActivity() {
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent()
-                            if (!showController.value)
+                            if (showController.value)
                                 continue
 
                             val change = event
