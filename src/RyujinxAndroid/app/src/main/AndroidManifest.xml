@@ -32,7 +32,6 @@
             android:name=".GameActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|uiMode"
             android:launchMode="singleTask"
-            android:label="@string/title_activity_game"
             android:theme="@style/Theme.RyujinxAndroid" />
         <activity
             android:name=".MainActivity"
