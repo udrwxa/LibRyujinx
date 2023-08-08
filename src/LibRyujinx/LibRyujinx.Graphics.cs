@@ -185,7 +185,22 @@ namespace LibRyujinx
 
                     while (device.ConsumeFrameAvailable())
                     {
-                        device.PresentFrame(() => _swapBuffersCallback?.Invoke());
+                        device.PresentFrame(() =>
+                        {
+                            VulkanRenderer? vk = device.Gpu.Renderer as VulkanRenderer;
+                            if(vk == null)
+                            {
+                                vk = (device.Gpu.Renderer as ThreadedRenderer)?.BaseRenderer as VulkanRenderer;
+                            }
+
+                            if(vk != null)
+                            {
+                                var transform = vk.CurrentTransform;
+
+                                setCurrentTransform(_window, (int)transform);
+                            }
+                            _swapBuffersCallback?.Invoke();
+                        });
                     }
                 }
 
