@@ -132,6 +132,8 @@ namespace Ryujinx.Graphics.Vulkan
 
             var oldSwapchain = _swapchain;
 
+            CurrentTransform = capabilities.CurrentTransform;
+
             var swapchainCreateInfo = new SwapchainCreateInfoKHR
             {
                 SType = StructureType.SwapchainCreateInfoKhr,
@@ -143,7 +145,7 @@ namespace Ryujinx.Graphics.Vulkan
                 ImageUsage = ImageUsageFlags.ColorAttachmentBit | ImageUsageFlags.TransferDstBit | ImageUsageFlags.StorageBit,
                 ImageSharingMode = SharingMode.Exclusive,
                 ImageArrayLayers = 1,
-                PreTransform = Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid() ? SurfaceTransformFlagsKHR.IdentityBitKhr : capabilities.CurrentTransform,
+                PreTransform = capabilities.CurrentTransform,
                 CompositeAlpha = ChooseCompositeAlpha(capabilities.SupportedCompositeAlpha),
                 PresentMode = ChooseSwapPresentMode(presentModes, _vsyncEnabled),
                 Clipped = true,

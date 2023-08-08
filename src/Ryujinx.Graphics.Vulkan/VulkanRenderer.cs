@@ -72,6 +72,8 @@ namespace Ryujinx.Graphics.Vulkan
 
         public IWindow Window => _window;
 
+        public SurfaceTransformFlagsKHR CurrentTransform => _window.CurrentTransform;
+
         private readonly Func<Instance, Vk, SurfaceKHR> _getSurface;
         private readonly Func<string[]> _getRequiredExtensions;
         private readonly string _preferredGpuId;
