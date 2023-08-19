@@ -367,8 +367,6 @@
                   Dynamic="Required All" />
             <Type Name="Ryujinx.HLE.HOS.Services.Nfc.Nfp.INfp"
                   Dynamic="Required All" />
-            <Type Name="Ryujinx.HLE.HOS.Services.Mm.IRequest"
-                  Dynamic="Required All" />
             <Type Name="Ryujinx.HLE.HOS.Services.Ns.IVulnerabilityManagerInterface"
                   Dynamic="Required All" />
             <Type Name="Ryujinx.HLE.HOS.Services.Wlan.IInfraManager"
