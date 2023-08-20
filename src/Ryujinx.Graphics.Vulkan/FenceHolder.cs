@@ -10,12 +10,15 @@ namespace Ryujinx.Graphics.Vulkan
         private readonly Device _device;
         private Fence _fence;
         private int _referenceCount;
+        private int _lock;
+        private readonly bool _needsLock;
         private bool _disposed;
 
-        public unsafe FenceHolder(Vk api, Device device)
+        public unsafe FenceHolder(Vk api, Device device, bool needsLock)
         {
             _api = api;
             _device = device;
+            _needsLock = needsLock;
 
             var fenceCreateInfo = new FenceCreateInfo
             {
@@ -47,6 +50,11 @@ namespace Ryujinx.Graphics.Vulkan
             }
             while (Interlocked.CompareExchange(ref _referenceCount, lastValue + 1, lastValue) != lastValue);
 
+            if (_needsLock)
+            {
+                AcquireLock();
+            }
+
             fence = _fence;
             return true;
         }
@@ -55,6 +63,16 @@ namespace Ryujinx.Graphics.Vulkan
         {
             Interlocked.Increment(ref _referenceCount);
             return _fence;
+        }
+
+        public void PutLock()
+        {
+            Put();
+
+            if (_needsLock)
+            {
+                ReleaseLock();
+            }
         }
 
         public void Put()
@@ -66,24 +84,54 @@ namespace Ryujinx.Graphics.Vulkan
             }
         }
 
+        private void AcquireLock()
+        {
+            while (!TryAcquireLock())
+            {
+                Thread.SpinWait(32);
+            }
+        }
+
+        private bool TryAcquireLock()
+        {
+            return Interlocked.Exchange(ref _lock, 1) == 0;
+        }
+
+        private void ReleaseLock()
+        {
+            Interlocked.Exchange(ref _lock, 0);
+        }
+
         public void Wait()
         {
-            Span<Fence> fences = stackalloc Fence[]
+            if (_needsLock)
             {
-                _fence,
-            };
+                AcquireLock();
+            }
 
-            FenceHelper.WaitAllIndefinitely(_api, _device, fences);
+            FenceHelper.WaitAllIndefinitely(_api, _device, stackalloc Fence[] { _fence });
+
+            if (_needsLock)
+            {
+                ReleaseLock();
+            }
         }
 
         public bool IsSignaled()
         {
-            Span<Fence> fences = stackalloc Fence[]
+            if (_needsLock && !TryAcquireLock())
             {
-                _fence,
-            };
+                return false;
+            }
 
-            return FenceHelper.AllSignaled(_api, _device, fences);
+            bool result = FenceHelper.AllSignaled(_api, _device, stackalloc Fence[] { _fence });
+
+            if (_needsLock)
+            {
+                ReleaseLock();
+            }
+
+            return result;
         }
 
         public void Dispose()
