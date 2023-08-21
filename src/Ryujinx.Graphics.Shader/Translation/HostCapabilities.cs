@@ -7,6 +7,7 @@ namespace Ryujinx.Graphics.Shader.Translation
         public readonly bool SupportsFragmentShaderOrderingIntel;
         public readonly bool SupportsGeometryShaderPassthrough;
         public readonly bool SupportsShaderBallot;
+        public readonly bool SupportsShaderBallotDivergence;
         public readonly bool SupportsShaderBarrierDivergence;
         public readonly bool SupportsTextureShadowLod;
         public readonly bool SupportsViewportMask;
@@ -17,6 +18,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             bool supportsFragmentShaderOrderingIntel,
             bool supportsGeometryShaderPassthrough,
             bool supportsShaderBallot,
+            bool supportsShaderBallotDivergence,
             bool supportsShaderBarrierDivergence,
             bool supportsTextureShadowLod,
             bool supportsViewportMask)
@@ -26,6 +28,7 @@ namespace Ryujinx.Graphics.Shader.Translation
             SupportsFragmentShaderOrderingIntel = supportsFragmentShaderOrderingIntel;
             SupportsGeometryShaderPassthrough = supportsGeometryShaderPassthrough;
             SupportsShaderBallot = supportsShaderBallot;
+            SupportsShaderBallotDivergence = supportsShaderBallotDivergence;
             SupportsShaderBarrierDivergence = supportsShaderBarrierDivergence;
             SupportsTextureShadowLod = supportsTextureShadowLod;
             SupportsViewportMask = supportsViewportMask;

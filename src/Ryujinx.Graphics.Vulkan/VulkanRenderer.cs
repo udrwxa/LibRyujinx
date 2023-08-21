@@ -616,6 +616,7 @@ namespace Ryujinx.Graphics.Vulkan
                 supportsNonConstantTextureOffset: false,
                 supportsScaledVertexFormats: FormatCapabilities.SupportsScaledVertexFormats(),
                 supportsShaderBallot: false,
+                supportsShaderBallotDivergence: Vendor != Vendor.Qualcomm,
                 supportsShaderBarrierDivergence: Vendor != Vendor.Intel,
                 supportsShaderFloat64: Capabilities.SupportsShaderFloat64,
                 supportsTextureGatherOffsets: features2.Features.ShaderImageGatherExtended && !IsMoltenVk,
