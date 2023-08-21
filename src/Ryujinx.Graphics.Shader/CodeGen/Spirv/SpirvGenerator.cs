@@ -28,7 +28,7 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
             _poolLock = new object();
         }
 
-        private const HelperFunctionsMask NeedsInvocationIdMask = HelperFunctionsMask.SwizzleAdd;
+        private const HelperFunctionsMask NeedsInvocationIdMask = HelperFunctionsMask.SwizzleAdd | HelperFunctionsMask.Ballot;
 
         public static byte[] Generate(StructuredProgramInfo info, CodeGenParameters parameters)
         {
@@ -50,6 +50,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Spirv
             context.AddCapability(Capability.ImageGatherExtended);
             context.AddCapability(Capability.ImageQuery);
             context.AddCapability(Capability.SampledBuffer);
+
+            if (info.HelperFunctionsMask.HasFlag(HelperFunctionsMask.Ballot) && !context.HostCapabilities.SupportsShaderBallotDivergence)
+            {
+                // Ballots might be emulated with subgroupAdd in those cases.
+                context.AddCapability(Capability.GroupNonUniformArithmetic);
+            }
 
             if (parameters.Definitions.TransformFeedbackEnabled && parameters.Definitions.LastInVertexPipeline)
             {
