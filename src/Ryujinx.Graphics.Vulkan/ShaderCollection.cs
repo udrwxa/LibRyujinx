@@ -117,10 +117,10 @@ namespace Ryujinx.Graphics.Vulkan
 
             Stages = stages;
 
-            bool hasBatchedTextureSamplerBug = gd.Vendor == Vendor.Qualcomm;
+            bool hasBatchedTextureBug = gd.Vendor == Vendor.Qualcomm;
 
             ClearSegments = BuildClearSegments(resourceLayout.Sets);
-            BindingSegments = BuildBindingSegments(resourceLayout.SetUsages, hasBatchedTextureSamplerBug);
+            BindingSegments = BuildBindingSegments(resourceLayout.SetUsages, hasBatchedTextureBug);
             Templates = BuildTemplates();
 
             _compileTask = Task.CompletedTask;
@@ -193,7 +193,7 @@ namespace Ryujinx.Graphics.Vulkan
             return segments;
         }
 
-        private static ResourceBindingSegment[][] BuildBindingSegments(ReadOnlyCollection<ResourceUsageCollection> setUsages, bool hasBatchedTextureSamplerBug)
+        private static ResourceBindingSegment[][] BuildBindingSegments(ReadOnlyCollection<ResourceUsageCollection> setUsages, bool hasBatchedTextureBug)
         {
             ResourceBindingSegment[][] segments = new ResourceBindingSegment[setUsages.Count][];
 
@@ -210,7 +210,7 @@ namespace Ryujinx.Graphics.Vulkan
 
                     if (currentUsage.Binding + currentCount != usage.Binding ||
                         currentUsage.Type != usage.Type ||
-                        (currentUsage.Type == ResourceType.TextureAndSampler && hasBatchedTextureSamplerBug) ||
+                        (IsReadOnlyTexture(currentUsage.Type) && hasBatchedTextureBug) ||
                         currentUsage.Stages != usage.Stages ||
                         currentUsage.Access != usage.Access)
                     {
@@ -262,6 +262,11 @@ namespace Ryujinx.Graphics.Vulkan
             }
 
             return templates;
+        }
+
+        private static bool IsReadOnlyTexture(ResourceType resourceType)
+        {
+            return resourceType == ResourceType.TextureAndSampler || resourceType == ResourceType.BufferTexture;
         }
 
         private async Task BackgroundCompilation()
