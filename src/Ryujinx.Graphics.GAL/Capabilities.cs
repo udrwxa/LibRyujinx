@@ -37,6 +37,7 @@ namespace Ryujinx.Graphics.GAL
         public readonly bool SupportsCubemapView;
         public readonly bool SupportsNonConstantTextureOffset;
         public readonly bool SupportsShaderBallot;
+        public readonly bool SupportsShaderBallotDivergence;
         public readonly bool SupportsShaderBarrierDivergence;
         public readonly bool SupportsShaderFloat64;
         public readonly bool SupportsTextureGatherOffsets;
@@ -93,6 +94,7 @@ namespace Ryujinx.Graphics.GAL
             bool supportsCubemapView,
             bool supportsNonConstantTextureOffset,
             bool supportsShaderBallot,
+            bool supportsShaderBallotDivergence,
             bool supportsShaderBarrierDivergence,
             bool supportsShaderFloat64,
             bool supportsTextureGatherOffsets,
@@ -145,6 +147,7 @@ namespace Ryujinx.Graphics.GAL
             SupportsCubemapView = supportsCubemapView;
             SupportsNonConstantTextureOffset = supportsNonConstantTextureOffset;
             SupportsShaderBallot = supportsShaderBallot;
+            SupportsShaderBallotDivergence = supportsShaderBallotDivergence;
             SupportsShaderBarrierDivergence = supportsShaderBarrierDivergence;
             SupportsShaderFloat64 = supportsShaderFloat64;
             SupportsTextureGatherOffsets = supportsTextureGatherOffsets;

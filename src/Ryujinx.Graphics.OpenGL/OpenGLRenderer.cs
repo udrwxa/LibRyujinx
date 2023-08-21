@@ -167,6 +167,7 @@ namespace Ryujinx.Graphics.OpenGL
                 supportsNonConstantTextureOffset: HwCapabilities.SupportsNonConstantTextureOffset,
                 supportsScaledVertexFormats: true,
                 supportsShaderBallot: HwCapabilities.SupportsShaderBallot,
+                supportsShaderBallotDivergence: true,
                 supportsShaderBarrierDivergence: !(intelWindows || intelUnix),
                 supportsShaderFloat64: true,
                 supportsTextureGatherOffsets: true,
