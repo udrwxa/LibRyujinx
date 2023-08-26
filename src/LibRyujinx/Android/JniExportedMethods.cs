@@ -50,6 +50,9 @@ namespace LibRyujinx
         internal extern static void onFrameEnd(double time);
 
         [DllImport("libryujinxjni")]
+        internal extern static void setProgressInfo(IntPtr info, float progress);
+
+        [DllImport("libryujinxjni")]
         internal extern static void setCurrentTransform(long native_window, int transform);
 
         public delegate IntPtr JniCreateSurface(IntPtr native_surface, IntPtr instance);
@@ -287,7 +290,7 @@ namespace LibRyujinx
                 extensions.Add(GetString(jEnv, ext));
             }
 
-            if((long)driverHandle != 0)
+            if ((long)driverHandle != 0)
             {
                 VulkanLoader = new VulkanLoader((IntPtr)(long)driverHandle);
             }
