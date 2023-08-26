@@ -1,10 +1,13 @@
 ﻿using ARMeilleure.Translation;
+using LibHac.Bcat;
 using LibRyujinx.Shared;
 using OpenTK.Graphics.OpenGL;
 using Ryujinx.Common.Configuration;
+using Ryujinx.Cpu;
 using Ryujinx.Graphics.GAL;
 using Ryujinx.Graphics.GAL.Multithreading;
 using Ryujinx.Graphics.Gpu;
+using Ryujinx.Graphics.Gpu.Shader;
 using Ryujinx.Graphics.OpenGL;
 using Ryujinx.Graphics.Vulkan;
 using Silk.NET.Vulkan;
@@ -153,64 +156,125 @@ namespace LibRyujinx
             device.Gpu.Renderer.Initialize(GraphicsDebugLevel.None);
             _gpuCancellationTokenSource = new CancellationTokenSource();
 
-            device.Gpu.Renderer.RunLoop(() =>
+            device.Gpu.ShaderCacheStateChanged += LoadProgressStateChangedHandler;
+            device.Processes.ActiveApplication.DiskCacheLoadState.StateChanged += LoadProgressStateChangedHandler;
+
+            try
             {
-                _gpuDoneEvent.Reset();
-                device.Gpu.SetGpuThread();
-                device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
-                Translator.IsReadyForTranslation.Set();
-
-                _isActive = true;
-
-                while (_isActive)
+                device.Gpu.Renderer.RunLoop(() =>
                 {
-                    if (_isStopped)
-                    {
-                        break;
-                    }
+                    _gpuDoneEvent.Reset();
+                    device.Gpu.SetGpuThread();
+                    device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
+                    Translator.IsReadyForTranslation.Set();
 
-                    debug_break(1);
+                    _isActive = true;
 
-                    if (Ryujinx.Common.SystemInfo.SystemInfo.IsBionic)
+                    while (_isActive)
                     {
-                        setRenderingThread();
-                    }
-
-                    if (device.WaitFifo())
-                    {
-                        device.Statistics.RecordFifoStart();
-                        device.ProcessFrame();
-                        device.Statistics.RecordFifoEnd();
-                    }
-
-                    while (device.ConsumeFrameAvailable())
-                    {
-                        device.PresentFrame(() =>
+                        if (_isStopped)
                         {
-                            VulkanRenderer? vk = device.Gpu.Renderer as VulkanRenderer;
-                            if(vk == null)
-                            {
-                                vk = (device.Gpu.Renderer as ThreadedRenderer)?.BaseRenderer as VulkanRenderer;
-                            }
+                            break;
+                        }
 
-                            if(vk != null)
-                            {
-                                var transform = vk.CurrentTransform;
+                        debug_break(1);
 
-                                setCurrentTransform(_window, (int)transform);
-                            }
-                            _swapBuffersCallback?.Invoke();
-                        });
+                        if (Ryujinx.Common.SystemInfo.SystemInfo.IsBionic)
+                        {
+                            setRenderingThread();
+                        }
+
+                        if (device.WaitFifo())
+                        {
+                            device.Statistics.RecordFifoStart();
+                            device.ProcessFrame();
+                            device.Statistics.RecordFifoEnd();
+                        }
+
+                        while (device.ConsumeFrameAvailable())
+                        {
+                            device.PresentFrame(() =>
+                            {
+                                VulkanRenderer? vk = device.Gpu.Renderer as VulkanRenderer;
+                                if (vk == null)
+                                {
+                                    vk = (device.Gpu.Renderer as ThreadedRenderer)?.BaseRenderer as VulkanRenderer;
+                                }
+
+                                if (vk != null)
+                                {
+                                    var transform = vk.CurrentTransform;
+
+                                    setCurrentTransform(_window, (int)transform);
+                                }
+                                _swapBuffersCallback?.Invoke();
+                            });
+                        }
                     }
-                }
 
-                if (device.Gpu.Renderer is ThreadedRenderer threaded)
-                {
-                    threaded.FlushThreadedCommands();
-                }
+                    if (device.Gpu.Renderer is ThreadedRenderer threaded)
+                    {
+                        threaded.FlushThreadedCommands();
+                    }
 
-                _gpuDoneEvent.Set();
-            });
+                    _gpuDoneEvent.Set();
+                });
+            }
+            finally
+            {
+                device.Gpu.ShaderCacheStateChanged -= LoadProgressStateChangedHandler;
+                device.Processes.ActiveApplication.DiskCacheLoadState.StateChanged -= LoadProgressStateChangedHandler;
+            }
+        }
+
+        private static void LoadProgressStateChangedHandler<T>(T state, int current, int total) where T : Enum
+        {
+            void SetInfo(string status, float value)
+            {
+                var ptr = Marshal.StringToHGlobalAnsi(status);
+
+                setProgressInfo(ptr, value);
+
+                Marshal.FreeHGlobal(ptr);
+            }
+                    var status = $"{current} / {total}";
+                    var progress = current / (float)total;
+
+            switch (state)
+            {
+                case LoadState ptcState:
+                    if (float.IsNaN((progress)))
+                        progress = 0;
+
+                    switch (ptcState)
+                    {
+                        case LoadState.Unloaded:
+                        case LoadState.Loading:
+                            SetInfo($"Loading PTC {status}", progress);
+                            break;
+                        case LoadState.Loaded:
+                            SetInfo($"PTC Loaded", -1);
+                            break;
+                    }
+                    break;
+                case ShaderCacheState shaderCacheState:
+                    switch (shaderCacheState)
+                    {
+                        case ShaderCacheState.Start:
+                        case ShaderCacheState.Loading:
+                            SetInfo($"Compiling Shaders {status}", progress);
+                            break;
+                        case ShaderCacheState.Packaging:
+                            SetInfo($"Packaging Shaders {status}", progress);
+                            break;
+                        case ShaderCacheState.Loaded:
+                            SetInfo($"Shaders Loaded", -1);
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown Progress Handler type {typeof(T)}");
+            }
         }
 
         [UnmanagedCallersOnly(EntryPoint = "graphics_renderer_set_swap_buffer_callback")]

@@ -8,7 +8,7 @@ import org.ryujinx.android.RyujinxNative
 
 
 class GameModel(var file: DocumentFile, val context: Context) {
-    private var descriptor: ParcelFileDescriptor? = null
+    var descriptor: ParcelFileDescriptor? = null
     var fileName: String?
     var fileSize = 0.0
     var titleName: String? = null
