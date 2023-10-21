@@ -211,8 +211,7 @@ namespace Ryujinx.Graphics.Vulkan
                     if (currentUsage.Binding + currentCount != usage.Binding ||
                         currentUsage.Type != usage.Type ||
                         (IsReadOnlyTexture(currentUsage.Type) && hasBatchedTextureBug) ||
-                        currentUsage.Stages != usage.Stages ||
-                        currentUsage.Access != usage.Access)
+                        currentUsage.Stages != usage.Stages)
                     {
                         if (currentCount != 0)
                         {
