@@ -628,6 +628,7 @@ namespace LibRyujinx
 
     public class SwitchDevice : IDisposable
     {
+        private readonly SystemVersion _firmwareVersion;
         public VirtualFileSystem VirtualFileSystem { get; set; }
         public ContentManager ContentManager { get; set; }
         public AccountManager AccountManager { get; set; }
@@ -658,6 +659,11 @@ namespace LibRyujinx
             ContentManager = new ContentManager(VirtualFileSystem);
             AccountManager = new AccountManager(LibHacHorizonManager.RyujinxClient);
             UserChannelPersistence = new UserChannelPersistence();
+
+            _firmwareVersion = ContentManager.GetCurrentFirmwareVersion();
+            
+            
+            Logger.Notice.Print(LogClass.Application, $"System Firmware Version: {_firmwareVersion.VersionString}");
         }
 
         public bool InitializeContext(bool isHostMapped,
