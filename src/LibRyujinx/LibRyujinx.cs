@@ -26,6 +26,7 @@ using LibHac.FsSystem;
 using LibHac.Fs;
 using Path = System.IO.Path;
 using LibHac;
+using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.HLE.Loaders.Npdm;
 using Ryujinx.Common.Utilities;
 using System.Globalization;
@@ -709,7 +710,8 @@ namespace LibRyujinx
                                                                    LibRyujinx.GraphicsConfiguration.AspectRatio,
                                                                   100,
                                                                   useNce,
-                                                                  "");
+                                                                  "",
+                                                                  MultiplayerMode.Disabled);
 
             EmulationContext = new Switch(configuration);
 
