@@ -1,7 +1,9 @@
 package org.ryujinx.android.views
 
 import android.content.res.Resources
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +13,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -47,7 +50,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,9 +63,11 @@ import coil.compose.AsyncImage
 import com.anggrayudi.storage.extension.launchOnUiThread
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.R
+import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.HomeViewModel
 import java.io.File
+import java.util.Base64
 import java.util.Locale
 import kotlin.concurrent.thread
 import kotlin.math.roundToInt
@@ -84,6 +92,10 @@ class HomeViews {
             val refresh = remember {
                 mutableStateOf(true)
             }
+            val native = RyujinxNative()
+            val user = native.userGetOpenedUser()
+            val decoder = Base64.getDecoder()
+            val pic = decoder.decode(native.userGetUserPicture(user))
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
@@ -115,10 +127,16 @@ class HomeViews {
                         },
                         actions = {
                             IconButton(onClick = {
+                                navController?.navigate("user")
                             }) {
-                                Icon(
-                                    Icons.Filled.Person,
-                                    contentDescription = "Run"
+                                Image(
+                                    bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.size).asImageBitmap(),
+                                    contentDescription = "user image",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .size(52.dp)
+                                        .clip(CircleShape)
                                 )
                             }
                             IconButton(

@@ -724,6 +724,12 @@ namespace LibRyujinx
             return true;
         }
 
+        internal void ReloadFileSystem()
+        {
+            VirtualFileSystem.ReloadKeySet();
+            ContentManager = new ContentManager(VirtualFileSystem);
+        }
+
         internal void DisposeContext()
         {
             EmulationContext?.Dispose();
