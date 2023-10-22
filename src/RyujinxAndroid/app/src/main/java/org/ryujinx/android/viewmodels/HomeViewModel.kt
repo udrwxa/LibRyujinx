@@ -109,6 +109,6 @@ class HomeViewModel(
 
     fun setViewList(list: SnapshotStateList<GameModel>) {
         gameList = list
-        applyFilter()
+        reloadGameList()
     }
 }

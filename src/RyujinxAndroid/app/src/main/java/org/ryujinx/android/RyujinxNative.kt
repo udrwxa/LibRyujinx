@@ -38,6 +38,7 @@ class RyujinxNative {
     external fun graphicsRendererSetSize(width: Int, height: Int)
     external fun graphicsRendererSetVsync(enabled: Boolean)
     external fun graphicsRendererRunLoop()
+    external fun deviceReloadFilesystem()
     external fun inputInitialize(width: Int, height: Int)
     external fun inputSetClientSize(width: Int, height: Int)
     external fun inputSetTouchPoint(x: Int, y: Int)
