@@ -30,6 +30,8 @@ import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -48,14 +50,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -130,7 +129,8 @@ class HomeViews {
                                 navController?.navigate("user")
                             }) {
                                 Image(
-                                    bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.size).asImageBitmap(),
+                                    bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.size)
+                                        .asImageBitmap(),
                                     contentDescription = "user image",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -154,7 +154,7 @@ class HomeViews {
                 },
                 bottomBar = {
                     BottomAppBar(actions = {
-                        if (showAppActions.value) {
+                        if (!showAppActions.value) {
                             IconButton(onClick = {
                             }) {
                                 Icon(
@@ -163,73 +163,42 @@ class HomeViews {
                                 )
                             }
                             val showAppMenu = remember { mutableStateOf(false) }
-                            IconButton(onClick = {
-                                showAppMenu.value = true
-                            }) {
-                                Icon(
-                                    Icons.Filled.Menu,
-                                    contentDescription = "Menu"
-                                )
-                            }
-
-                            if (true) {
-                                AlertDialog(onDismissRequest = {
-                                    showAppMenu.value = false
+                            Box {
+                                IconButton(onClick = {
+                                    showAppMenu.value = true
                                 }) {
-                                    Surface(shape = MaterialTheme.shapes.medium, color = Color.Black) {
-                                        Row {
-                                            IconButton(onClick = {
-                                                openTitleUpdateDialog.value = true
-                                            }) {
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                ) {
-                                                    Icon(
-                                                        painter = painterResource(R.drawable.app_update),
-                                                        contentDescription = "Updates",
-                                                        tint = MaterialTheme.colorScheme.onSurface,
-                                                        modifier = Modifier
-                                                            .width(20.dp)
-                                                            .height(20.dp)
-                                                            .align(Alignment.CenterHorizontally)
-                                                    )
-                                                    Text(
-                                                        text = "Updates",
-                                                        fontWeight = FontWeight.Bold,
-                                                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                                                        color = MaterialTheme.colorScheme.onSurface
-                                                    )
+                                    Icon(
+                                        Icons.Filled.Menu,
+                                        contentDescription = "Menu"
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showAppMenu.value,
+                                    onDismissRequest = { showAppMenu.value = false }) {
+                                    DropdownMenuItem(text = {
+                                        Text(text = "Manage Updates")
+                                    }, onClick = {
 
-                                                }
-                                            }
-                                            IconButton(onClick = {
-                                                openDlcDialog.value = true
-                                            }) {
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                ) {
-                                                    Icon(
-                                                        imageVector = org.ryujinx.android.Icons.download(),
-                                                        contentDescription = "Dlc",
-                                                        tint = MaterialTheme.colorScheme.onSurface,
-                                                        modifier = Modifier
-                                                            .width(20.dp)
-                                                            .height(20.dp)
-                                                            .align(Alignment.CenterHorizontally)
-                                                    )
-                                                    Text(
-                                                        text = "DLC",
-                                                        fontWeight = FontWeight.Bold,
-                                                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                                                        color = MaterialTheme.colorScheme.onSurface
-                                                    )
+                                        openTitleUpdateDialog.value = true
+                                    }, leadingIcon = {
+                                        Icon(
+                                            painter = painterResource(R.drawable.app_update),
+                                            contentDescription = "Updates",
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    })
+                                    DropdownMenuItem(text = {
+                                        Text(text = "Manage DLC")
+                                    }, onClick = {
 
-                                                }
-                                            }
-                                        }
-                                    }
+                                        openDlcDialog.value = true
+                                    }, leadingIcon = {
+                                        Icon(
+                                            imageVector = org.ryujinx.android.Icons.download(),
+                                            contentDescription = "Dlc",
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    })
                                 }
                             }
                         }
