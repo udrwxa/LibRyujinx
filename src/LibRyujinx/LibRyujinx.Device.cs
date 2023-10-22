@@ -17,6 +17,12 @@ namespace LibRyujinx
             return InitializeDevice(true, false, SystemLanguage.AmericanEnglish, RegionCode.USA, true, true, true, false, "UTC", false);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "device_reloadFilesystem")]
+        public static void ReloadFileSystem()
+        {
+            SwitchDevice?.ReloadFileSystem();
+        }
+
         public static bool InitializeDevice(bool isHostMapped,
                                             bool useNce,
                                             SystemLanguage systemLanguage,
