@@ -53,4 +53,14 @@ class RyujinxNative {
     external fun deviceSignalEmulationClose()
     external fun deviceGetDlcTitleId(path: String, ncaPath: String) : String
     external fun deviceGetDlcContentList(path: String, titleId: Long) : Array<String>
+    external fun userGetOpenedUser() : String
+    external fun userGetUserPicture(userId: String) : String
+    external fun userSetUserPicture(userId: String, picture: String)
+    external fun userGetUserName(userId: String) : String
+    external fun userSetUserName(userId: String, userName: String)
+    external fun userGetAllUsers() : Array<String>
+    external fun userAddUser(username: String, picture: String)
+    external fun userDeleteUser(userId: String)
+    external fun userOpenUser(userId: String)
+    external fun userCloseUser(userId: String)
 }
