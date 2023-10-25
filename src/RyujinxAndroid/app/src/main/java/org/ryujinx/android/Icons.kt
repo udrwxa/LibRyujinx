@@ -129,6 +129,83 @@ class Icons {
             }
         }
         @Composable
+        fun gameUpdate(): ImageVector {
+            val primaryColor = MaterialTheme.colorScheme.primary
+            return remember {
+                ImageVector.Builder(
+                    name = "game_update_alt",
+                    defaultWidth = 40.0.dp,
+                    defaultHeight = 40.0.dp,
+                    viewportWidth = 40.0f,
+                    viewportHeight = 40.0f
+                ).apply {
+                    path(
+                        fill = SolidColor(Color.Black.copy(alpha = 0.5f)),
+                        stroke = SolidColor(primaryColor),
+                        fillAlpha = 1f,
+                        strokeAlpha = 1f,
+                        strokeLineWidth = 1.0f,
+                        strokeLineCap = StrokeCap.Butt,
+                        strokeLineJoin = StrokeJoin.Miter,
+                        strokeLineMiter = 1f,
+                        pathFillType = PathFillType.NonZero
+                    ) {
+                        moveTo(6.25f, 33.083f)
+                        quadToRelative(-1.083f, 0f, -1.854f, -0.791f)
+                        quadToRelative(-0.771f, -0.792f, -0.771f, -1.834f)
+                        verticalLineTo(9.542f)
+                        quadToRelative(0f, -1.042f, 0.771f, -1.854f)
+                        quadToRelative(0.771f, -0.813f, 1.854f, -0.813f)
+                        horizontalLineToRelative(8.458f)
+                        quadToRelative(0.584f, 0f, 0.959f, 0.396f)
+                        reflectiveQuadToRelative(0.375f, 0.937f)
+                        quadToRelative(0f, 0.584f, -0.375f, 0.959f)
+                        reflectiveQuadToRelative(-0.959f, 0.375f)
+                        horizontalLineTo(6.25f)
+                        verticalLineToRelative(20.916f)
+                        horizontalLineToRelative(27.542f)
+                        verticalLineTo(9.542f)
+                        horizontalLineToRelative(-8.5f)
+                        quadToRelative(-0.584f, 0f, -0.959f, -0.375f)
+                        reflectiveQuadToRelative(-0.375f, -0.959f)
+                        quadToRelative(0f, -0.541f, 0.375f, -0.937f)
+                        reflectiveQuadToRelative(0.959f, -0.396f)
+                        horizontalLineToRelative(8.5f)
+                        quadToRelative(1.041f, 0f, 1.833f, 0.813f)
+                        quadToRelative(0.792f, 0.812f, 0.792f, 1.854f)
+                        verticalLineToRelative(20.916f)
+                        quadToRelative(0f, 1.042f, -0.792f, 1.834f)
+                        quadToRelative(-0.792f, 0.791f, -1.833f, 0.791f)
+                        close()
+                        moveTo(20f, 25f)
+                        quadToRelative(-0.25f, 0f, -0.479f, -0.083f)
+                        quadToRelative(-0.229f, -0.084f, -0.396f, -0.292f)
+                        lineTo(12.75f, 18.25f)
+                        quadToRelative(-0.375f, -0.333f, -0.375f, -0.896f)
+                        quadToRelative(0f, -0.562f, 0.417f, -0.979f)
+                        quadToRelative(0.375f, -0.375f, 0.916f, -0.375f)
+                        quadToRelative(0.542f, 0f, 0.959f, 0.375f)
+                        lineToRelative(4.041f, 4.083f)
+                        verticalLineTo(8.208f)
+                        quadToRelative(0f, -0.541f, 0.375f, -0.937f)
+                        reflectiveQuadTo(20f, 6.875f)
+                        quadToRelative(0.542f, 0f, 0.938f, 0.396f)
+                        quadToRelative(0.395f, 0.396f, 0.395f, 0.937f)
+                        verticalLineToRelative(12.25f)
+                        lineToRelative(4.084f, -4.083f)
+                        quadToRelative(0.333f, -0.333f, 0.875f, -0.333f)
+                        quadToRelative(0.541f, 0f, 0.916f, 0.375f)
+                        quadToRelative(0.417f, 0.416f, 0.417f, 0.958f)
+                        reflectiveQuadToRelative(-0.375f, 0.917f)
+                        lineToRelative(-6.333f, 6.333f)
+                        quadToRelative(-0.209f, 0.208f, -0.438f, 0.292f)
+                        quadTo(20.25f, 25f, 20f, 25f)
+                        close()
+                    }
+                }.build()
+            }
+        }
+        @Composable
         fun download(): ImageVector {
             val primaryColor = MaterialTheme.colorScheme.primary
             return remember {
