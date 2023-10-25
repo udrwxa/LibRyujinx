@@ -54,14 +54,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anggrayudi.storage.extension.launchOnUiThread
 import org.ryujinx.android.MainActivity
-import org.ryujinx.android.R
 import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.HomeViewModel
@@ -154,7 +152,7 @@ class HomeViews {
                 },
                 bottomBar = {
                     BottomAppBar(actions = {
-                        if (!showAppActions.value) {
+                        if (showAppActions.value) {
                             IconButton(onClick = {
                             }) {
                                 Icon(
@@ -178,11 +176,11 @@ class HomeViews {
                                     DropdownMenuItem(text = {
                                         Text(text = "Manage Updates")
                                     }, onClick = {
-
+                                        showAppMenu.value = false
                                         openTitleUpdateDialog.value = true
                                     }, leadingIcon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.app_update),
+                                            imageVector = org.ryujinx.android.Icons.gameUpdate(),
                                             contentDescription = "Updates",
                                             tint = MaterialTheme.colorScheme.onSurface
                                         )
@@ -190,7 +188,7 @@ class HomeViews {
                                     DropdownMenuItem(text = {
                                         Text(text = "Manage DLC")
                                     }, onClick = {
-
+                                        showAppMenu.value = false
                                         openDlcDialog.value = true
                                     }, leadingIcon = {
                                         Icon(
