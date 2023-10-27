@@ -162,6 +162,7 @@ class UserViews {
                                                 openedUser.value = user
                                                 openedUserPic.value = pic
                                                 openedUserName.value = name
+                                                viewModel?.requestUserRefresh()
                                             })
                                 )
                             }

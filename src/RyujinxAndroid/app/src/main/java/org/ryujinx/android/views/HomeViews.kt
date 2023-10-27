@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -79,6 +80,7 @@ class HomeViews {
             viewModel: HomeViewModel = HomeViewModel(),
             navController: NavHostController? = null
         ) {
+            val native = RyujinxNative()
             val showAppActions = remember { mutableStateOf(false) }
             val showLoading = remember { mutableStateOf(false) }
             val openTitleUpdateDialog = remember { mutableStateOf(false) }
@@ -89,10 +91,27 @@ class HomeViews {
             val refresh = remember {
                 mutableStateOf(true)
             }
-            val native = RyujinxNative()
-            val user = native.userGetOpenedUser()
-            val decoder = Base64.getDecoder()
-            val pic = decoder.decode(native.userGetUserPicture(user))
+            val refreshUser = remember {
+                mutableStateOf(true)
+            }
+
+            viewModel.mainViewModel?.setRefreshUserState(refreshUser)
+            val user = remember {
+                mutableStateOf("")
+            }
+            val pic = remember {
+                mutableStateOf(ByteArray(0))
+            }
+            
+            if(refreshUser.value){
+                user.value = native.userGetOpenedUser()
+                if(user.value.isNotEmpty()) {
+                    val decoder = Base64.getDecoder()
+                    pic.value = decoder.decode(native.userGetUserPicture(user.value))
+                }
+
+                refreshUser.value = false;
+            }
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
@@ -126,16 +145,28 @@ class HomeViews {
                             IconButton(onClick = {
                                 navController?.navigate("user")
                             }) {
-                                Image(
-                                    bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.size)
-                                        .asImageBitmap(),
-                                    contentDescription = "user image",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .size(52.dp)
-                                        .clip(CircleShape)
-                                )
+                                if(pic.value.isNotEmpty()) {
+                                    Image(
+                                        bitmap = BitmapFactory.decodeByteArray(
+                                            pic.value,
+                                            0,
+                                            pic.value.size
+                                        )
+                                            .asImageBitmap(),
+                                        contentDescription = "user image",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .size(52.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                                else{
+                                    Icon(
+                                        Icons.Filled.Person,
+                                        contentDescription = "user"
+                                    )
+                                }
                             }
                             IconButton(
                                 onClick = {

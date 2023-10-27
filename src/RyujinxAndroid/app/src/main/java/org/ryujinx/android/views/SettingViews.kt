@@ -54,6 +54,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.file.extension
 import org.ryujinx.android.Helpers
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.SettingsViewModel
 import org.ryujinx.android.viewmodels.VulkanDriverViewModel
 import kotlin.concurrent.thread
@@ -65,7 +66,7 @@ class SettingViews {
 
         @OptIn(ExperimentalMaterial3Api::class)
         @Composable
-        fun Main(settingsViewModel: SettingsViewModel) {
+        fun Main(settingsViewModel: SettingsViewModel, mainViewModel: MainViewModel) {
             val loaded = remember {
                 mutableStateOf(false)
             }
@@ -301,6 +302,7 @@ class SettingViews {
                                                         thread {
                                                             Helpers.importAppData(this, isImporting)
                                                             showImportCompletion.value = true
+                                                            mainViewModel.requestUserRefresh()
                                                         }
                                                     }
                                                 }, modifier = Modifier.padding(horizontal = 8.dp)) {

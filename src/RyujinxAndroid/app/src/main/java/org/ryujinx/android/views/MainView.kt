@@ -22,7 +22,7 @@ class MainView {
                         SettingsViewModel(
                             navController,
                             mainViewModel.activity
-                        )
+                        ), mainViewModel
                     )
                 }
             }
