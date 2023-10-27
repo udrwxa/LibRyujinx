@@ -37,6 +37,7 @@ class MainViewModel(val activity: MainActivity) {
     private var progress: MutableState<String>? = null
     private var progressValue: MutableState<Float>? = null
     private var showLoading: MutableState<Boolean>? = null
+    private var refreshUser: MutableState<Boolean>? = null
     var gameHost: GameHost? = null
         set(value) {
             field = value
@@ -212,5 +213,16 @@ class MainViewModel(val activity: MainActivity) {
         this.progressValue = progressValue
         this.progress = progress
         gameHost?.setProgressStates(showLoading, progressValue, progress)
+    }
+
+    fun setRefreshUserState(refreshUser: MutableState<Boolean>)
+    {
+        this.refreshUser = refreshUser
+    }
+
+    fun requestUserRefresh(){
+        refreshUser?.apply {
+            value = true
+        }
     }
 }
