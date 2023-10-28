@@ -9,7 +9,13 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.compose.runtime.MutableState
 import androidx.documentfile.provider.DocumentFile
+import com.anggrayudi.storage.SimpleStorageHelper
+import com.anggrayudi.storage.callback.FileCallback
+import com.anggrayudi.storage.file.copyFileTo
 import com.anggrayudi.storage.file.openInputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.lingala.zip4j.io.inputstream.ZipInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -65,6 +71,61 @@ class Helpers {
                 return uri.path
             }
             return null
+        }
+        fun copyToData(
+            file: DocumentFile, path: String, storageHelper: SimpleStorageHelper,
+            isCopying: MutableState<Boolean>,
+            copyProgress: MutableState<Float>,
+            currentProgressName: MutableState<String>,
+            finish: () -> Unit
+        ) {
+            var callback: FileCallback? = object : FileCallback() {
+                override fun onFailed(errorCode: FileCallback.ErrorCode) {
+                    super.onFailed(errorCode)
+                    File(path).delete()
+                    finish()
+                }
+
+                override fun onStart(file: Any, workerThread: Thread): Long {
+                    copyProgress.value = 0f
+
+                    (file as DocumentFile)?.apply {
+                        currentProgressName.value = "Copying ${file.name}"
+                    }
+                    return super.onStart(file, workerThread)
+                }
+
+                override fun onReport(report: Report) {
+                    super.onReport(report)
+
+                    if(!isCopying.value) {
+                        Thread.currentThread().interrupt()
+                    }
+
+                    copyProgress.value = report.progress / 100f
+                }
+
+                override fun onCompleted(result: Any) {
+                    super.onCompleted(result)
+                    isCopying.value = false
+                    finish()
+                }
+            }
+            val ioScope = CoroutineScope(Dispatchers.IO)
+            isCopying.value = true
+            file.apply {
+                if (!File(path + "/${file.name}").exists()) {
+                    val f = this
+                    ioScope.launch {
+                        f.copyFileTo(
+                            storageHelper.storage.context,
+                            File(path),
+                            callback = callback!!
+                        )
+
+                    }
+                }
+            }
         }
 
         private fun getDataColumn(

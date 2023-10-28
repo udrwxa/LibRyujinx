@@ -169,6 +169,47 @@ class MainViewModel(val activity: MainActivity) {
         return true
     }
 
+    fun clearPptcCache(titleId :String){
+        if(titleId.isNotEmpty()){
+            val basePath = MainActivity.AppPath + "/games/$titleId/cache/cpu"
+            if(File(basePath).exists()){
+                var caches = mutableListOf<String>()
+
+                val mainCache = basePath + "${File.separator}0"
+                File(mainCache).listFiles()?.forEach {
+                    if(it.isFile && it.name.endsWith(".cache"))
+                        caches.add(it.absolutePath)
+                }
+                val backupCache = basePath + "${File.separator}1"
+                File(backupCache).listFiles()?.forEach {
+                    if(it.isFile && it.name.endsWith(".cache"))
+                        caches.add(it.absolutePath)
+                }
+                for(path in caches)
+                    File(path).delete()
+            }
+        }
+    }
+
+    fun purgeShaderCache(titleId :String) {
+        if(titleId.isNotEmpty()){
+            val basePath = MainActivity.AppPath + "/games/$titleId/cache/shader"
+            if(File(basePath).exists()){
+                var caches = mutableListOf<String>()
+                File(basePath).listFiles()?.forEach {
+                    if(!it.isFile)
+                        it.delete()
+                    else{
+                        if(it.name.endsWith(".toc") || it.name.endsWith(".data"))
+                            caches.add(it.absolutePath)
+                    }
+                }
+                for(path in caches)
+                    File(path).delete()
+            }
+        }
+    }
+
     fun setStatStates(
         fifo: MutableState<Double>,
         gameFps: MutableState<Double>,

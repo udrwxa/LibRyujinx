@@ -325,6 +325,8 @@ class SettingViews {
                                 AlertDialog(onDismissRequest = {
                                     showImportCompletion.value = false
                                     importFile.value = null
+                                    mainViewModel.requestUserRefresh()
+                                    mainViewModel.homeViewModel.clearLoadedCache()
                                 }) {
                                     Card(
                                         modifier = Modifier,
