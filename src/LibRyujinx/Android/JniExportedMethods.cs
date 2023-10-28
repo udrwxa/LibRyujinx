@@ -42,6 +42,9 @@ namespace LibRyujinx
         private extern static JStringLocalRef createString(JEnvRef jEnv, IntPtr ch);
 
         [DllImport("libryujinxjni")]
+        private extern static void pushString(string ch);
+
+        [DllImport("libryujinxjni")]
         internal extern static void setRenderingThread();
 
         [DllImport("libryujinxjni")]
@@ -511,11 +514,11 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_userGetOpenedUser")]
-        public static JStringLocalRef JniGetOpenedUser(JEnvRef jEnv, JObjectLocalRef jObj)
+        public static void JniGetOpenedUser(JEnvRef jEnv, JObjectLocalRef jObj)
         {
             var userId = GetOpenedUser();
 
-            return CreateString(jEnv, userId);
+            pushString(userId);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_userGetUserPicture")]

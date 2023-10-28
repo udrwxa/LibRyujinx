@@ -61,6 +61,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.anggrayudi.storage.extension.launchOnUiThread
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.NativeHelpers
 import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.HomeViewModel
@@ -84,6 +85,7 @@ class HomeViews {
             val showAppActions = remember { mutableStateOf(false) }
             val showLoading = remember { mutableStateOf(false) }
             val openTitleUpdateDialog = remember { mutableStateOf(false) }
+            val canClose = remember { mutableStateOf(true) }
             val openDlcDialog = remember { mutableStateOf(false) }
             val query = remember {
                 mutableStateOf("")
@@ -102,10 +104,11 @@ class HomeViews {
             val pic = remember {
                 mutableStateOf(ByteArray(0))
             }
-            
-            if(refreshUser.value){
-                user.value = native.userGetOpenedUser()
-                if(user.value.isNotEmpty()) {
+
+            if (refreshUser.value) {
+                native.userGetOpenedUser()
+                user.value = NativeHelpers().popStringJava()
+                if (user.value.isNotEmpty()) {
                     val decoder = Base64.getDecoder()
                     pic.value = decoder.decode(native.userGetUserPicture(user.value))
                 }
@@ -145,7 +148,7 @@ class HomeViews {
                             IconButton(onClick = {
                                 navController?.navigate("user")
                             }) {
-                                if(pic.value.isNotEmpty()) {
+                                if (pic.value.isNotEmpty()) {
                                     Image(
                                         bitmap = BitmapFactory.decodeByteArray(
                                             pic.value,
@@ -160,8 +163,7 @@ class HomeViews {
                                             .size(52.dp)
                                             .clip(CircleShape)
                                     )
-                                }
-                                else{
+                                } else {
                                     Icon(
                                         Icons.Filled.Person,
                                         contentDescription = "user"
@@ -205,28 +207,28 @@ class HomeViews {
                                     expanded = showAppMenu.value,
                                     onDismissRequest = { showAppMenu.value = false }) {
                                     DropdownMenuItem(text = {
+                                        Text(text = "Clear PPTC Cache")
+                                    }, onClick = {
+                                        showAppMenu.value = false
+                                        viewModel.mainViewModel?.clearPptcCache(viewModel.mainViewModel?.selected?.titleId ?: "")
+                                    })
+                                    DropdownMenuItem(text = {
+                                        Text(text = "Purge Shader Cache")
+                                    }, onClick = {
+                                        showAppMenu.value = false
+                                        viewModel.mainViewModel?.purgeShaderCache(viewModel.mainViewModel?.selected?.titleId ?: "")
+                                    })
+                                    DropdownMenuItem(text = {
                                         Text(text = "Manage Updates")
                                     }, onClick = {
                                         showAppMenu.value = false
                                         openTitleUpdateDialog.value = true
-                                    }, leadingIcon = {
-                                        Icon(
-                                            imageVector = org.ryujinx.android.Icons.gameUpdate(),
-                                            contentDescription = "Updates",
-                                            tint = MaterialTheme.colorScheme.onSurface
-                                        )
                                     })
                                     DropdownMenuItem(text = {
                                         Text(text = "Manage DLC")
                                     }, onClick = {
                                         showAppMenu.value = false
                                         openDlcDialog.value = true
-                                    }, leadingIcon = {
-                                        Icon(
-                                            imageVector = org.ryujinx.android.Icons.download(),
-                                            contentDescription = "Dlc",
-                                            tint = MaterialTheme.colorScheme.onSurface
-                                        )
                                     })
                                 }
                             }
@@ -255,11 +257,10 @@ class HomeViews {
                     val list = remember {
                         mutableStateListOf<GameModel>()
                     }
-
-
                     if (refresh.value) {
                         viewModel.setViewList(list)
                         refresh.value = false
+                        showAppActions.value = false
                     }
                     val selectedModel = remember {
                         mutableStateOf(viewModel.mainViewModel?.selected)
@@ -323,7 +324,7 @@ class HomeViews {
                         ) {
                             val titleId = viewModel.mainViewModel?.selected?.titleId ?: ""
                             val name = viewModel.mainViewModel?.selected?.titleName ?: ""
-                            TitleUpdateViews.Main(titleId, name, openTitleUpdateDialog)
+                            TitleUpdateViews.Main(titleId, name, openTitleUpdateDialog, canClose)
                         }
 
                     }
