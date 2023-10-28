@@ -354,6 +354,7 @@ class GameActivity : BaseActivity() {
                                         .padding(16.dp)
                                 ) {
                                     Button(onClick = {
+                                        showBackNotice.value = false
                                         mainViewModel.closeGame()
                                         setFullScreen(false)
                                         finishActivity(0)

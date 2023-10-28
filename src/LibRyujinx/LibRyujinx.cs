@@ -728,6 +728,7 @@ namespace LibRyujinx
         {
             VirtualFileSystem.ReloadKeySet();
             ContentManager = new ContentManager(VirtualFileSystem);
+            AccountManager = new AccountManager(LibHacHorizonManager.RyujinxClient);
         }
 
         internal void DisposeContext()

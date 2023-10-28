@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.ryujinx.android.NativeHelpers
 import org.ryujinx.android.RyujinxNative
 import org.ryujinx.android.viewmodels.MainViewModel
 import java.util.Base64
@@ -47,8 +48,9 @@ class UserViews {
         fun Main(viewModel: MainViewModel? = null, navController: NavHostController? = null) {
             val ryujinxNative = RyujinxNative()
             val decoder = Base64.getDecoder()
+            ryujinxNative.userGetOpenedUser()
             val openedUser = remember {
-                mutableStateOf(ryujinxNative.userGetOpenedUser())
+                mutableStateOf(NativeHelpers().popStringJava())
             }
 
             val openedUserPic = remember {
