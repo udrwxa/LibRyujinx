@@ -20,7 +20,7 @@ namespace Ryujinx.HLE.Loaders.Processes.Extensions
         private static readonly DownloadableContentJsonSerializerContext _contentSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
         private static readonly TitleUpdateMetadataJsonSerializerContext _titleSerializerContext = new(JsonHelper.GetDefaultSerializerOptions());
 
-        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, , Stream stream, out string errorMessage, string extension)
+        internal static (bool, ProcessResult) TryLoad<TMetaData, TFormat, THeader, TEntry>(this PartitionFileSystemCore<TMetaData, TFormat, THeader, TEntry> partitionFileSystem, Switch device, Stream stream, out string errorMessage, string extension)
             where TMetaData : PartitionFileSystemMetaCore<TFormat, THeader, TEntry>, new()
             where TFormat : IPartitionFileSystemFormat
             where THeader : unmanaged, IPartitionFileSystemHeader
