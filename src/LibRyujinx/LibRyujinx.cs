@@ -159,7 +159,7 @@ namespace LibRyujinx
             {
                 try
                 {
-                    PartitionFileSystem pfs;
+                    IFileSystem pfs;
 
                     bool isExeFs = false;
 
@@ -171,7 +171,9 @@ namespace LibRyujinx
                     }
                     else
                     {
-                        pfs = new PartitionFileSystem(gameStream.AsStorage());
+                        var pfsTemp = new PartitionFileSystem();
+                        pfsTemp.Initialize(gameStream.AsStorage()).ThrowIfFailure();
+                        pfs = pfsTemp;
 
                         // If the NSP doesn't have a main NCA, decrement the number of applications found and then continue to the next application.
                         bool hasMainNca = false;
@@ -372,7 +374,7 @@ namespace LibRyujinx
                 version = controlData.DisplayVersionString.ToString();
             }
 
-            void GetControlFsAndTitleId(PartitionFileSystem pfs, out IFileSystem? controlFs, out string? titleId)
+            void GetControlFsAndTitleId(IFileSystem pfs, out IFileSystem? controlFs, out string? titleId)
             {
                 if (SwitchDevice == null)
                 {
@@ -394,7 +396,7 @@ namespace LibRyujinx
                 titleId = controlNca?.Header.TitleId.ToString("x16");
             }
 
-            (Nca? mainNca, Nca? patchNca, Nca? controlNca) GetGameData(VirtualFileSystem fileSystem, PartitionFileSystem pfs, int programIndex)
+            (Nca? mainNca, Nca? patchNca, Nca? controlNca) GetGameData(VirtualFileSystem fileSystem, IFileSystem pfs, int programIndex)
             {
                 Nca? mainNca = null;
                 Nca? patchNca = null;
@@ -495,7 +497,8 @@ namespace LibRyujinx
                         if (File.Exists(updatePath))
                         {
                             FileStream file = new(updatePath, FileMode.Open, FileAccess.Read);
-                            PartitionFileSystem nsp = new(file.AsStorage());
+                            PartitionFileSystem nsp = new();
+                            nsp.Initialize(file.AsStorage()).ThrowIfFailure();
 
                             return GetGameUpdateDataFromPartition(fileSystem, nsp, titleIdBase.ToString("x16"), programIndex);
                         }
@@ -554,7 +557,8 @@ namespace LibRyujinx
             {
                 using FileStream containerFile = File.OpenRead(path);
 
-                PartitionFileSystem partitionFileSystem = new(containerFile.AsStorage());
+                PartitionFileSystem partitionFileSystem = new();
+                partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();
 
                 SwitchDevice.VirtualFileSystem.ImportTickets(partitionFileSystem);
 
@@ -592,9 +596,9 @@ namespace LibRyujinx
                 return new List<string>();
 
             using FileStream containerFile = File.OpenRead(path);
-
-            PartitionFileSystem partitionFileSystem = new(containerFile.AsStorage());
-            bool containsDownloadableContent = false;
+            
+            PartitionFileSystem partitionFileSystem = new();
+            partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();
 
             SwitchDevice.VirtualFileSystem.ImportTickets(partitionFileSystem);
             List<string> paths = new List<string>();
