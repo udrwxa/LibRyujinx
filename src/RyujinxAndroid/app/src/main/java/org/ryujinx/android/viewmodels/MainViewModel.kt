@@ -2,7 +2,6 @@ package org.ryujinx.android.viewmodels
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.PerformanceHintManager
 import androidx.compose.runtime.MutableState
@@ -10,7 +9,6 @@ import androidx.navigation.NavHostController
 import com.anggrayudi.storage.extension.launchOnUiThread
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
-import org.ryujinx.android.GameActivity
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.GraphicsConfiguration
@@ -241,8 +239,9 @@ class MainViewModel(val activity: MainActivity) {
     }
 
     fun navigateToGame() {
-        val intent = Intent(activity, GameActivity::class.java)
-        activity.startActivity(intent)
+        activity.setFullScreen(true)
+        navController?.navigate("game")
+        activity.isGameRunning = true
     }
 
     fun setProgressStates(
