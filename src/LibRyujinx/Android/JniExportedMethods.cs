@@ -42,7 +42,23 @@ namespace LibRyujinx
         private extern static JStringLocalRef createString(JEnvRef jEnv, IntPtr ch);
 
         [DllImport("libryujinxjni")]
-        private extern static void pushString(string ch);
+        private extern static long storeString(string ch);
+        [DllImport("libryujinxjni")]
+        private extern static IntPtr getString(long id);
+
+        private static string GetStoredString(long id)
+        {
+            var pointer = getString(id);
+            if (pointer != IntPtr.Zero)
+            {
+                var str = Marshal.PtrToStringAnsi(pointer) ?? "";
+
+                Marshal.FreeHGlobal(pointer);
+                return str;
+            }
+
+            return "";
+        }
 
         [DllImport("libryujinxjni")]
         internal extern static void setRenderingThread();
@@ -514,11 +530,11 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_userGetOpenedUser")]
-        public static void JniGetOpenedUser(JEnvRef jEnv, JObjectLocalRef jObj)
+        public static JLong JniGetOpenedUser(JEnvRef jEnv, JObjectLocalRef jObj)
         {
             var userId = GetOpenedUser();
 
-            pushString(userId);
+            return storeString(userId);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_userGetUserPicture")]
