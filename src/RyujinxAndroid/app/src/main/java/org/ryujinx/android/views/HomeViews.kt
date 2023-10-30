@@ -106,8 +106,8 @@ class HomeViews {
             }
 
             if (refreshUser.value) {
-                native.userGetOpenedUser()
-                user.value = NativeHelpers().popStringJava()
+                val id = native.userGetOpenedUser()
+                user.value = NativeHelpers().getStringJava(id)
                 if (user.value.isNotEmpty()) {
                     val decoder = Base64.getDecoder()
                     pic.value = decoder.decode(native.userGetUserPicture(user.value))

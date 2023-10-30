@@ -48,9 +48,9 @@ class UserViews {
         fun Main(viewModel: MainViewModel? = null, navController: NavHostController? = null) {
             val ryujinxNative = RyujinxNative()
             val decoder = Base64.getDecoder()
-            ryujinxNative.userGetOpenedUser()
+            val id = ryujinxNative.userGetOpenedUser()
             val openedUser = remember {
-                mutableStateOf(NativeHelpers().popStringJava())
+                mutableStateOf(NativeHelpers().getStringJava(id))
             }
 
             val openedUserPic = remember {
