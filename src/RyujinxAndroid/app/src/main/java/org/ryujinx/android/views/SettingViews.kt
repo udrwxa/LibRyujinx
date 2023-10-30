@@ -461,7 +461,8 @@ class SettingViews {
                                                     Column(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .height(300.dp)
+                                                            .height(350.dp)
+                                                            .verticalScroll(rememberScrollState())
                                                     ) {
                                                         Row(
                                                             modifier = Modifier
@@ -494,7 +495,7 @@ class SettingViews {
                                                             Row(
                                                                 modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(8.dp),
+                                                                    .padding(4.dp),
                                                                 verticalAlignment = Alignment.CenterVertically
                                                             ) {
                                                                 RadioButton(
