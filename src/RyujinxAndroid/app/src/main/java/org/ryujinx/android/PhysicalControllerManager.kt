@@ -3,7 +3,7 @@ package org.ryujinx.android
 import android.view.KeyEvent
 import android.view.MotionEvent
 
-class PhysicalControllerManager(val activity: GameActivity) {
+class PhysicalControllerManager(val activity: MainActivity) {
     private var controllerId: Int = -1
     private var ryujinxNative: RyujinxNative = RyujinxNative()
 

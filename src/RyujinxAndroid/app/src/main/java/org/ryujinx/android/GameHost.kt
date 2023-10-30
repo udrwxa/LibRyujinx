@@ -12,7 +12,8 @@ import org.ryujinx.android.viewmodels.QuickSettings
 import kotlin.concurrent.thread
 
 @SuppressLint("ViewConstructor")
-class GameHost(context: Context?, private val mainViewModel: MainViewModel) : SurfaceView(context), SurfaceHolder.Callback {
+class GameHost(context: Context?, private val mainViewModel: MainViewModel) : SurfaceView(context),
+    SurfaceHolder.Callback {
     private var isProgressHidden: Boolean = false
     private var progress: MutableState<String>? = null
     private var progressValue: MutableState<Float>? = null
@@ -26,7 +27,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
     private var _guestThread: Thread? = null
     private var _isInit: Boolean = false
     private var _isStarted: Boolean = false
-    private val nativeWindow : NativeWindow
+    private val nativeWindow: NativeWindow
 
     private var _nativeRyujinx: RyujinxNative = RyujinxNative()
 
@@ -42,12 +43,11 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        if(_isClosed)
+        if (_isClosed)
             return
         start(holder)
 
-        if(_width != width || _height != height)
-        {
+        if (_width != width || _height != height) {
             val window = nativeWindow.requeryWindowHandle()
             _nativeRyujinx.graphicsSetSurface(window, nativeWindow.nativePointer)
 
@@ -62,8 +62,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
             height
         )
 
-        if(_isStarted)
-        {
+        if (_isStarted) {
             _nativeRyujinx.inputSetClientSize(width, height)
         }
     }
@@ -72,7 +71,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
 
     }
 
-    fun close(){
+    fun close() {
         _isClosed = true
         _isInit = false
         _isStarted = false
@@ -82,7 +81,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
     }
 
     private fun start(surfaceHolder: SurfaceHolder) {
-        if(_isStarted)
+        if (_isStarted)
             return
 
         game = mainViewModel.gameModel
@@ -91,10 +90,9 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
 
         val settings = QuickSettings(mainViewModel.activity)
 
-        if(!settings.useVirtualController){
+        if (!settings.useVirtualController) {
             mainViewModel.controller?.setVisible(false)
-        }
-        else{
+        } else {
             mainViewModel.controller?.connect()
         }
 
@@ -118,13 +116,13 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
                 Thread.sleep(1)
 
                 showLoading?.apply {
-                    if(value){
+                    if (value) {
                         var value = helper.getProgressValue()
 
-                        if(value != -1f)
-                        progress?.apply {
-                            this.value = helper.getProgressInfo()
-                        }
+                        if (value != -1f)
+                            progress?.apply {
+                                this.value = helper.getProgressInfo()
+                            }
 
                         progressValue?.apply {
                             this.value = value
@@ -133,12 +131,16 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
                 }
                 c++
                 if (c >= 1000) {
-                    if(helper.getProgressValue() == -1f)
+                    if (helper.getProgressValue() == -1f)
                         progress?.apply {
                             this.value = "Loading ${game!!.titleName}"
                         }
                     c = 0
-                    mainViewModel.updateStats(_nativeRyujinx.deviceGetGameFifo(), _nativeRyujinx.deviceGetGameFrameRate(), _nativeRyujinx.deviceGetGameFrameTime())
+                    mainViewModel.updateStats(
+                        _nativeRyujinx.deviceGetGameFifo(),
+                        _nativeRyujinx.deviceGetGameFrameRate(),
+                        _nativeRyujinx.deviceGetGameFrameTime()
+                    )
                 }
             }
         }
