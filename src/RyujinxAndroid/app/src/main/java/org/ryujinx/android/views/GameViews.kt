@@ -74,7 +74,7 @@ class GameViews {
             Box(modifier = Modifier.fillMaxSize()) {
                 GameStats(mainViewModel)
 
-                val ryujinxNative = RyujinxNative()
+                val ryujinxNative = RyujinxNative.instance
 
                 val showController = remember {
                     mutableStateOf(QuickSettings(mainViewModel.activity).useVirtualController)
@@ -183,7 +183,7 @@ class GameViews {
                                     IconButton(modifier = Modifier.padding(4.dp), onClick = {
                                         showMore.value = false
                                         enableVsync.value = !enableVsync.value
-                                        RyujinxNative().graphicsRendererSetVsync(enableVsync.value)
+                                        RyujinxNative.instance.graphicsRendererSetVsync(enableVsync.value)
                                     }) {
                                         Icon(
                                             imageVector = Icons.vSync(),

@@ -5,6 +5,7 @@ import android.view.Surface
 class NativeHelpers {
 
     companion object {
+        val instance = NativeHelpers()
         init {
             System.loadLibrary("ryujinxjni")
         }

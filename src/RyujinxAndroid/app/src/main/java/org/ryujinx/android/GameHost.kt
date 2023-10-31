@@ -29,7 +29,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
     private var _isStarted: Boolean = false
     private val nativeWindow: NativeWindow
 
-    private var _nativeRyujinx: RyujinxNative = RyujinxNative()
+    private var _nativeRyujinx: RyujinxNative = RyujinxNative.instance
 
     init {
         holder.addCallback(this)
@@ -84,7 +84,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
         if (_isStarted)
             return
 
-        game = mainViewModel.gameModel
+        game = if (mainViewModel.isMiiEditorLaunched) null else mainViewModel.gameModel;
 
         _nativeRyujinx.inputInitialize(width, height)
 
@@ -110,7 +110,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
 
         _updateThread = thread(start = true) {
             var c = 0
-            val helper = NativeHelpers()
+            val helper = NativeHelpers.instance
             while (_isStarted) {
                 _nativeRyujinx.inputUpdate()
                 Thread.sleep(1)
@@ -133,7 +133,7 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
                 if (c >= 1000) {
                     if (helper.getProgressValue() == -1f)
                         progress?.apply {
-                            this.value = "Loading ${game!!.titleName}"
+                            this.value = "Loading ${if(mainViewModel.isMiiEditorLaunched) "Mii Editor" else game!!.titleName}"
                         }
                     c = 0
                     mainViewModel.updateStats(
