@@ -1,4 +1,6 @@
 ﻿using ARMeilleure.Translation;
+using LibHac.Ncm;
+using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.Input.HLE;
@@ -68,6 +70,13 @@ namespace LibRyujinx
         {
             var emulationContext = SwitchDevice.EmulationContext;
             return (isXci ? emulationContext?.LoadXci(stream) : emulationContext.LoadNsp(stream)) ?? false;
+        }
+
+        public static bool LaunchMiiEditApplet()
+        {
+            string contentPath = SwitchDevice.ContentManager.GetInstalledContentPath(0x0100000000001009, StorageId.BuiltInSystem, NcaContentType.Program);
+
+            return LoadApplication(contentPath);
         }
 
         public static bool LoadApplication(string? path)

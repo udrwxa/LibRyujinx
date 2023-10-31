@@ -306,7 +306,7 @@ class SettingViews {
                                                         thread {
                                                             Helpers.importAppData(this, isImporting)
                                                             showImportCompletion.value = true
-                                                            mainViewModel.requestUserRefresh()
+                                                            mainViewModel.userViewModel.refreshUsers()
                                                         }
                                                     }
                                                 }, modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -329,7 +329,7 @@ class SettingViews {
                                 AlertDialog(onDismissRequest = {
                                     showImportCompletion.value = false
                                     importFile.value = null
-                                    mainViewModel.requestUserRefresh()
+                                    mainViewModel.userViewModel.refreshUsers()
                                     mainViewModel.homeViewModel.clearLoadedCache()
                                 }) {
                                     Card(
