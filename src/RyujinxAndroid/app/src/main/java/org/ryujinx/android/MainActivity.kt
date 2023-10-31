@@ -64,7 +64,7 @@ class MainActivity : BaseActivity() {
             return
 
         val appPath: String = AppPath
-        val success = RyujinxNative().initialize(appPath, false)
+        val success = RyujinxNative.instance.initialize(NativeHelpers.instance.storeStringJava(appPath), false)
         _isInit = success
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -171,7 +171,7 @@ class MainActivity : BaseActivity() {
         super.onStop()
 
         if(isGameRunning) {
-            NativeHelpers().setTurboMode(false)
+            NativeHelpers.instance.setTurboMode(false)
             force60HzRefreshRate(false)
         }
     }
@@ -181,7 +181,7 @@ class MainActivity : BaseActivity() {
 
         if(isGameRunning) {
             setFullScreen(true)
-            NativeHelpers().setTurboMode(true)
+            NativeHelpers.instance.setTurboMode(true)
             force60HzRefreshRate(true)
         }
     }
@@ -190,7 +190,7 @@ class MainActivity : BaseActivity() {
         super.onPause()
 
         if(isGameRunning) {
-            NativeHelpers().setTurboMode(false)
+            NativeHelpers.instance.setTurboMode(false)
             force60HzRefreshRate(false)
         }
     }
