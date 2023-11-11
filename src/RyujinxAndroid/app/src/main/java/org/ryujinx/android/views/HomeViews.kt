@@ -226,7 +226,7 @@ class HomeViews {
                             }
                         }
 
-                        /*val showAppletMenu = remember { mutableStateOf(false) }
+                        /*\val showAppletMenu = remember { mutableStateOf(false) }
                         Box {
                             IconButton(onClick = {
                                 showAppletMenu.value = true

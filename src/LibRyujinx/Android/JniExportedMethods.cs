@@ -6,6 +6,7 @@ using LibRyujinx.Jni.Values;
 using LibRyujinx.Shared.Audio.Oboe;
 using Microsoft.Win32.SafeHandles;
 using Rxmxnx.PInvoke;
+using Ryujinx.Audio.Backends.OpenAL;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Logging;
 using Ryujinx.Common.Logging.Targets;
@@ -137,7 +138,7 @@ namespace LibRyujinx
                                                          JBoolean ignoreMissingServices)
         {
             Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
-            AudioDriver = new OboeHardwareDeviceDriver();
+            AudioDriver = new OpenALHardwareDeviceDriver();//new OboeHardwareDeviceDriver();
             return InitializeDevice(isHostMapped,
                                     useNce,
                                     (SystemLanguage)(int)systemLanguage,
