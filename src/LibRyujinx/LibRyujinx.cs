@@ -26,6 +26,7 @@ using LibHac.FsSystem;
 using LibHac.Fs;
 using Path = System.IO.Path;
 using LibHac;
+using OpenTK.Audio.OpenAL;
 using Ryujinx.Common.Configuration.Multiplayer;
 using Ryujinx.HLE.Loaders.Npdm;
 using Ryujinx.Common.Utilities;
@@ -94,6 +95,8 @@ namespace LibRyujinx
                 Console.WriteLine(ex);
                 return false;
             }
+            
+            OpenALLibraryNameContainer.OverridePath = "libopenal.so";
 
             Logger.Notice.Print(LogClass.Application, "RyujinxAndroid is ready!");
 
