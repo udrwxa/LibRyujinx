@@ -27,7 +27,8 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableShaderCache: MutableState<Boolean>,
         enableTextureRecompression: MutableState<Boolean>,
         resScale: MutableState<Float>,
-        useVirtualController: MutableState<Boolean>
+        useVirtualController: MutableState<Boolean>,
+        isGrid: MutableState<Boolean>,
     )
     {
 
@@ -41,6 +42,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableTextureRecompression.value = sharedPref.getBoolean("enableTextureRecompression", false)
         resScale.value = sharedPref.getFloat("resScale", 1f)
         useVirtualController.value = sharedPref.getBoolean("useVirtualController", true)
+        isGrid.value = sharedPref.getBoolean("isGrid", true)
     }
 
     fun save(
@@ -53,7 +55,8 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableShaderCache: MutableState<Boolean>,
         enableTextureRecompression: MutableState<Boolean>,
         resScale: MutableState<Float>,
-        useVirtualController: MutableState<Boolean>
+        useVirtualController: MutableState<Boolean>,
+        isGrid: MutableState<Boolean>
     ){
         val editor = sharedPref.edit()
 
@@ -67,6 +70,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putBoolean("enableTextureRecompression", enableTextureRecompression.value)
         editor.putFloat("resScale", resScale.value)
         editor.putBoolean("useVirtualController", useVirtualController.value)
+        editor.putBoolean("isGrid", isGrid.value)
 
         editor.apply()
     }
