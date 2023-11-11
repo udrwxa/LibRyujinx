@@ -85,8 +85,11 @@ class HomeViewModel(
                     if (file.extension == "xci" || file.extension == "nsp")
                         activity.let {
                             val item = GameModel(file, it)
-                            files.add(item)
-                            gameList.add(item)
+
+                            if(item.titleId?.isNotEmpty() == true && item.titleName?.isNotEmpty() == true) {
+                                files.add(item)
+                                gameList.add(item)
+                            }
                         }
                 }
 
