@@ -15,6 +15,7 @@ class QuickSettings(val activity: Activity) {
     var enableShaderCache: Boolean
     var enableTextureRecompression: Boolean
     var resScale : Float
+    var isGrid : Boolean
 
     private var sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
 
@@ -29,5 +30,6 @@ class QuickSettings(val activity: Activity) {
         enableTextureRecompression = sharedPref.getBoolean("enableTextureRecompression", false)
         resScale = sharedPref.getFloat("resScale", 1f)
         useVirtualController = sharedPref.getBoolean("useVirtualController", true)
+        isGrid = sharedPref.getBoolean("isGrid", true)
     }
 }

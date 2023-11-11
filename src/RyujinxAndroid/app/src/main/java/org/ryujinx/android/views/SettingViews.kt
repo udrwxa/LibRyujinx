@@ -103,6 +103,9 @@ class SettingViews {
             val useVirtualController = remember {
                 mutableStateOf(true)
             }
+            val isGrid = remember {
+                mutableStateOf(true)
+            }
 
             if (!loaded.value) {
                 settingsViewModel.initializeState(
@@ -112,7 +115,8 @@ class SettingViews {
                     enableShaderCache,
                     enableTextureRecompression,
                     resScale,
-                    useVirtualController
+                    useVirtualController,
+                    isGrid
                 )
                 loaded.value = true
             }
@@ -134,7 +138,8 @@ class SettingViews {
                                     enableShaderCache,
                                     enableTextureRecompression,
                                     resScale,
-                                    useVirtualController
+                                    useVirtualController,
+                                    isGrid
                                 )
                                 settingsViewModel.navController.popBackStack()
                             }) {
@@ -145,6 +150,25 @@ class SettingViews {
                 Column(modifier = Modifier
                     .padding(contentPadding)
                     .verticalScroll(rememberScrollState())) {
+                    ExpandableView(onCardArrowClick = { }, title = "App") {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Use Grid",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = isGrid.value, onCheckedChange = {
+                                    isGrid.value = !isGrid.value
+                                })
+                            }
+                        }
+                    }
                     ExpandableView(onCardArrowClick = { }, title = "System") {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Row(
@@ -602,7 +626,8 @@ class SettingViews {
                         enableShaderCache,
                         enableTextureRecompression,
                         resScale,
-                        useVirtualController
+                        useVirtualController,
+                        isGrid
                     )
                     settingsViewModel.navController.popBackStack()
                 }
