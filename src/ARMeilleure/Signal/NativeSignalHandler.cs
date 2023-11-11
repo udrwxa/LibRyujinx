@@ -2,6 +2,7 @@ using ARMeilleure.IntermediateRepresentation;
 using ARMeilleure.Memory;
 using ARMeilleure.Translation;
 using ARMeilleure.Translation.Cache;
+using Ryujinx.Common;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -112,9 +113,9 @@ namespace ARMeilleure.Signal
 
                 ref SignalHandlerConfig config = ref GetConfigRef();
 
-                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
+                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
                 {
-                    if (Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
+                    if (PlatformInfo.IsBionic)
                     {
                         config.StructAddressOffset = 16; // si_addr
                         config.StructWriteOffset = 8; // si_code
@@ -298,7 +299,7 @@ namespace ARMeilleure.Signal
                     return context.BitwiseAnd(err, Const(2ul));
                 }
             }
-            else if (OperatingSystem.IsLinux() || Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
+            else if (OperatingSystem.IsLinux())
             {
                 if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
                 {

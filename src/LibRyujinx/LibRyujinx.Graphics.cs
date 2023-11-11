@@ -37,7 +37,7 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "graphics_initialize")]
         public static bool InitializeGraphicsNative(GraphicsConfiguration graphicsConfiguration)
         {
-            if(Ryujinx.Common.SystemInfo.SystemInfo.IsAndroid())
+            if(Ryujinx.Common.PlatformInfo.IsBionic)
             {
                 Silk.NET.Core.Loader.SearchPathContainer.Platform = Silk.NET.Core.Loader.UnderlyingPlatform.Android;
             }
@@ -179,7 +179,7 @@ namespace LibRyujinx
 
                         debug_break(1);
 
-                        if (Ryujinx.Common.SystemInfo.SystemInfo.IsBionic)
+                        if (Ryujinx.Common.PlatformInfo.IsBionic)
                         {
                             setRenderingThread();
                         }
