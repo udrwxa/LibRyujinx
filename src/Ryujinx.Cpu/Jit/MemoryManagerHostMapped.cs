@@ -195,11 +195,6 @@ namespace Ryujinx.Cpu.Jit
         }
 
         /// <inheritdoc/>
-        public void Reprotect(ulong va, ulong size, MemoryPermission permission)
-        {
-        }
-
-        /// <inheritdoc/>
         public T Read<T>(ulong va) where T : unmanaged
         {
             try

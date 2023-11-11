@@ -35,7 +35,7 @@ namespace Ryujinx.Common
                 return BuildVersion;
             }
 
-            if (SystemInfo.SystemInfo.IsBionic)
+            if (PlatformInfo.IsBionic)
             {
                 return "Android_1.0";
             }
@@ -59,7 +59,7 @@ namespace Ryujinx.Common
 #else
         public static string GetBaseApplicationDirectory()
         {
-            if (IsFlatHubBuild() || OperatingSystem.IsMacOS() || SystemInfo.SystemInfo.IsBionic)
+            if (IsFlatHubBuild() || OperatingSystem.IsMacOS() || PlatformInfo.IsBionic)
             {
                 return AppDataManager.BaseDirPath;
             }
