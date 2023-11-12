@@ -167,6 +167,23 @@ class SettingViews {
                                     isGrid.value = !isGrid.value
                                 })
                             }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Game Folder",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Button(onClick = {
+                                    settingsViewModel.openGameFolder()
+                                }) {
+                                    Text(text = "Choose Folder")
+                                }
+                            }
                         }
                     }
                     ExpandableView(onCardArrowClick = { }, title = "System") {

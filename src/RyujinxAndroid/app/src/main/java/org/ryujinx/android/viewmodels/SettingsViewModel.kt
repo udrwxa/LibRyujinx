@@ -2,15 +2,28 @@ package org.ryujinx.android.viewmodels
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.MutableState
+import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.NavHostController
 import androidx.preference.PreferenceManager
+import com.anggrayudi.storage.file.FileFullPath
+import com.anggrayudi.storage.file.getAbsolutePath
 import org.ryujinx.android.MainActivity
 
 class SettingsViewModel(var navController: NavHostController, val activity: MainActivity) {
+    private var previousCallback: ((requestCode: Int, folder: DocumentFile) -> Unit)?
     private var sharedPref: SharedPreferences
 
     init {
         sharedPref = getPreferences()
+        previousCallback = activity.storageHelper!!.onFolderSelected
+        activity.storageHelper!!.onFolderSelected = { requestCode, folder ->
+            run {
+                val p = folder.getAbsolutePath(activity!!)
+                val editor = sharedPref?.edit()
+                editor?.putString("gameFolder", p)
+                editor?.apply()
+            }
+        }
     }
 
     private fun getPreferences() : SharedPreferences {
@@ -73,5 +86,20 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putBoolean("isGrid", isGrid.value)
 
         editor.apply()
+        activity.storageHelper!!.onFolderSelected = previousCallback
+    }
+
+
+
+    fun openGameFolder() {
+        val path = sharedPref?.getString("gameFolder", "") ?: ""
+
+        if (path.isEmpty())
+            activity?.storageHelper?.storage?.openFolderPicker()
+        else
+            activity?.storageHelper?.storage?.openFolderPicker(
+                activity.storageHelper!!.storage.requestCodeFolderPicker,
+                FileFullPath(activity, path)
+            )
     }
 }
