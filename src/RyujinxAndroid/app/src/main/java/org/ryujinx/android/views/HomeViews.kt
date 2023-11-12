@@ -33,18 +33,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -55,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -75,7 +73,7 @@ import kotlin.math.roundToInt
 class HomeViews {
     companion object {
         const val ListImageSize = 150
-        const val GridImageSize = 256
+        const val GridImageSize = 300
 
         @OptIn(ExperimentalMaterial3Api::class)
         @Composable
@@ -88,6 +86,9 @@ class HomeViews {
             val openTitleUpdateDialog = remember { mutableStateOf(false) }
             val canClose = remember { mutableStateOf(true) }
             val openDlcDialog = remember { mutableStateOf(false) }
+            val selectedModel = remember {
+                mutableStateOf(viewModel.mainViewModel?.selected)
+            }
             val query = remember {
                 mutableStateOf("")
             }
@@ -161,137 +162,12 @@ class HomeViews {
                             }
                         }
                     )
-                },
-                bottomBar = {
-                    BottomAppBar(
-                        actions = {
-                            if (showAppActions.value) {
-                                IconButton(onClick = {
-                                    if (viewModel.mainViewModel?.selected != null) {
-                                        thread {
-                                            showLoading.value = true
-                                            val success =
-                                                viewModel.mainViewModel?.loadGame(viewModel.mainViewModel.selected!!)
-                                                    ?: false
-                                            if (success) {
-                                                launchOnUiThread {
-                                                    viewModel.mainViewModel?.navigateToGame()
-                                                }
-                                            } else {
-                                                viewModel.mainViewModel?.selected!!.close()
-                                            }
-                                            showLoading.value = false
-                                        }
-                                    }
-                                }) {
-                                    Icon(
-                                        org.ryujinx.android.Icons.playArrow(MaterialTheme.colorScheme.onSurface),
-                                        contentDescription = "Run"
-                                    )
-                                }
-                                val showAppMenu = remember { mutableStateOf(false) }
-                                Box {
-                                    IconButton(onClick = {
-                                        showAppMenu.value = true
-                                    }) {
-                                        Icon(
-                                            Icons.Filled.Menu,
-                                            contentDescription = "Menu"
-                                        )
-                                    }
-                                    DropdownMenu(
-                                        expanded = showAppMenu.value,
-                                        onDismissRequest = { showAppMenu.value = false }) {
-                                        DropdownMenuItem(text = {
-                                            Text(text = "Clear PPTC Cache")
-                                        }, onClick = {
-                                            showAppMenu.value = false
-                                            viewModel.mainViewModel?.clearPptcCache(
-                                                viewModel.mainViewModel?.selected?.titleId ?: ""
-                                            )
-                                        })
-                                        DropdownMenuItem(text = {
-                                            Text(text = "Purge Shader Cache")
-                                        }, onClick = {
-                                            showAppMenu.value = false
-                                            viewModel.mainViewModel?.purgeShaderCache(
-                                                viewModel.mainViewModel?.selected?.titleId ?: ""
-                                            )
-                                        })
-                                        DropdownMenuItem(text = {
-                                            Text(text = "Manage Updates")
-                                        }, onClick = {
-                                            showAppMenu.value = false
-                                            openTitleUpdateDialog.value = true
-                                        })
-                                        DropdownMenuItem(text = {
-                                            Text(text = "Manage DLC")
-                                        }, onClick = {
-                                            showAppMenu.value = false
-                                            openDlcDialog.value = true
-                                        })
-                                    }
-                                }
-                            }
-
-                            /*\val showAppletMenu = remember { mutableStateOf(false) }
-                            Box {
-                                IconButton(onClick = {
-                                    showAppletMenu.value = true
-                                }) {
-                                    Icon(
-                                        org.ryujinx.android.Icons.applets(MaterialTheme.colorScheme.onSurface),
-                                        contentDescription = "Applets"
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = showAppletMenu.value,
-                                    onDismissRequest = { showAppletMenu.value = false }) {
-                                    DropdownMenuItem(text = {
-                                        Text(text = "Launch Mii Editor")
-                                    }, onClick = {
-                                        showAppletMenu.value = false
-                                        showLoading.value = true
-                                        thread {
-                                            val success =
-                                                viewModel.mainViewModel?.loadMiiEditor() ?: false
-                                            if (success) {
-                                                launchOnUiThread {
-                                                    viewModel.mainViewModel?.navigateToGame()
-                                                }
-                                            } else
-                                                viewModel.mainViewModel!!.isMiiEditorLaunched = false
-                                            showLoading.value = false
-                                        }
-                                    })
-                                }
-                            }*/
-                        },
-                        floatingActionButton = {
-                            FloatingActionButton(
-                                onClick = {
-                                    viewModel.openGameFolder()
-                                },
-                                containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation()
-                            ) {
-                                Icon(
-                                    org.ryujinx.android.Icons.folderOpen(MaterialTheme.colorScheme.onSurface),
-                                    contentDescription = "Open Folder"
-                                )
-                            }
-                        }
-                    )
                 }
-
 
             ) { contentPadding ->
                 Box(modifier = Modifier.padding(contentPadding)) {
                     val list = remember {
                         viewModel.gameList
-                    }
-                    val selectedModel = remember {
-                        mutableStateOf(viewModel.mainViewModel?.selected)
                     }
                     var settings = QuickSettings(viewModel.activity!!)
 
@@ -301,13 +177,13 @@ class HomeViews {
                             columns = GridCells.Adaptive(minSize = (size + 4).dp),
                             modifier = Modifier
                                 .fillMaxSize()
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             items(list) {
                                 it.titleName?.apply {
                                     if (this.isNotEmpty() && (query.value.trim()
-                                            .isEmpty() || this.lowercase(
-                                            Locale.getDefault()
-                                        )
+                                            .isEmpty() || this.lowercase(Locale.getDefault())
                                             .contains(query.value))
                                     )
                                         GridGameItem(
@@ -335,7 +211,7 @@ class HomeViews {
                                             viewModel,
                                             showAppActions,
                                             showLoading,
-                                            selectedModel
+                                            selectedModel,
                                         )
                                 }
                             }
@@ -405,6 +281,89 @@ class HomeViews {
                     }
                 }
             }
+
+            if (showAppActions.value)
+                ModalBottomSheet(
+                    content = {
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            if (showAppActions.value) {
+                                IconButton(onClick = {
+                                    if (viewModel.mainViewModel?.selected != null) {
+                                        thread {
+                                            showLoading.value = true
+                                            val success =
+                                                viewModel.mainViewModel?.loadGame(viewModel.mainViewModel.selected!!)
+                                                    ?: false
+                                            if (success) {
+                                                launchOnUiThread {
+                                                    viewModel.mainViewModel?.navigateToGame()
+                                                }
+                                            } else {
+                                                viewModel.mainViewModel?.selected!!.close()
+                                            }
+                                            showLoading.value = false
+                                        }
+                                    }
+                                }) {
+                                    Icon(
+                                        org.ryujinx.android.Icons.playArrow(MaterialTheme.colorScheme.onSurface),
+                                        contentDescription = "Run"
+                                    )
+                                }
+                                val showAppMenu = remember { mutableStateOf(false) }
+                                Box {
+                                    IconButton(onClick = {
+                                        showAppMenu.value = true
+                                    }) {
+                                        Icon(
+                                            Icons.Filled.Menu,
+                                            contentDescription = "Menu"
+                                        )
+                                    }
+                                    DropdownMenu(
+                                        expanded = showAppMenu.value,
+                                        onDismissRequest = { showAppMenu.value = false }) {
+                                        DropdownMenuItem(text = {
+                                            Text(text = "Clear PPTC Cache")
+                                        }, onClick = {
+                                            showAppMenu.value = false
+                                            viewModel.mainViewModel?.clearPptcCache(
+                                                viewModel.mainViewModel?.selected?.titleId ?: ""
+                                            )
+                                        })
+                                        DropdownMenuItem(text = {
+                                            Text(text = "Purge Shader Cache")
+                                        }, onClick = {
+                                            showAppMenu.value = false
+                                            viewModel.mainViewModel?.purgeShaderCache(
+                                                viewModel.mainViewModel?.selected?.titleId ?: ""
+                                            )
+                                        })
+                                        DropdownMenuItem(text = {
+                                            Text(text = "Manage Updates")
+                                        }, onClick = {
+                                            showAppMenu.value = false
+                                            openTitleUpdateDialog.value = true
+                                        })
+                                        DropdownMenuItem(text = {
+                                            Text(text = "Manage DLC")
+                                        }, onClick = {
+                                            showAppMenu.value = false
+                                            openDlcDialog.value = true
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onDismissRequest = {
+                        showAppActions.value = false
+                        selectedModel.value = null
+                    }
+                )
         }
 
         @OptIn(ExperimentalFoundationApi::class)
@@ -548,7 +507,7 @@ class HomeViews {
                             selectedModel.value = gameModel
                         })
             ) {
-                Column {
+                Column(modifier = Modifier.padding(4.dp)) {
                     if (!gameModel.titleId.isNullOrEmpty() && gameModel.titleId != "0000000000000000") {
                         if (gameModel.icon?.isNotEmpty() == true) {
                             val pic = decoder.decode(gameModel.icon)
@@ -560,6 +519,7 @@ class HomeViews {
                                 modifier = Modifier
                                     .padding(0.dp)
                                     .clip(RoundedCornerShape(16.dp))
+                                    .align(Alignment.CenterHorizontally)
                             )
                         } else NotAvailableIcon()
                     } else NotAvailableIcon()
@@ -567,13 +527,15 @@ class HomeViews {
                         text = gameModel.titleName ?: "N/A",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.basicMarquee()
+                        modifier = Modifier.padding(vertical = 4.dp)
+                            .basicMarquee()
                     )
                     Text(
                         text = gameModel.developer ?: "N/A",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.basicMarquee()
+                        modifier = Modifier.padding(vertical = 4.dp)
+                            .basicMarquee()
                     )
                 }
             }
@@ -584,7 +546,7 @@ class HomeViews {
             val size = ListImageSize / Resources.getSystem().displayMetrics.density
             Icon(
                 Icons.Filled.Add,
-                contentDescription = "Options",
+                contentDescription = "N/A",
                 modifier = Modifier
                     .padding(end = 8.dp)
                     .width(size.roundToInt().dp)
