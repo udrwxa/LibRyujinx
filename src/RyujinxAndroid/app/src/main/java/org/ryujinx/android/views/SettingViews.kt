@@ -371,7 +371,7 @@ class SettingViews {
                                     showImportCompletion.value = false
                                     importFile.value = null
                                     mainViewModel.userViewModel.refreshUsers()
-                                    mainViewModel.homeViewModel.clearLoadedCache()
+                                    mainViewModel.homeViewModel.requestReload()
                                 }) {
                                     Card(
                                         modifier = Modifier,

@@ -81,6 +81,7 @@ class HomeViews {
             viewModel: HomeViewModel = HomeViewModel(),
             navController: NavHostController? = null
         ) {
+            viewModel.ensureReloadIfNecessary()
             val showAppActions = remember { mutableStateOf(false) }
             val showLoading = remember { mutableStateOf(false) }
             val openTitleUpdateDialog = remember { mutableStateOf(false) }
@@ -169,6 +170,7 @@ class HomeViews {
                     val list = remember {
                         viewModel.gameList
                     }
+                    viewModel.filter(query.value)
                     var settings = QuickSettings(viewModel.activity!!)
 
                     if (settings.isGrid) {
