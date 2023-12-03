@@ -137,8 +137,8 @@ class TitleUpdateViewModel(val titleId: String) {
             val gson = Gson()
             data = gson.fromJson(File(jsonPath).readText(), TitleUpdateMetadata::class.java)
 
-            refreshPaths()
         }
+        refreshPaths()
 
         storageHelper = MainActivity.StorageHelper!!
     }
