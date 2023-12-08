@@ -12,6 +12,7 @@ import kotlinx.coroutines.sync.Semaphore
 import org.ryujinx.android.GameController
 import org.ryujinx.android.GameHost
 import org.ryujinx.android.GraphicsConfiguration
+import org.ryujinx.android.Logging
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.NativeGraphicsInterop
 import org.ryujinx.android.NativeHelpers
@@ -31,6 +32,7 @@ class MainViewModel(val activity: MainActivity) {
     var selected: GameModel? = null
     var isMiiEditorLaunched = false
     val userViewModel = UserViewModel()
+    val logging = Logging(this)
     private var gameTimeState: MutableState<Double>? = null
     private var gameFpsState: MutableState<Double>? = null
     private var fifoState: MutableState<Double>? = null
@@ -38,6 +40,7 @@ class MainViewModel(val activity: MainActivity) {
     private var progressValue: MutableState<Float>? = null
     private var showLoading: MutableState<Boolean>? = null
     private var refreshUser: MutableState<Boolean>? = null
+
     var gameHost: GameHost? = null
         set(value) {
             field = value
