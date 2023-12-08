@@ -377,9 +377,11 @@ class SettingViews {
                                         modifier = Modifier,
                                         shape = MaterialTheme.shapes.medium
                                     ) {
-                                        Text(modifier = Modifier
-                                            .padding(24.dp),
-                                            text = "App Data import completed.")
+                                        Text(
+                                            modifier = Modifier
+                                                .padding(24.dp),
+                                            text = "App Data import completed."
+                                        )
                                     }
                                 }
                             }
@@ -631,6 +633,21 @@ class SettingViews {
                                 Switch(checked = useVirtualController.value, onCheckedChange = {
                                     useVirtualController.value = !useVirtualController.value
                                 })
+                            }
+                        }
+                    }
+                    ExpandableView(onCardArrowClick = { }, title = "Log") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(onClick = {
+                                mainViewModel.logging.requestExport()
+                            }) {
+                                Text(text = "Send Logs")
                             }
                         }
                     }
