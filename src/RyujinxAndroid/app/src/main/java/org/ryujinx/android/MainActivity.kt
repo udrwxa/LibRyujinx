@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.anggrayudi.storage.SimpleStorageHelper
 import org.ryujinx.android.ui.theme.RyujinxAndroidTheme
 import org.ryujinx.android.viewmodels.MainViewModel
+import org.ryujinx.android.viewmodels.QuickSettings
 import org.ryujinx.android.views.MainView
 import kotlin.math.abs
 
@@ -64,7 +65,17 @@ class MainActivity : BaseActivity() {
             return
 
         val appPath: String = AppPath
-        val success = RyujinxNative.instance.initialize(NativeHelpers.instance.storeStringJava(appPath), false)
+
+        var quickSettings = QuickSettings(this)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Debug.ordinal, quickSettings.enableDebugLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Info.ordinal, quickSettings.enableInfoLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Stub.ordinal, quickSettings.enableStubLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Warning.ordinal, quickSettings.enableWarningLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Error.ordinal, quickSettings.enableErrorLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.AccessLog.ordinal, quickSettings.enableAccessLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Guest.ordinal, quickSettings.enableGuestLogs)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Trace.ordinal, quickSettings.enableTraceLogs)
+        val success = RyujinxNative.instance.initialize(NativeHelpers.instance.storeStringJava(appPath))
         _isInit = success
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +88,6 @@ class MainActivity : BaseActivity() {
         }
 
         AppPath = this.getExternalFilesDir(null)!!.absolutePath
-
 
         initialize()
 
