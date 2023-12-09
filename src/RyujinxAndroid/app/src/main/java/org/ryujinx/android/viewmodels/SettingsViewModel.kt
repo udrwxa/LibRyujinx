@@ -7,7 +7,9 @@ import androidx.navigation.NavHostController
 import androidx.preference.PreferenceManager
 import com.anggrayudi.storage.file.FileFullPath
 import com.anggrayudi.storage.file.getAbsolutePath
+import org.ryujinx.android.LogLevel
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.RyujinxNative
 
 class SettingsViewModel(var navController: NavHostController, val activity: MainActivity) {
     private var previousCallback: ((requestCode: Int, folder: DocumentFile) -> Unit)?
@@ -42,6 +44,14 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         resScale: MutableState<Float>,
         useVirtualController: MutableState<Boolean>,
         isGrid: MutableState<Boolean>,
+        enableDebugLogs: MutableState<Boolean>,
+        enableStubLogs: MutableState<Boolean>,
+        enableInfoLogs: MutableState<Boolean>,
+        enableWarningLogs: MutableState<Boolean>,
+        enableErrorLogs: MutableState<Boolean>,
+        enableGuestLogs: MutableState<Boolean>,
+        enableAccessLogs: MutableState<Boolean>,
+        enableTraceLogs: MutableState<Boolean>
     )
     {
 
@@ -56,6 +66,15 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         resScale.value = sharedPref.getFloat("resScale", 1f)
         useVirtualController.value = sharedPref.getBoolean("useVirtualController", true)
         isGrid.value = sharedPref.getBoolean("isGrid", true)
+
+        enableDebugLogs.value = sharedPref.getBoolean("enableDebugLogs", false)
+        enableStubLogs.value = sharedPref.getBoolean("enableStubLogs", false)
+        enableInfoLogs.value = sharedPref.getBoolean("enableInfoLogs", true)
+        enableWarningLogs.value = sharedPref.getBoolean("enableWarningLogs", true)
+        enableErrorLogs.value = sharedPref.getBoolean("enableErrorLogs", true)
+        enableGuestLogs.value = sharedPref.getBoolean("enableGuestLogs", true)
+        enableAccessLogs.value = sharedPref.getBoolean("enableAccessLogs", false)
+        enableTraceLogs.value = sharedPref.getBoolean("enableStubLogs", false)
     }
 
     fun save(
@@ -69,7 +88,15 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableTextureRecompression: MutableState<Boolean>,
         resScale: MutableState<Float>,
         useVirtualController: MutableState<Boolean>,
-        isGrid: MutableState<Boolean>
+        isGrid: MutableState<Boolean>,
+        enableDebugLogs: MutableState<Boolean>,
+        enableStubLogs: MutableState<Boolean>,
+        enableInfoLogs: MutableState<Boolean>,
+        enableWarningLogs: MutableState<Boolean>,
+        enableErrorLogs: MutableState<Boolean>,
+        enableGuestLogs: MutableState<Boolean>,
+        enableAccessLogs: MutableState<Boolean>,
+        enableTraceLogs: MutableState<Boolean>
     ){
         val editor = sharedPref.edit()
 
@@ -85,8 +112,27 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putBoolean("useVirtualController", useVirtualController.value)
         editor.putBoolean("isGrid", isGrid.value)
 
+
+        editor.putBoolean("enableDebugLogs", enableDebugLogs.value)
+        editor.putBoolean("enableStubLogs", enableStubLogs.value)
+        editor.putBoolean("enableInfoLogs", enableInfoLogs.value)
+        editor.putBoolean("enableWarningLogs", enableWarningLogs.value)
+        editor.putBoolean("enableErrorLogs", enableErrorLogs.value)
+        editor.putBoolean("enableGuestLogs", enableGuestLogs.value)
+        editor.putBoolean("enableAccessLogs", enableAccessLogs.value)
+        editor.putBoolean("enableTraceLogs", enableTraceLogs.value)
+
         editor.apply()
         activity.storageHelper!!.onFolderSelected = previousCallback
+
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Debug.ordinal, enableDebugLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Info.ordinal, enableInfoLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Stub.ordinal, enableStubLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Warning.ordinal, enableWarningLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Error.ordinal, enableErrorLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.AccessLog.ordinal, enableAccessLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Guest.ordinal, enableGuestLogs.value)
+        RyujinxNative.instance.loggingSetEnabled(LogLevel.Trace.ordinal, enableTraceLogs.value)
     }
 
 

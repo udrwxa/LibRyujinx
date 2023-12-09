@@ -52,3 +52,7 @@ class Logging(private var viewModel: MainViewModel) {
         File(logPath).mkdirs()
     }
 }
+
+internal enum class LogLevel {
+    Debug, Stub, Info, Warning, Error, Guest, AccessLog, Notice, Trace
+}

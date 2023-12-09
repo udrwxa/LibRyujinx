@@ -103,9 +103,16 @@ class SettingViews {
             val useVirtualController = remember {
                 mutableStateOf(true)
             }
-            val isGrid = remember {
-                mutableStateOf(true)
-            }
+            val isGrid = remember { mutableStateOf(true) }
+
+            val enableDebugLogs = remember { mutableStateOf(true) }
+            val enableStubLogs = remember { mutableStateOf(true) }
+            val enableInfoLogs = remember { mutableStateOf(true) }
+            val enableWarningLogs = remember { mutableStateOf(true) }
+            val enableErrorLogs = remember { mutableStateOf(true) }
+            val enableGuestLogs = remember { mutableStateOf(true) }
+            val enableAccessLogs = remember { mutableStateOf(true) }
+            val enableTraceLogs = remember { mutableStateOf(true) }
 
             if (!loaded.value) {
                 settingsViewModel.initializeState(
@@ -116,7 +123,15 @@ class SettingViews {
                     enableTextureRecompression,
                     resScale,
                     useVirtualController,
-                    isGrid
+                    isGrid,
+                    enableDebugLogs,
+                    enableStubLogs,
+                    enableInfoLogs,
+                    enableWarningLogs,
+                    enableErrorLogs,
+                    enableGuestLogs,
+                    enableAccessLogs,
+                    enableTraceLogs
                 )
                 loaded.value = true
             }
@@ -139,7 +154,15 @@ class SettingViews {
                                     enableTextureRecompression,
                                     resScale,
                                     useVirtualController,
-                                    isGrid
+                                    isGrid,
+                                    enableDebugLogs,
+                                    enableStubLogs,
+                                    enableInfoLogs,
+                                    enableWarningLogs,
+                                    enableErrorLogs,
+                                    enableGuestLogs,
+                                    enableAccessLogs,
+                                    enableTraceLogs
                                 )
                                 settingsViewModel.navController.popBackStack()
                             }) {
@@ -637,17 +660,139 @@ class SettingViews {
                         }
                     }
                     ExpandableView(onCardArrowClick = { }, title = "Log") {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Button(onClick = {
-                                mainViewModel.logging.requestExport()
-                            }) {
-                                Text(text = "Send Logs")
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Debug Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableDebugLogs.value, onCheckedChange = {
+                                    enableDebugLogs.value = !enableDebugLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Stub Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableStubLogs.value, onCheckedChange = {
+                                    enableStubLogs.value = !enableStubLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Info Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableInfoLogs.value, onCheckedChange = {
+                                    enableInfoLogs.value = !enableInfoLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Warning Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableWarningLogs.value, onCheckedChange = {
+                                    enableWarningLogs.value = !enableWarningLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Error Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableErrorLogs.value, onCheckedChange = {
+                                    enableErrorLogs.value = !enableErrorLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Guest Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableGuestLogs.value, onCheckedChange = {
+                                    enableGuestLogs.value = !enableGuestLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Access Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableAccessLogs.value, onCheckedChange = {
+                                    enableAccessLogs.value = !enableAccessLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Enable Trace Logs",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableTraceLogs.value, onCheckedChange = {
+                                    enableTraceLogs.value = !enableTraceLogs.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Button(onClick = {
+                                    mainViewModel.logging.requestExport()
+                                }) {
+                                    Text(text = "Send Logs")
+                                }
                             }
                         }
                     }
@@ -661,7 +806,15 @@ class SettingViews {
                         enableTextureRecompression,
                         resScale,
                         useVirtualController,
-                        isGrid
+                        isGrid,
+                        enableDebugLogs,
+                        enableStubLogs,
+                        enableInfoLogs,
+                        enableWarningLogs,
+                        enableErrorLogs,
+                        enableGuestLogs,
+                        enableAccessLogs,
+                        enableTraceLogs
                     )
                     settingsViewModel.navController.popBackStack()
                 }
