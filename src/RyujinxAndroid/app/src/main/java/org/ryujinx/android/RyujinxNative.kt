@@ -4,7 +4,7 @@ import org.ryujinx.android.viewmodels.GameInfo
 
 @Suppress("KotlinJniMissingFunction")
 class RyujinxNative {
-    external fun initialize(appPath: Long, enableDebugLogs : Boolean): Boolean
+    external fun initialize(appPath: Long): Boolean
 
     companion object {
         val instance: RyujinxNative = RyujinxNative()
@@ -64,4 +64,5 @@ class RyujinxNative {
     external fun userDeleteUser(userId: String)
     external fun userOpenUser(userId: Long)
     external fun userCloseUser(userId: String)
+    external fun loggingSetEnabled(logLevel: Int, enabled: Boolean)
 }

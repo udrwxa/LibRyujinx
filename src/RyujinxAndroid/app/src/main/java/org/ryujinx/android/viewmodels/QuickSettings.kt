@@ -17,6 +17,16 @@ class QuickSettings(val activity: Activity) {
     var resScale : Float
     var isGrid : Boolean
 
+    // Logs
+    var enableDebugLogs: Boolean
+    var enableStubLogs: Boolean
+    var enableInfoLogs: Boolean
+    var enableWarningLogs: Boolean
+    var enableErrorLogs: Boolean
+    var enableGuestLogs: Boolean
+    var enableAccessLogs: Boolean
+    var enableTraceLogs: Boolean
+
     private var sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
 
     init {
@@ -31,5 +41,41 @@ class QuickSettings(val activity: Activity) {
         resScale = sharedPref.getFloat("resScale", 1f)
         useVirtualController = sharedPref.getBoolean("useVirtualController", true)
         isGrid = sharedPref.getBoolean("isGrid", true)
+
+        enableDebugLogs = sharedPref.getBoolean("enableDebugLogs", false)
+        enableStubLogs = sharedPref.getBoolean("enableStubLogs", false)
+        enableInfoLogs = sharedPref.getBoolean("enableInfoLogs", true)
+        enableWarningLogs = sharedPref.getBoolean("enableWarningLogs", true)
+        enableErrorLogs = sharedPref.getBoolean("enableErrorLogs", true)
+        enableGuestLogs = sharedPref.getBoolean("enableGuestLogs", true)
+        enableAccessLogs = sharedPref.getBoolean("enableAccessLogs", false)
+        enableTraceLogs = sharedPref.getBoolean("enableStubLogs", false)
+    }
+
+    fun save(){
+        val editor = sharedPref.edit()
+
+        editor.putBoolean("isHostMapped", isHostMapped)
+        editor.putBoolean("useNce", useNce)
+        editor.putBoolean("enableVsync", enableVsync)
+        editor.putBoolean("enableDocked", enableDocked)
+        editor.putBoolean("enablePtc", enablePtc)
+        editor.putBoolean("ignoreMissingServices", ignoreMissingServices)
+        editor.putBoolean("enableShaderCache", enableShaderCache)
+        editor.putBoolean("enableTextureRecompression", enableTextureRecompression)
+        editor.putFloat("resScale", resScale)
+        editor.putBoolean("useVirtualController", useVirtualController)
+        editor.putBoolean("isGrid", isGrid)
+
+        editor.putBoolean("enableDebugLogs", enableDebugLogs)
+        editor.putBoolean("enableStubLogs", enableStubLogs)
+        editor.putBoolean("enableInfoLogs", enableInfoLogs)
+        editor.putBoolean("enableWarningLogs", enableWarningLogs)
+        editor.putBoolean("enableErrorLogs", enableErrorLogs)
+        editor.putBoolean("enableGuestLogs", enableGuestLogs)
+        editor.putBoolean("enableAccessLogs", enableAccessLogs)
+        editor.putBoolean("enableTraceLogs", enableTraceLogs)
+
+        editor.apply()
     }
 }
