@@ -1,6 +1,9 @@
 package org.ryujinx.android.views
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.DocumentsContract
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -56,6 +59,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.file.extension
 import org.ryujinx.android.Helpers
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.providers.DocumentProvider
 import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.SettingsViewModel
 import org.ryujinx.android.viewmodels.VulkanDriverViewModel
@@ -206,6 +210,37 @@ class SettingViews {
                                 }) {
                                     Text(text = "Choose Folder")
                                 }
+                            }
+                            Button(onClick = {
+                                fun createIntent(action: String) : Intent{
+                                    val intent = Intent(action)
+                                    intent.addCategory(Intent.CATEGORY_DEFAULT)
+                                    intent.data = DocumentsContract.buildRootUri(DocumentProvider.AUTHORITY, DocumentProvider.ROOT_ID)
+                                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                                    return intent
+                                }
+                                try {
+                                    mainViewModel.activity.startActivity(createIntent(Intent.ACTION_VIEW))
+                                    return@Button
+                                }
+                                catch (_: ActivityNotFoundException){}
+                                try {
+                                    mainViewModel.activity.startActivity(createIntent("android.provider.action.BROWSE"))
+                                    return@Button
+                                }
+                                catch (_: ActivityNotFoundException){}
+                                try {
+                                    mainViewModel.activity.startActivity(createIntent("com.google.android.documentsui"))
+                                    return@Button
+                                }
+                                catch (_: ActivityNotFoundException){}
+                                try {
+                                    mainViewModel.activity.startActivity(createIntent("com.android.documentsui"))
+                                    return@Button
+                                }
+                                catch (_: ActivityNotFoundException){}
+                            }) {
+                                Text(text = "Open App Folder")
                             }
                         }
                     }

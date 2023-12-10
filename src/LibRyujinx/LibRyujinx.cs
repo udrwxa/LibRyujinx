@@ -1,4 +1,4 @@
-﻿// State class for the library
+// State class for the library
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.Services.Account.Acc;
 using Ryujinx.HLE.HOS;
@@ -56,7 +56,7 @@ namespace LibRyujinx
             return res;
         }
 
-        public static bool Initialize(string? basePath, bool enableDebugLogs = false)
+        public static bool Initialize(string? basePath)
         {
             if (SwitchDevice != null)
             {
@@ -69,15 +69,6 @@ namespace LibRyujinx
 
                 ConfigurationState.Initialize();
                 LoggerModule.Initialize();
-
-                Logger.SetEnable(LogLevel.Debug, enableDebugLogs);
-                Logger.SetEnable(LogLevel.Stub, false);
-                Logger.SetEnable(LogLevel.Info, true);
-                Logger.SetEnable(LogLevel.Warning, true);
-                Logger.SetEnable(LogLevel.Error, true);
-                Logger.SetEnable(LogLevel.Trace, false);
-                Logger.SetEnable(LogLevel.Guest, true);
-                Logger.SetEnable(LogLevel.AccessLog, false);
 
                 Logger.AddTarget(new AsyncLogTargetWrapper(
                     new FileLogTarget(AppDataManager.BaseDirPath, "file"),
