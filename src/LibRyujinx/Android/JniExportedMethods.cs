@@ -1,4 +1,4 @@
-﻿using LibRyujinx.Jni;
+using LibRyujinx.Jni;
 using LibRyujinx.Jni.Pointers;
 using LibRyujinx.Jni.Primitives;
 using LibRyujinx.Jni.References;
@@ -84,7 +84,7 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_initialize")]
-        public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JLong jpathId, JBoolean enableDebugLogs)
+        public static JBoolean JniInitialize(JEnvRef jEnv, JObjectLocalRef jObj, JLong jpathId)
         {
             Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
             PlatformInfo.IsBionic = true;
@@ -98,7 +98,7 @@ namespace LibRyujinx
 
             var path = GetStoredString(jpathId);
 
-            var init = Initialize(path, enableDebugLogs);
+            var init = Initialize(path);
 
             _surfaceEvent?.Set();
 
@@ -411,6 +411,13 @@ namespace LibRyujinx
                 onFrameEnd(time);
             });
             RunLoop();
+        }
+
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_loggingSetEnabled")]
+        public static void JniSetLoggingEnabledNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt logLevel, JBoolean enabled)
+        {
+            Logger.SetEnable((LogLevel)(int)logLevel, enabled);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameInfoFromPath")]
