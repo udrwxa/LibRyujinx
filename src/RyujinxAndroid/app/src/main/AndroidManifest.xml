@@ -51,7 +51,7 @@
         </provider>
         <provider
             android:name=".providers.DocumentProvider"
-            android:authorities="org.ryujinx.android.provider"
+            android:authorities="org.ryujinx.android.providers"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">

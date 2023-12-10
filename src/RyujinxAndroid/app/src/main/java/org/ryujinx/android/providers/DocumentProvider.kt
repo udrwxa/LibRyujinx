@@ -7,6 +7,7 @@ import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
+import org.ryujinx.android.BuildConfig
 import org.ryujinx.android.R
 import org.ryujinx.android.RyujinxApplication
 import java.io.File
@@ -40,7 +41,7 @@ class DocumentProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_SIZE
         )
 
-        const val AUTHORITY : String = "org.ryujinx.android.providers"
+        const val AUTHORITY : String =  BuildConfig.APPLICATION_ID + ".providers"
 
         const val ROOT_ID : String = "root"
     }

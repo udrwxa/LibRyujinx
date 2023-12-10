@@ -80,6 +80,7 @@ class MainActivity : BaseActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler)
 
         if(
             !Environment.isExternalStorageManager()
