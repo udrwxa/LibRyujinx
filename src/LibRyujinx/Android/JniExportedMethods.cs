@@ -553,6 +553,20 @@ namespace LibRyujinx
             SetButtonReleased((GamepadButtonInputId)(int)button, id);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetAccelerometerData")]
+        public static void JniSetAccelerometerData(JEnvRef jEnv, JObjectLocalRef jObj, JFloat x, JFloat y, JFloat z, JInt id)
+        {
+            var accel = new Vector3(x, y, z);
+            SetAccelerometerData(accel, id);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetGyroData")]
+        public static void JniSetGyroData(JEnvRef jEnv, JObjectLocalRef jObj, JFloat x, JFloat y, JFloat z, JInt id)
+        {
+            var gryo = new Vector3(x, y, z);
+            SetGryoData(gryo, id);
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_inputSetStickAxis")]
         public static void JniSetStickAxis(JEnvRef jEnv, JObjectLocalRef jObj, JInt stick, JFloat x, JFloat y, JInt id)
         {
