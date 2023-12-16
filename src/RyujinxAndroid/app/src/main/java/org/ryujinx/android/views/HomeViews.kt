@@ -57,11 +57,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.anggrayudi.storage.extension.launchOnUiThread
+import org.ryujinx.android.R
+import org.ryujinx.android.viewmodels.FileType
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.HomeViewModel
 import org.ryujinx.android.viewmodels.QuickSettings
@@ -398,7 +401,7 @@ class HomeViews {
                                     selected = null
                                 }
                                 selectedModel.value = null
-                            } else if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000") {
+                            } else if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000" || gameModel.type == FileType.Nro) {
                                 thread {
                                     showLoading.value = true
                                     val success =
@@ -427,7 +430,7 @@ class HomeViews {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row {
-                        if (!gameModel.titleId.isNullOrEmpty() && gameModel.titleId != "0000000000000000") {
+                        if (!gameModel.titleId.isNullOrEmpty() && (gameModel.titleId != "0000000000000000" || gameModel.type == FileType.Nro)) {
                             if (gameModel.icon?.isNotEmpty() == true) {
                                 val pic = decoder.decode(gameModel.icon)
                                 val size =
@@ -441,7 +444,9 @@ class HomeViews {
                                         .width(size.roundToInt().dp)
                                         .height(size.roundToInt().dp)
                                 )
-                            } else NotAvailableIcon()
+                            } else if (gameModel.type == FileType.Nro)
+                                NROIcon()
+                            else NotAvailableIcon()
                         } else NotAvailableIcon()
                         Column {
                             Text(text = gameModel.titleName ?: "")
@@ -487,7 +492,7 @@ class HomeViews {
                                     selected = null
                                 }
                                 selectedModel.value = null
-                            } else if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000") {
+                            } else if (gameModel.titleId.isNullOrEmpty() || gameModel.titleId != "0000000000000000" || gameModel.type == FileType.Nro) {
                                 thread {
                                     showLoading.value = true
                                     val success =
@@ -510,7 +515,7 @@ class HomeViews {
                         })
             ) {
                 Column(modifier = Modifier.padding(4.dp)) {
-                    if (!gameModel.titleId.isNullOrEmpty() && gameModel.titleId != "0000000000000000") {
+                    if (!gameModel.titleId.isNullOrEmpty() && (gameModel.titleId != "0000000000000000" || gameModel.type == FileType.Nro)) {
                         if (gameModel.icon?.isNotEmpty() == true) {
                             val pic = decoder.decode(gameModel.icon)
                             val size = GridImageSize / Resources.getSystem().displayMetrics.density
@@ -523,20 +528,24 @@ class HomeViews {
                                     .clip(RoundedCornerShape(16.dp))
                                     .align(Alignment.CenterHorizontally)
                             )
-                        } else NotAvailableIcon()
+                        } else if (gameModel.type == FileType.Nro)
+                            NROIcon()
+                        else NotAvailableIcon()
                     } else NotAvailableIcon()
                     Text(
                         text = gameModel.titleName ?: "N/A",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
                             .basicMarquee()
                     )
                     Text(
                         text = gameModel.developer ?: "N/A",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
                             .basicMarquee()
                     )
                 }
@@ -549,6 +558,19 @@ class HomeViews {
             Icon(
                 Icons.Filled.Add,
                 contentDescription = "N/A",
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .width(size.roundToInt().dp)
+                    .height(size.roundToInt().dp)
+            )
+        }
+
+        @Composable
+        fun NROIcon() {
+            val size = ListImageSize / Resources.getSystem().displayMetrics.density
+            Image(
+                painter = painterResource(id = R.drawable.icon_nro),
+                contentDescription = "NRO",
                 modifier = Modifier
                     .padding(end = 8.dp)
                     .width(size.roundToInt().dp)

@@ -33,9 +33,9 @@ class RyujinxNative {
     external fun deviceGetGameFrameRate(): Double
     external fun deviceGetGameFrameTime(): Double
     external fun deviceGetGameFifo(): Double
-    external fun deviceGetGameInfo(fileDescriptor: Int,  isXci:Boolean): GameInfo
+    external fun deviceGetGameInfo(fileDescriptor: Int, extension: Long): GameInfo
     external fun deviceGetGameInfoFromPath(path: String): GameInfo
-    external fun deviceLoadDescriptor(fileDescriptor: Int,  isXci:Boolean): Boolean
+    external fun deviceLoadDescriptor(fileDescriptor: Int,  gameType: Int): Boolean
     external fun graphicsRendererSetSize(width: Int, height: Int)
     external fun graphicsRendererSetVsync(enabled: Boolean)
     external fun graphicsRendererRunLoop()

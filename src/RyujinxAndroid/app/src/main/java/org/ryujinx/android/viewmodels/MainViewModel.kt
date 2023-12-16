@@ -165,7 +165,7 @@ class MainViewModel(val activity: MainActivity) {
         if (!success)
             return false
 
-        success = nativeRyujinx.deviceLoadDescriptor(descriptor, game.isXci())
+        success = nativeRyujinx.deviceLoadDescriptor(descriptor, game.type.ordinal)
 
         if (!success)
             return false

@@ -34,6 +34,9 @@ using System.Globalization;
 using Ryujinx.Ui.Common.Configuration.System;
 using Ryujinx.Common.Logging.Targets;
 using System.Collections.Generic;
+using LibHac.Bcat;
+using Ryujinx.Ui.App.Common;
+using System.Text;
 
 namespace LibRyujinx
 {
@@ -126,10 +129,10 @@ namespace LibRyujinx
 
             using var stream = File.Open(file, FileMode.Open);
 
-            return GetGameInfo(stream, file.ToLower().EndsWith("xci"));
+            return GetGameInfo(stream, new FileInfo(file).Extension.Remove('.'));
         }
 
-        public static GameInfo? GetGameInfo(Stream gameStream, bool isXci)
+        public static GameInfo? GetGameInfo(Stream gameStream, string extension)
         {
             if (SwitchDevice == null)
             {
@@ -142,7 +145,7 @@ namespace LibRyujinx
                 FileSize = gameStream.Length * 0.000000000931, TitleName = "Unknown", TitleId = "0000000000000000",
                 Developer = "Unknown",
                 Version = "0",
-                Icon = null,
+                Icon = null
             };
 
             const Language TitleLanguage = Language.AmericanEnglish;
@@ -153,129 +156,169 @@ namespace LibRyujinx
             {
                 try
                 {
-                    IFileSystem pfs;
-
-                    bool isExeFs = false;
-
-                    if (isXci)
+                    if (extension == "nsp" || extension == "pfs0" || extension == "xci")
                     {
-                        Xci xci = new(SwitchDevice.VirtualFileSystem.KeySet, gameStream.AsStorage());
+                        IFileSystem pfs;
 
-                        pfs = xci.OpenPartition(XciPartitionType.Secure);
-                    }
-                    else
-                    {
-                        var pfsTemp = new PartitionFileSystem();
-                        pfsTemp.Initialize(gameStream.AsStorage()).ThrowIfFailure();
-                        pfs = pfsTemp;
+                        bool isExeFs = false;
 
-                        // If the NSP doesn't have a main NCA, decrement the number of applications found and then continue to the next application.
-                        bool hasMainNca = false;
-
-                        foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*"))
+                        if (extension == "xci")
                         {
-                            if (Path.GetExtension(fileEntry.FullPath).ToLower() == ".nca")
+                            Xci xci = new(SwitchDevice.VirtualFileSystem.KeySet, gameStream.AsStorage());
+
+                            pfs = xci.OpenPartition(XciPartitionType.Secure);
+                        }
+                        else
+                        {
+                            var pfsTemp = new PartitionFileSystem();
+                            pfsTemp.Initialize(gameStream.AsStorage()).ThrowIfFailure();
+                            pfs = pfsTemp;
+
+                            // If the NSP doesn't have a main NCA, decrement the number of applications found and then continue to the next application.
+                            bool hasMainNca = false;
+
+                            foreach (DirectoryEntryEx fileEntry in pfs.EnumerateEntries("/", "*"))
                             {
-                                using UniqueRef<IFile> ncaFile = new();
-
-                                pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-                                Nca nca = new(SwitchDevice.VirtualFileSystem.KeySet, ncaFile.Get.AsStorage());
-                                int dataIndex = Nca.GetSectionIndexFromType(NcaSectionType.Data, NcaContentType.Program);
-
-                                // Some main NCAs don't have a data partition, so check if the partition exists before opening it
-                                if (nca.Header.ContentType == NcaContentType.Program && !(nca.SectionExists(NcaSectionType.Data) && nca.Header.GetFsHeader(dataIndex).IsPatchSection()))
+                                if (Path.GetExtension(fileEntry.FullPath).ToLower() == ".nca")
                                 {
-                                    hasMainNca = true;
+                                    using UniqueRef<IFile> ncaFile = new();
 
-                                    break;
+                                    pfs.OpenFile(ref ncaFile.Ref, fileEntry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                                    Nca nca = new(SwitchDevice.VirtualFileSystem.KeySet, ncaFile.Get.AsStorage());
+                                    int dataIndex = Nca.GetSectionIndexFromType(NcaSectionType.Data, NcaContentType.Program);
+
+                                    // Some main NCAs don't have a data partition, so check if the partition exists before opening it
+                                    if (nca.Header.ContentType == NcaContentType.Program && !(nca.SectionExists(NcaSectionType.Data) && nca.Header.GetFsHeader(dataIndex).IsPatchSection()))
+                                    {
+                                        hasMainNca = true;
+
+                                        break;
+                                    }
+                                }
+                                else if (Path.GetFileNameWithoutExtension(fileEntry.FullPath) == "main")
+                                {
+                                    isExeFs = true;
                                 }
                             }
-                            else if (Path.GetFileNameWithoutExtension(fileEntry.FullPath) == "main")
+
+                            if (!hasMainNca && !isExeFs)
                             {
-                                isExeFs = true;
+                                return null;
                             }
                         }
 
-                        if (!hasMainNca && !isExeFs)
+                        if (isExeFs)
                         {
-                            return null;
-                        }
-                    }
+                            using UniqueRef<IFile> npdmFile = new();
 
-                    if (isExeFs)
-                    {
-                        using UniqueRef<IFile> npdmFile = new();
+                            Result result = pfs.OpenFile(ref npdmFile.Ref, "/main.npdm".ToU8Span(), OpenMode.Read);
 
-                        Result result = pfs.OpenFile(ref npdmFile.Ref, "/main.npdm".ToU8Span(), OpenMode.Read);
-
-                        if (ResultFs.PathNotFound.Includes(result))
-                        {
-                            Npdm npdm = new(npdmFile.Get.AsStream());
-
-                            gameInfo.TitleName = npdm.TitleName;
-                            gameInfo.TitleId = npdm.Aci0.TitleId.ToString("x16");
-                        }
-                    }
-                    else
-                    {
-                        GetControlFsAndTitleId(pfs, out IFileSystem? controlFs, out string? id);
-
-                        gameInfo.TitleId = id;
-
-                        if (controlFs == null)
-                        {
-                            Logger.Error?.Print(LogClass.Application, $"No control FS was returned. Unable to process game any further: {gameInfo.TitleName}");
-                            return null;
-                        }
-
-                        // Check if there is an update available.
-                        if (IsUpdateApplied(gameInfo.TitleId, out IFileSystem? updatedControlFs))
-                        {
-                            // Replace the original ControlFs by the updated one.
-                            controlFs = updatedControlFs;
-                        }
-
-                        ReadControlData(controlFs, controlHolder.ByteSpan);
-
-                        GetGameInformation(ref controlHolder.Value, out gameInfo.TitleName, out _, out gameInfo.Developer, out gameInfo.Version);
-
-                        // Read the icon from the ControlFS and store it as a byte array
-                        try
-                        {
-                            using UniqueRef<IFile> icon = new();
-
-                            controlFs?.OpenFile(ref icon.Ref, $"/icon_{TitleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
-
-                            using MemoryStream stream = new();
-
-                            icon.Get.AsStream().CopyTo(stream);
-                            gameInfo.Icon = stream.ToArray();
-                        }
-                        catch (HorizonResultException)
-                        {
-                            foreach (DirectoryEntryEx entry in controlFs.EnumerateEntries("/", "*"))
+                            if (ResultFs.PathNotFound.Includes(result))
                             {
-                                if (entry.Name == "control.nacp")
-                                {
-                                    continue;
-                                }
+                                Npdm npdm = new(npdmFile.Get.AsStream());
 
-                                using var icon = new UniqueRef<IFile>();
+                                gameInfo.TitleName = npdm.TitleName;
+                                gameInfo.TitleId = npdm.Aci0.TitleId.ToString("x16");
+                            }
+                        }
+                        else
+                        {
+                            GetControlFsAndTitleId(pfs, out IFileSystem? controlFs, out string? id);
 
-                                controlFs?.OpenFile(ref icon.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+                            gameInfo.TitleId = id;
+
+                            if (controlFs == null)
+                            {
+                                Logger.Error?.Print(LogClass.Application, $"No control FS was returned. Unable to process game any further: {gameInfo.TitleName}");
+                                return null;
+                            }
+
+                            // Check if there is an update available.
+                            if (IsUpdateApplied(gameInfo.TitleId, out IFileSystem? updatedControlFs))
+                            {
+                                // Replace the original ControlFs by the updated one.
+                                controlFs = updatedControlFs;
+                            }
+
+                            ReadControlData(controlFs, controlHolder.ByteSpan);
+
+                            GetGameInformation(ref controlHolder.Value, out gameInfo.TitleName, out _, out gameInfo.Developer, out gameInfo.Version);
+
+                            // Read the icon from the ControlFS and store it as a byte array
+                            try
+                            {
+                                using UniqueRef<IFile> icon = new();
+
+                                controlFs?.OpenFile(ref icon.Ref, $"/icon_{TitleLanguage}.dat".ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
                                 using MemoryStream stream = new();
 
                                 icon.Get.AsStream().CopyTo(stream);
                                 gameInfo.Icon = stream.ToArray();
-
-                                if (gameInfo.Icon != null)
+                            }
+                            catch (HorizonResultException)
+                            {
+                                foreach (DirectoryEntryEx entry in controlFs.EnumerateEntries("/", "*"))
                                 {
-                                    break;
+                                    if (entry.Name == "control.nacp")
+                                    {
+                                        continue;
+                                    }
+
+                                    using var icon = new UniqueRef<IFile>();
+
+                                    controlFs?.OpenFile(ref icon.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+
+                                    using MemoryStream stream = new();
+
+                                    icon.Get.AsStream().CopyTo(stream);
+                                    gameInfo.Icon = stream.ToArray();
+
+                                    if (gameInfo.Icon != null)
+                                    {
+                                        break;
+                                    }
                                 }
+
+                            }
+                        }
+                    }
+                    else if (extension == "nro")
+                    {
+                        BinaryReader reader = new(gameStream);
+
+                        byte[] Read(long position, int size)
+                        {
+                            gameStream.Seek(position, SeekOrigin.Begin);
+
+                            return reader.ReadBytes(size);
+                        }
+
+                        gameStream.Seek(24, SeekOrigin.Begin);
+
+                        int assetOffset = reader.ReadInt32();
+
+                        if (Encoding.ASCII.GetString(Read(assetOffset, 4)) == "ASET")
+                        {
+                            byte[] iconSectionInfo = Read(assetOffset + 8, 0x10);
+
+                            long iconOffset = BitConverter.ToInt64(iconSectionInfo, 0);
+                            long iconSize = BitConverter.ToInt64(iconSectionInfo, 8);
+
+                            ulong nacpOffset = reader.ReadUInt64();
+                            ulong nacpSize = reader.ReadUInt64();
+
+                            // Reads and stores game icon as byte array
+                            if (iconSize > 0)
+                            {
+                                gameInfo.Icon = Read(assetOffset + iconOffset, (int)iconSize);
                             }
 
+                            // Read the NACP data
+                            Read(assetOffset + (int)nacpOffset, (int)nacpSize).AsSpan().CopyTo(controlHolder.ByteSpan);
+
+                            GetGameInformation(ref controlHolder.Value, out gameInfo.TitleName, out _, out gameInfo.Developer, out gameInfo.Version);
                         }
                     }
                 }
