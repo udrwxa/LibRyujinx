@@ -49,6 +49,8 @@ class RyujinxNative {
     external fun inputSetButtonReleased(button: Int, id: Int)
     external fun inputConnectGamepad(index: Int): Int
     external fun inputSetStickAxis(stick: Int, x: Float, y: Float, id: Int)
+    external fun inputSetAccelerometerData(x: Float, y: Float, z: Float, id: Int)
+    external fun inputSetGyroData(x: Float, y: Float, z: Float, id: Int)
     external fun graphicsSetSurface(surface: Long, window: Long)
     external fun deviceCloseEmulation()
     external fun deviceSignalEmulationClose()
