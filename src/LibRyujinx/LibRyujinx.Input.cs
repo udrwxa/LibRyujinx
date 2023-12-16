@@ -1,4 +1,4 @@
-﻿using DiscordRPC;
+using DiscordRPC;
 using Ryujinx.Common.Configuration;
 using Ryujinx.Common.Configuration.Hid;
 using Ryujinx.Common.Configuration.Hid.Controller;
@@ -81,6 +81,16 @@ namespace LibRyujinx
         public static void SetButtonReleased(GamepadButtonInputId button, int id)
         {
             _gamepadDriver?.SetButtonReleased(button, id);
+        }
+
+        public static void SetAccelerometerData(Vector3 accel, int id)
+        {
+            _gamepadDriver?.SetAccelerometerData(accel, id);
+        }
+
+        public static void SetGryoData(Vector3 gyro, int id)
+        {
+            _gamepadDriver?.SetGryoData(gyro, id);
         }
 
         public static void SetStickAxis(StickInputId stick, Vector2 axes, int deviceId)
@@ -460,6 +470,22 @@ namespace LibRyujinx
                 gamePad.ButtonInputs[(int)button] = false;
             }
         }
+
+        public void SetAccelerometerData(Vector3 accel, int deviceId)
+        {
+            if (_gamePads.TryGetValue(deviceId, out var gamePad))
+            {
+                gamePad.Accelerometer = accel;
+            }
+        }
+
+        public void SetGryoData(Vector3 gyro, int deviceId)
+        {
+            if (_gamePads.TryGetValue(deviceId, out var gamePad))
+            {
+                gamePad.Gyro = gyro;
+            }
+        }
     }
 
     public class VirtualGamepad : IGamepad
@@ -481,7 +507,7 @@ namespace LibRyujinx
 
         public void Dispose() { }
 
-        public GamepadFeaturesFlag Features { get; }
+        public GamepadFeaturesFlag Features { get; } = GamepadFeaturesFlag.Motion;
         public string Id { get; }
 
         internal readonly int IdInt;
@@ -490,6 +516,8 @@ namespace LibRyujinx
         public bool IsConnected { get; }
         public Vector2[] StickInputs { get => _stickInputs; set => _stickInputs = value; }
         public bool[] ButtonInputs { get => _buttonInputs; set => _buttonInputs = value; }
+        public Vector3 Accelerometer { get; internal set; }
+        public Vector3 Gyro { get; internal set; }
 
         public bool IsPressed(GamepadButtonInputId inputId)
         {
@@ -505,7 +533,16 @@ namespace LibRyujinx
 
         public Vector3 GetMotionData(MotionInputId inputId)
         {
+            if (inputId == MotionInputId.Accelerometer)
+                return Accelerometer;
+            else if (inputId == MotionInputId.Gyroscope)
+                return RadToDegree(Gyro);
             return new Vector3();
+        }
+
+        private static Vector3 RadToDegree(Vector3 rad)
+        {
+            return rad * (180 / MathF.PI);
         }
 
         public void SetTriggerThreshold(float triggerThreshold)

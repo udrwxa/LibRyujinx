@@ -28,6 +28,7 @@ import kotlin.math.abs
 class MainActivity : BaseActivity() {
     private var physicalControllerManager: PhysicalControllerManager =
         PhysicalControllerManager(this)
+    private lateinit var motionSensorManager: MotionSensorManager
     private var _isInit: Boolean = false
     var isGameRunning = false
     var storageHelper: SimpleStorageHelper? = null
@@ -80,6 +81,8 @@ class MainActivity : BaseActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        motionSensorManager = MotionSensorManager(this)
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
 
         if(
@@ -97,6 +100,7 @@ class MainActivity : BaseActivity() {
 
         mainViewModel = MainViewModel(this)
         mainViewModel!!.physicalControllerManager = physicalControllerManager
+        mainViewModel!!.motionSensorManager = motionSensorManager
 
         mainViewModel?.apply {
             setContent {
@@ -194,6 +198,7 @@ class MainActivity : BaseActivity() {
             setFullScreen(true)
             NativeHelpers.instance.setTurboMode(true)
             force60HzRefreshRate(true)
+            motionSensorManager.register()
         }
     }
 
@@ -204,5 +209,7 @@ class MainActivity : BaseActivity() {
             NativeHelpers.instance.setTurboMode(false)
             force60HzRefreshRate(false)
         }
+
+        motionSensorManager.unregister()
     }
 }

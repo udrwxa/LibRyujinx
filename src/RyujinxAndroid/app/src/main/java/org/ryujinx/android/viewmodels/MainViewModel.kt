@@ -14,6 +14,7 @@ import org.ryujinx.android.GameHost
 import org.ryujinx.android.GraphicsConfiguration
 import org.ryujinx.android.Logging
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.MotionSensorManager
 import org.ryujinx.android.NativeGraphicsInterop
 import org.ryujinx.android.NativeHelpers
 import org.ryujinx.android.PerformanceManager
@@ -26,6 +27,7 @@ import java.io.File
 @SuppressLint("WrongConstant")
 class MainViewModel(val activity: MainActivity) {
     var physicalControllerManager: PhysicalControllerManager? = null
+    var motionSensorManager: MotionSensorManager? = null
     var gameModel: GameModel? = null
     var controller: GameController? = null
     var performanceManager: PerformanceManager? = null
@@ -62,6 +64,9 @@ class MainViewModel(val activity: MainActivity) {
         RyujinxNative.instance.deviceSignalEmulationClose()
         gameHost?.close()
         RyujinxNative.instance.deviceCloseEmulation()
+        motionSensorManager?.unregister()
+        physicalControllerManager?.disconnect()
+        motionSensorManager?.setControllerId(-1)
     }
 
     fun loadGame(game:GameModel) : Boolean {
@@ -354,6 +359,7 @@ class MainViewModel(val activity: MainActivity) {
         activity.setFullScreen(true)
         navController?.navigate("game")
         activity.isGameRunning = true
+        motionSensorManager?.register()
     }
 
     fun setProgressStates(

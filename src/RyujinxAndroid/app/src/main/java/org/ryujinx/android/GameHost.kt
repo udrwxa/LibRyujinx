@@ -96,7 +96,8 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
             mainViewModel.controller?.connect()
         }
 
-        mainViewModel.physicalControllerManager?.connect()
+        val id = mainViewModel.physicalControllerManager?.connect()
+        mainViewModel.motionSensorManager?.setControllerId(id ?: -1)
 
         _nativeRyujinx.graphicsRendererSetSize(
             surfaceHolder.surfaceFrame.width(),

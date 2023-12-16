@@ -41,8 +41,13 @@ class PhysicalControllerManager(val activity: MainActivity) {
         }
     }
 
-    fun connect(){
+    fun connect() : Int {
         controllerId = ryujinxNative.inputConnectGamepad(0)
+        return controllerId
+    }
+
+    fun disconnect(){
+        controllerId = -1
     }
 
     private fun getGamePadButtonInputId(keycode: Int): GamePadButtonInputId {
