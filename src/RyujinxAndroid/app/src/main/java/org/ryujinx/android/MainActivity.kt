@@ -144,7 +144,7 @@ class MainActivity : BaseActivity() {
 
     fun setFullScreen(fullscreen: Boolean) {
         requestedOrientation =
-            if (fullscreen) ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+            if (fullscreen) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_FULL_USER
 
         val insets = WindowCompat.getInsetsController(window, window.decorView)
 
