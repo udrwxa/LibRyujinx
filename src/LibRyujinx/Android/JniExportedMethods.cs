@@ -237,7 +237,7 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceLoadDescriptor")]
-        public static JBoolean JniLoadApplicationNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JBoolean isXci)
+        public static JBoolean JniLoadApplicationNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JInt type)
         {
             Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
             if (SwitchDevice?.EmulationContext == null)
@@ -247,7 +247,7 @@ namespace LibRyujinx
 
             var stream = OpenFile(descriptor);
 
-            return LoadApplication(stream, isXci);
+            return LoadApplication(stream, (FileType)(int)type);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsInitialize")]
@@ -429,12 +429,12 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetGameInfo")]
-        public static JObjectLocalRef JniGetGameInfo(JEnvRef jEnv, JObjectLocalRef jObj, JInt fileDescriptor, JBoolean isXci)
+        public static JObjectLocalRef JniGetGameInfo(JEnvRef jEnv, JObjectLocalRef jObj, JInt fileDescriptor, JLong extension)
         {
             Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
             using var stream = OpenFile(fileDescriptor);
-
-            var info = GetGameInfo(stream, isXci);
+            var ext = GetStoredString(extension);
+            var info = GetGameInfo(stream, ext.ToLower());
             return GetInfo(jEnv, info);
         }
 

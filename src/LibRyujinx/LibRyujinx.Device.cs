@@ -1,4 +1,4 @@
-﻿using ARMeilleure.Translation;
+using ARMeilleure.Translation;
 using LibHac.Ncm;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Logging;
@@ -66,10 +66,16 @@ namespace LibRyujinx
             return LoadApplication(path);
         }
 
-        public static bool LoadApplication(Stream stream, bool isXci)
+        public static bool LoadApplication(Stream stream, FileType type)
         {
             var emulationContext = SwitchDevice.EmulationContext;
-            return (isXci ? emulationContext?.LoadXci(stream) : emulationContext.LoadNsp(stream)) ?? false;
+            return type switch
+            {
+                FileType.None => false,
+                FileType.Nsp => emulationContext?.LoadNsp(stream) ?? false,
+                FileType.Xci => emulationContext?.LoadXci(stream) ?? false,
+                FileType.Nro => emulationContext?.LoadProgram(stream, true, "") ?? false,
+            };
         }
 
         public static bool LaunchMiiEditApplet()
@@ -220,6 +226,14 @@ namespace LibRyujinx
                 SwitchDevice?.DisposeContext();
                 Renderer = null;
             }
+        }
+
+        public enum FileType
+        {
+            None,
+            Nsp,
+            Xci,
+            Nro
         }
     }
 }

@@ -72,7 +72,7 @@ class HomeViewModel(
                 loadedCache.clear()
                 val files = mutableListOf<GameModel>()
                 for (file in folder.search(false, DocumentFileType.FILE)) {
-                    if (file.extension == "xci" || file.extension == "nsp")
+                    if (file.extension == "xci" || file.extension == "nsp" || file.extension == "nro")
                         activity.let {
                             val item = GameModel(file, it)
 
