@@ -2,6 +2,7 @@ using ARMeilleure.Translation;
 using LibHac.Ncm;
 using LibHac.Tools.FsSystem.NcaUtils;
 using Ryujinx.Common.Logging;
+using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.Input.HLE;
 using Silk.NET.Vulkan;
@@ -64,6 +65,16 @@ namespace LibRyujinx
             var path = Marshal.PtrToStringAnsi(pathPtr);
 
             return LoadApplication(path);
+        }
+
+        public static void InstallFirmware(Stream stream, bool isXci)
+        {
+            SwitchDevice?.ContentManager.InstallFirmware(stream, isXci);
+        }
+
+        public static SystemVersion? VerifyFirmware(Stream stream, bool isXci)
+        {
+            return SwitchDevice?.ContentManager?.VerifyFirmwarePackage(stream, isXci) ?? null;
         }
 
         public static bool LoadApplication(Stream stream, FileType type)

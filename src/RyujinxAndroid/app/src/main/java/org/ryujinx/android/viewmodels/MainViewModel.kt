@@ -35,6 +35,7 @@ class MainViewModel(val activity: MainActivity) {
     var isMiiEditorLaunched = false
     val userViewModel = UserViewModel()
     val logging = Logging(this)
+    var firmwareVersion = ""
     private var gameTimeState: MutableState<Double>? = null
     private var gameFpsState: MutableState<Double>? = null
     private var fifoState: MutableState<Double>? = null
@@ -67,6 +68,13 @@ class MainViewModel(val activity: MainActivity) {
         motionSensorManager?.unregister()
         physicalControllerManager?.disconnect()
         motionSensorManager?.setControllerId(-1)
+    }
+
+    fun refreshFirmwareVersion(){
+        var handle = RyujinxNative.instance.deviceGetInstalledFirmwareVersion()
+        if(handle != -1L) {
+            firmwareVersion = NativeHelpers.instance.getStringJava(handle)
+        }
     }
 
     fun loadGame(game:GameModel) : Boolean {
@@ -177,8 +185,6 @@ class MainViewModel(val activity: MainActivity) {
 
         return true
     }
-
-
 
     fun loadMiiEditor() : Boolean {
         val nativeRyujinx = RyujinxNative.instance
