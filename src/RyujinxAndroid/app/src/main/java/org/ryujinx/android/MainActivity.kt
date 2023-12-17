@@ -102,6 +102,8 @@ class MainActivity : BaseActivity() {
         mainViewModel!!.physicalControllerManager = physicalControllerManager
         mainViewModel!!.motionSensorManager = motionSensorManager
 
+        mainViewModel!!.refreshFirmwareVersion()
+
         mainViewModel?.apply {
             setContent {
                 RyujinxAndroidTheme {

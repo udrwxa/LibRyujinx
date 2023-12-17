@@ -60,6 +60,7 @@ import com.anggrayudi.storage.file.extension
 import org.ryujinx.android.Helpers
 import org.ryujinx.android.MainActivity
 import org.ryujinx.android.providers.DocumentProvider
+import org.ryujinx.android.viewmodels.FirmwareInstallState
 import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.SettingsViewModel
 import org.ryujinx.android.viewmodels.VulkanDriverViewModel
@@ -106,6 +107,15 @@ class SettingViews {
             }
             val useVirtualController = remember {
                 mutableStateOf(true)
+            }
+            val showFirwmareDialog = remember {
+                mutableStateOf(false)
+            }
+            val firmwareInstallState = remember {
+                mutableStateOf(FirmwareInstallState.None)
+            }
+            val firmwareVersion = remember {
+                mutableStateOf(mainViewModel.firmwareVersion)
             }
             val isGrid = remember { mutableStateOf(true) }
 
@@ -211,36 +221,186 @@ class SettingViews {
                                     Text(text = "Choose Folder")
                                 }
                             }
-                            Button(onClick = {
-                                fun createIntent(action: String) : Intent{
-                                    val intent = Intent(action)
-                                    intent.addCategory(Intent.CATEGORY_DEFAULT)
-                                    intent.data = DocumentsContract.buildRootUri(DocumentProvider.AUTHORITY, DocumentProvider.ROOT_ID)
-                                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                                    return intent
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "System Firmware",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Text(
+                                    text = firmwareVersion.value,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Button(onClick = {
+                                    fun createIntent(action: String): Intent {
+                                        val intent = Intent(action)
+                                        intent.addCategory(Intent.CATEGORY_DEFAULT)
+                                        intent.data = DocumentsContract.buildRootUri(
+                                            DocumentProvider.AUTHORITY,
+                                            DocumentProvider.ROOT_ID
+                                        )
+                                        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                                        return intent
+                                    }
+                                    try {
+                                        mainViewModel.activity.startActivity(createIntent(Intent.ACTION_VIEW))
+                                        return@Button
+                                    } catch (_: ActivityNotFoundException) {
+                                    }
+                                    try {
+                                        mainViewModel.activity.startActivity(createIntent("android.provider.action.BROWSE"))
+                                        return@Button
+                                    } catch (_: ActivityNotFoundException) {
+                                    }
+                                    try {
+                                        mainViewModel.activity.startActivity(createIntent("com.google.android.documentsui"))
+                                        return@Button
+                                    } catch (_: ActivityNotFoundException) {
+                                    }
+                                    try {
+                                        mainViewModel.activity.startActivity(createIntent("com.android.documentsui"))
+                                        return@Button
+                                    } catch (_: ActivityNotFoundException) {
+                                    }
+                                }) {
+                                    Text(text = "Open App Folder")
                                 }
-                                try {
-                                    mainViewModel.activity.startActivity(createIntent(Intent.ACTION_VIEW))
-                                    return@Button
+
+                                Button(onClick = {
+                                    settingsViewModel.importProdKeys()
+                                }) {
+                                    Text(text = "Import prod Keys")
                                 }
-                                catch (_: ActivityNotFoundException){}
-                                try {
-                                    mainViewModel.activity.startActivity(createIntent("android.provider.action.BROWSE"))
-                                    return@Button
+
+                                Button(onClick = {
+                                    showFirwmareDialog.value = true
+                                }) {
+                                    Text(text = "Install Firmware")
                                 }
-                                catch (_: ActivityNotFoundException){}
-                                try {
-                                    mainViewModel.activity.startActivity(createIntent("com.google.android.documentsui"))
-                                    return@Button
+                            }
+                        }
+                    }
+
+                    if(showFirwmareDialog.value) {
+                        AlertDialog(onDismissRequest = {
+                            if(firmwareInstallState.value != FirmwareInstallState.Install) {
+                                showFirwmareDialog.value = false
+                                settingsViewModel.clearFirmwareSelection(firmwareInstallState)
+                            }
+                        }) {
+                            Card(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxWidth()
+                                        .align(Alignment.CenterHorizontally),
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    if (firmwareInstallState.value == FirmwareInstallState.None) {
+                                        Text(text = "Select a zip or XCI file to install from.")
+                                        Row(
+                                            horizontalArrangement = Arrangement.End,
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(top = 4.dp)
+                                        ) {
+                                            Button(onClick = {
+                                                settingsViewModel.selectFirmware(
+                                                    firmwareInstallState
+                                                )
+                                            }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                                Text(text = "Select File")
+                                            }
+                                            Button(onClick = {
+                                                showFirwmareDialog.value = false
+                                                settingsViewModel.clearFirmwareSelection(
+                                                    firmwareInstallState
+                                                )
+                                            }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                                Text(text = "Cancel")
+                                            }
+                                        }
+                                    } else if (firmwareInstallState.value == FirmwareInstallState.Query) {
+                                        Text(text = "Firmware ${settingsViewModel.selectedFirmwareVersion} will be installed. Do you want to continue?")
+                                        Row(
+                                            horizontalArrangement = Arrangement.End,
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(top = 4.dp)
+                                        ) {
+                                            Button(onClick = {
+                                                settingsViewModel.installFirmware(
+                                                    firmwareInstallState
+                                                )
+
+                                                if(firmwareInstallState.value == FirmwareInstallState.None){
+                                                    showFirwmareDialog.value = false
+                                                    settingsViewModel.clearFirmwareSelection(firmwareInstallState)
+                                                }
+                                            }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                                Text(text = "Yes")
+                                            }
+                                            Button(onClick = {
+                                                showFirwmareDialog.value = false
+                                                settingsViewModel.clearFirmwareSelection(
+                                                    firmwareInstallState
+                                                )
+                                            }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                                Text(text = "No")
+                                            }
+                                        }
+                                    } else if (firmwareInstallState.value == FirmwareInstallState.Install) {
+                                        Text(text = "Installing Firmware ${settingsViewModel.selectedFirmwareVersion}...")
+                                        LinearProgressIndicator(modifier = Modifier
+                                            .padding(top = 4.dp))
+                                    } else if (firmwareInstallState.value == FirmwareInstallState.Verifying) {
+                                        Text(text = "Verifying selected file...")
+                                        LinearProgressIndicator(modifier = Modifier
+                                            .fillMaxWidth()
+                                            )
+                                    }
+                                    else if (firmwareInstallState.value == FirmwareInstallState.Done) {
+                                        Text(text = "Installed Firmware ${settingsViewModel.selectedFirmwareVersion}")
+                                        firmwareVersion.value = mainViewModel.firmwareVersion
+                                    }
+                                    else if(firmwareInstallState.value == FirmwareInstallState.Cancelled){
+                                        val file = settingsViewModel.selectedFirmwareFile
+                                        if(file != null){
+                                            if(file.extension == "xci" || file.extension == "zip"){
+                                                if(settingsViewModel.selectedFirmwareVersion.isEmpty()) {
+                                                    Text(text = "Unable to find version in selected file")
+                                                }
+                                                else {
+                                                    Text(text = "Unknown Error has occurred. Please check logs")
+                                                }
+                                            }
+                                            else {
+                                                Text(text = "File type is not supported")
+                                            }
+                                        }
+                                        else {
+                                            Text(text = "File type is not supported")
+                                        }
+                                    }
                                 }
-                                catch (_: ActivityNotFoundException){}
-                                try {
-                                    mainViewModel.activity.startActivity(createIntent("com.android.documentsui"))
-                                    return@Button
-                                }
-                                catch (_: ActivityNotFoundException){}
-                            }) {
-                                Text(text = "Open App Folder")
                             }
                         }
                     }

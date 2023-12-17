@@ -250,6 +250,59 @@ namespace LibRyujinx
             return LoadApplication(stream, (FileType)(int)type);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceVerifyFirmware")]
+        public static JLong JniVerifyFirmware(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JBoolean isXci)
+        {
+            Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
+
+            var stream = OpenFile(descriptor);
+
+            long stringHandle = -1;
+
+            try
+            {
+                var version = VerifyFirmware(stream, isXci);
+
+                if (version != null)
+                {
+                    stringHandle = storeString(version.VersionString);
+                }
+            }
+            catch(Exception _)
+            {
+
+            }
+
+            return stringHandle;
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceInstallFirmware")]
+        public static void JniInstallFirmware(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JBoolean isXci)
+        {
+            Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
+
+            var stream = OpenFile(descriptor);
+
+            InstallFirmware(stream, isXci);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceGetInstalledFirmwareVersion")]
+        public static JLong JniGetInstalledFirmwareVersion(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
+
+            var version = SwitchDevice?.ContentManager.GetCurrentFirmwareVersion();
+
+            long stringHandle = -1;
+
+            if (version != null)
+            {
+                stringHandle = storeString(version.VersionString);
+            }
+
+            return stringHandle;
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_graphicsInitialize")]
         public static JBoolean JniInitializeGraphicsNative(JEnvRef jEnv, JObjectLocalRef jObj, JObjectLocalRef graphicObject)
         {
