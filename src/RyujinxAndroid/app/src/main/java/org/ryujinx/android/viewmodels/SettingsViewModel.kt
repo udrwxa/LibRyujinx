@@ -5,30 +5,40 @@ import androidx.compose.runtime.MutableState
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.NavHostController
 import androidx.preference.PreferenceManager
+import com.anggrayudi.storage.callback.FileCallback
 import com.anggrayudi.storage.file.FileFullPath
+import com.anggrayudi.storage.file.copyFileTo
+import com.anggrayudi.storage.file.extension
 import com.anggrayudi.storage.file.getAbsolutePath
 import org.ryujinx.android.LogLevel
 import org.ryujinx.android.MainActivity
+import org.ryujinx.android.NativeHelpers
 import org.ryujinx.android.RyujinxNative
+import java.io.File
+import kotlin.concurrent.thread
 
 class SettingsViewModel(var navController: NavHostController, val activity: MainActivity) {
-    private var previousCallback: ((requestCode: Int, folder: DocumentFile) -> Unit)?
+    var selectedFirmwareVersion: String = ""
+    private var previousFileCallback: ((requestCode: Int, files: List<DocumentFile>) -> Unit)?
+    private var previousFolderCallback: ((requestCode: Int, folder: DocumentFile) -> Unit)?
     private var sharedPref: SharedPreferences
+    var selectedFirmwareFile: DocumentFile? = null
 
     init {
         sharedPref = getPreferences()
-        previousCallback = activity.storageHelper!!.onFolderSelected
+        previousFolderCallback = activity.storageHelper!!.onFolderSelected
+        previousFileCallback = activity.storageHelper!!.onFileSelected
         activity.storageHelper!!.onFolderSelected = { requestCode, folder ->
             run {
-                val p = folder.getAbsolutePath(activity!!)
-                val editor = sharedPref?.edit()
+                val p = folder.getAbsolutePath(activity)
+                val editor = sharedPref.edit()
                 editor?.putString("gameFolder", p)
                 editor?.apply()
             }
         }
     }
 
-    private fun getPreferences() : SharedPreferences {
+    private fun getPreferences(): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(activity)
     }
 
@@ -52,8 +62,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableGuestLogs: MutableState<Boolean>,
         enableAccessLogs: MutableState<Boolean>,
         enableTraceLogs: MutableState<Boolean>
-    )
-    {
+    ) {
 
         isHostMapped.value = sharedPref.getBoolean("isHostMapped", true)
         useNce.value = sharedPref.getBoolean("useNce", true)
@@ -62,7 +71,8 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enablePtc.value = sharedPref.getBoolean("enablePtc", true)
         ignoreMissingServices.value = sharedPref.getBoolean("ignoreMissingServices", false)
         enableShaderCache.value = sharedPref.getBoolean("enableShaderCache", true)
-        enableTextureRecompression.value = sharedPref.getBoolean("enableTextureRecompression", false)
+        enableTextureRecompression.value =
+            sharedPref.getBoolean("enableTextureRecompression", false)
         resScale.value = sharedPref.getFloat("resScale", 1f)
         useVirtualController.value = sharedPref.getBoolean("useVirtualController", true)
         isGrid.value = sharedPref.getBoolean("isGrid", true)
@@ -97,7 +107,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         enableGuestLogs: MutableState<Boolean>,
         enableAccessLogs: MutableState<Boolean>,
         enableTraceLogs: MutableState<Boolean>
-    ){
+    ) {
         val editor = sharedPref.edit()
 
         editor.putBoolean("isHostMapped", isHostMapped.value)
@@ -123,7 +133,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putBoolean("enableTraceLogs", enableTraceLogs.value)
 
         editor.apply()
-        activity.storageHelper!!.onFolderSelected = previousCallback
+        activity.storageHelper!!.onFolderSelected = previousFolderCallback
 
         RyujinxNative.instance.loggingSetEnabled(LogLevel.Debug.ordinal, enableDebugLogs.value)
         RyujinxNative.instance.loggingSetEnabled(LogLevel.Info.ordinal, enableInfoLogs.value)
@@ -135,17 +145,122 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         RyujinxNative.instance.loggingSetEnabled(LogLevel.Trace.ordinal, enableTraceLogs.value)
     }
 
-
-
     fun openGameFolder() {
         val path = sharedPref?.getString("gameFolder", "") ?: ""
 
         if (path.isEmpty())
-            activity?.storageHelper?.storage?.openFolderPicker()
+            activity.storageHelper?.storage?.openFolderPicker()
         else
-            activity?.storageHelper?.storage?.openFolderPicker(
+            activity.storageHelper?.storage?.openFolderPicker(
                 activity.storageHelper!!.storage.requestCodeFolderPicker,
                 FileFullPath(activity, path)
             )
     }
+
+    fun importProdKeys() {
+        activity.storageHelper!!.onFileSelected = { requestCode, files ->
+            run {
+                activity.storageHelper!!.onFileSelected = previousFileCallback
+                val file = files.firstOrNull()
+                file?.apply {
+                    if (name == "prod.keys") {
+                        val outputFile = File(MainActivity.AppPath + "/system");
+                        outputFile.delete()
+
+                        thread {
+                            file.copyFileTo(
+                                activity,
+                                outputFile,
+                                callback = object : FileCallback() {
+                                    override fun onCompleted(result: Any) {
+                                        super.onCompleted(result)
+                                    }
+                                })
+                        }
+                    }
+                }
+            }
+        }
+        activity.storageHelper?.storage?.openFilePicker()
+    }
+
+    fun selectFirmware(installState: MutableState<FirmwareInstallState>) {
+        if (installState.value != FirmwareInstallState.None)
+            return
+        activity.storageHelper!!.onFileSelected = { _, files ->
+            run {
+                activity.storageHelper!!.onFileSelected = previousFileCallback
+                val file = files.firstOrNull()
+                file?.apply {
+                    if (extension == "xci" || extension == "zip") {
+                        installState.value = FirmwareInstallState.Verifying
+                        thread {
+                            val descriptor =
+                                activity.contentResolver.openFileDescriptor(file.uri, "rw")
+                            descriptor?.use { d ->
+                                val version = RyujinxNative.instance.deviceVerifyFirmware(
+                                    d.fd,
+                                    extension == "xci"
+                                )
+                                selectedFirmwareFile = file
+                                if (version != -1L) {
+                                    selectedFirmwareVersion =
+                                        NativeHelpers.instance.getStringJava(version)
+                                    installState.value = FirmwareInstallState.Query
+                                } else {
+                                    installState.value = FirmwareInstallState.Cancelled
+                                }
+                            }
+                        }
+                    } else {
+                        installState.value = FirmwareInstallState.Cancelled
+                    }
+                }
+            }
+        }
+        activity.storageHelper?.storage?.openFilePicker()
+    }
+
+    fun installFirmware(installState: MutableState<FirmwareInstallState>) {
+        if (installState.value != FirmwareInstallState.Query)
+            return
+        if (selectedFirmwareFile == null) {
+            installState.value = FirmwareInstallState.None
+            return
+        }
+        selectedFirmwareFile?.apply {
+            val descriptor =
+                activity.contentResolver.openFileDescriptor(uri, "rw")
+            descriptor?.use { d ->
+                installState.value = FirmwareInstallState.Install
+                thread {
+                    try {
+                        RyujinxNative.instance.deviceInstallFirmware(
+                            d.fd,
+                            extension == "xci"
+                        )
+                    } finally {
+                        MainActivity.mainViewModel?.refreshFirmwareVersion()
+                        installState.value = FirmwareInstallState.Done
+                    }
+                }
+            }
+        }
+    }
+
+    fun clearFirmwareSelection(installState: MutableState<FirmwareInstallState>){
+        selectedFirmwareFile = null
+        selectedFirmwareVersion = ""
+        installState.value = FirmwareInstallState.None
+    }
+}
+
+
+enum class FirmwareInstallState{
+    None,
+    Cancelled,
+    Verifying,
+    Query,
+    Install,
+    Done
 }
