@@ -8,7 +8,6 @@ import android.view.SurfaceView
 import androidx.compose.runtime.MutableState
 import org.ryujinx.android.viewmodels.GameModel
 import org.ryujinx.android.viewmodels.MainViewModel
-import org.ryujinx.android.viewmodels.QuickSettings
 import kotlin.concurrent.thread
 
 @SuppressLint("ViewConstructor")
@@ -87,14 +86,6 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
         game = if (mainViewModel.isMiiEditorLaunched) null else mainViewModel.gameModel;
 
         _nativeRyujinx.inputInitialize(width, height)
-
-        val settings = QuickSettings(mainViewModel.activity)
-
-        if (!settings.useVirtualController) {
-            mainViewModel.controller?.setVisible(false)
-        } else {
-            mainViewModel.controller?.connect()
-        }
 
         val id = mainViewModel.physicalControllerManager?.connect()
         mainViewModel.motionSensorManager?.setControllerId(id ?: -1)
