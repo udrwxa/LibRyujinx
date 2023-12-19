@@ -95,6 +95,8 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
             surfaceHolder.surfaceFrame.height()
         )
 
+        NativeHelpers.instance.setIsInitialOrientationFlipped(mainViewModel.activity.display?.rotation == 3)
+
         _guestThread = thread(start = true) {
             runGame()
         }

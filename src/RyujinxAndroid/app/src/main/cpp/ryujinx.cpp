@@ -185,6 +185,8 @@ void setProgressInfo(char* info, float progressValue) {
     progress = progressValue;
 }
 
+bool isInitialOrientationFlipped = true;
+
 extern "C"
 void setCurrentTransform(long native_window, int transform){
     if(native_window == 0 || native_window == -1)
@@ -201,10 +203,10 @@ void setCurrentTransform(long native_window, int transform){
             nativeTransform = ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_IDENTITY;
             break;
         case 0x2:
-            nativeTransform = ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_ROTATE_90;
+            nativeTransform =  ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_ROTATE_90;
             break;
         case 0x4:
-            nativeTransform = ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_ROTATE_180;
+            nativeTransform = isInitialOrientationFlipped ? ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_IDENTITY : ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_ROTATE_180;
             break;
         case 0x8:
             nativeTransform = ANativeWindowTransform::ANATIVEWINDOW_TRANSFORM_ROTATE_270;
@@ -336,4 +338,11 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_org_ryujinx_android_NativeHelpers_getStringJava(JNIEnv *env, jobject thiz, jlong id) {
     return createStringFromStdString(env, str_helper.get_stored(id));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_org_ryujinx_android_NativeHelpers_setIsInitialOrientationFlipped(JNIEnv *env, jobject thiz,
+                                                                      jboolean is_flipped) {
+    isInitialOrientationFlipped = is_flipped;
 }
