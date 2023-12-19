@@ -31,4 +31,5 @@ class NativeHelpers {
     external fun getProgressValue() : Float
     external fun storeStringJava(string: String) : Long
     external fun getStringJava(id: Long) : String
+    external fun setIsInitialOrientationFlipped(isFlipped: Boolean)
 }
