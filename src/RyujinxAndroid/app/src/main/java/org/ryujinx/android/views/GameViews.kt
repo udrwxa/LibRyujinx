@@ -173,6 +173,7 @@ class GameViews {
                                     IconButton(modifier = Modifier.padding(4.dp), onClick = {
                                         showMore.value = false
                                         showController.value = !showController.value
+                                        ryujinxNative.inputReleaseTouchPoint()
                                         mainViewModel.controller?.setVisible(showController.value)
                                     }) {
                                         Icon(
