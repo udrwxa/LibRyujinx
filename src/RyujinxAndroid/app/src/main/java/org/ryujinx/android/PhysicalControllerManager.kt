@@ -8,7 +8,7 @@ class PhysicalControllerManager(val activity: MainActivity) {
     private var ryujinxNative: RyujinxNative = RyujinxNative.instance
 
     fun onKeyEvent(event: KeyEvent) : Boolean{
-        if(controllerId != -1) {
+        if(controllerId != -1 && (event.flags and KeyEvent.FLAG_FALLBACK) == 0) {
             val id = getGamePadButtonInputId(event.keyCode)
 
             if(id != GamePadButtonInputId.None) {
