@@ -54,6 +54,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         resScale: MutableState<Float>,
         useVirtualController: MutableState<Boolean>,
         isGrid: MutableState<Boolean>,
+        useSwitchLayout: MutableState<Boolean>,
         enableDebugLogs: MutableState<Boolean>,
         enableStubLogs: MutableState<Boolean>,
         enableInfoLogs: MutableState<Boolean>,
@@ -76,6 +77,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         resScale.value = sharedPref.getFloat("resScale", 1f)
         useVirtualController.value = sharedPref.getBoolean("useVirtualController", true)
         isGrid.value = sharedPref.getBoolean("isGrid", true)
+        useSwitchLayout.value = sharedPref.getBoolean("useSwitchLayout", true)
 
         enableDebugLogs.value = sharedPref.getBoolean("enableDebugLogs", false)
         enableStubLogs.value = sharedPref.getBoolean("enableStubLogs", false)
@@ -99,6 +101,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         resScale: MutableState<Float>,
         useVirtualController: MutableState<Boolean>,
         isGrid: MutableState<Boolean>,
+        useSwitchLayout: MutableState<Boolean>,
         enableDebugLogs: MutableState<Boolean>,
         enableStubLogs: MutableState<Boolean>,
         enableInfoLogs: MutableState<Boolean>,
@@ -121,7 +124,7 @@ class SettingsViewModel(var navController: NavHostController, val activity: Main
         editor.putFloat("resScale", resScale.value)
         editor.putBoolean("useVirtualController", useVirtualController.value)
         editor.putBoolean("isGrid", isGrid.value)
-
+        editor.putBoolean("useSwitchLayout", useSwitchLayout.value)
 
         editor.putBoolean("enableDebugLogs", enableDebugLogs.value)
         editor.putBoolean("enableStubLogs", enableStubLogs.value)
