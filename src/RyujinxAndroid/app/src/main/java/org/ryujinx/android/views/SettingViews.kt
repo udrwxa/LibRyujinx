@@ -120,6 +120,7 @@ class SettingViews {
                 mutableStateOf(mainViewModel.firmwareVersion)
             }
             val isGrid = remember { mutableStateOf(true) }
+            val useSwitchLayout = remember { mutableStateOf(true) }
 
             val enableDebugLogs = remember { mutableStateOf(true) }
             val enableStubLogs = remember { mutableStateOf(true) }
@@ -140,6 +141,7 @@ class SettingViews {
                     resScale,
                     useVirtualController,
                     isGrid,
+                    useSwitchLayout,
                     enableDebugLogs,
                     enableStubLogs,
                     enableInfoLogs,
@@ -171,6 +173,7 @@ class SettingViews {
                                     resScale,
                                     useVirtualController,
                                     isGrid,
+                                    useSwitchLayout,
                                     enableDebugLogs,
                                     enableStubLogs,
                                     enableInfoLogs,
@@ -854,6 +857,21 @@ class SettingViews {
                                     useVirtualController.value = !useVirtualController.value
                                 })
                             }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Use Switch Controller Layout",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = useSwitchLayout.value, onCheckedChange = {
+                                    useSwitchLayout.value = !useSwitchLayout.value
+                                })
+                            }
                         }
                     }
                     ExpandableView(onCardArrowClick = { }, title = "Log") {
@@ -1004,6 +1022,7 @@ class SettingViews {
                         resScale,
                         useVirtualController,
                         isGrid,
+                        useSwitchLayout,
                         enableDebugLogs,
                         enableStubLogs,
                         enableInfoLogs,

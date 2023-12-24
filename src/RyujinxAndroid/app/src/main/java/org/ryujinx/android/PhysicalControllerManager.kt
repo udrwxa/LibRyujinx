@@ -2,6 +2,7 @@ package org.ryujinx.android
 
 import android.view.KeyEvent
 import android.view.MotionEvent
+import org.ryujinx.android.viewmodels.QuickSettings
 
 class PhysicalControllerManager(val activity: MainActivity) {
     private var controllerId: Int = -1
@@ -54,11 +55,12 @@ class PhysicalControllerManager(val activity: MainActivity) {
     }
 
     private fun getGamePadButtonInputId(keycode: Int): GamePadButtonInputId {
+        val quickSettings = QuickSettings(activity)
         return when (keycode) {
-            KeyEvent.KEYCODE_BUTTON_A -> GamePadButtonInputId.B
-            KeyEvent.KEYCODE_BUTTON_B -> GamePadButtonInputId.A
-            KeyEvent.KEYCODE_BUTTON_X -> GamePadButtonInputId.X
-            KeyEvent.KEYCODE_BUTTON_Y -> GamePadButtonInputId.Y
+            KeyEvent.KEYCODE_BUTTON_A -> if (!quickSettings.useSwitchLayout) GamePadButtonInputId.A else GamePadButtonInputId.B
+            KeyEvent.KEYCODE_BUTTON_B -> if (!quickSettings.useSwitchLayout) GamePadButtonInputId.B else GamePadButtonInputId.A
+            KeyEvent.KEYCODE_BUTTON_X -> if (!quickSettings.useSwitchLayout) GamePadButtonInputId.X else GamePadButtonInputId.Y
+            KeyEvent.KEYCODE_BUTTON_Y -> if (!quickSettings.useSwitchLayout) GamePadButtonInputId.Y else GamePadButtonInputId.X
             KeyEvent.KEYCODE_BUTTON_L1 -> GamePadButtonInputId.LeftShoulder
             KeyEvent.KEYCODE_BUTTON_L2 -> GamePadButtonInputId.LeftTrigger
             KeyEvent.KEYCODE_BUTTON_R1 -> GamePadButtonInputId.RightShoulder

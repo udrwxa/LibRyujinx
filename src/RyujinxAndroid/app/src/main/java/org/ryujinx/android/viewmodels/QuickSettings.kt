@@ -16,6 +16,7 @@ class QuickSettings(val activity: Activity) {
     var enableTextureRecompression: Boolean
     var resScale : Float
     var isGrid : Boolean
+    var useSwitchLayout : Boolean
 
     // Logs
     var enableDebugLogs: Boolean
@@ -41,6 +42,7 @@ class QuickSettings(val activity: Activity) {
         resScale = sharedPref.getFloat("resScale", 1f)
         useVirtualController = sharedPref.getBoolean("useVirtualController", true)
         isGrid = sharedPref.getBoolean("isGrid", true)
+        useSwitchLayout = sharedPref.getBoolean("useSwitchLayout", true)
 
         enableDebugLogs = sharedPref.getBoolean("enableDebugLogs", false)
         enableStubLogs = sharedPref.getBoolean("enableStubLogs", false)
@@ -66,6 +68,7 @@ class QuickSettings(val activity: Activity) {
         editor.putFloat("resScale", resScale)
         editor.putBoolean("useVirtualController", useVirtualController)
         editor.putBoolean("isGrid", isGrid)
+        editor.putBoolean("useSwitchLayout", useSwitchLayout)
 
         editor.putBoolean("enableDebugLogs", enableDebugLogs)
         editor.putBoolean("enableStubLogs", enableStubLogs)
