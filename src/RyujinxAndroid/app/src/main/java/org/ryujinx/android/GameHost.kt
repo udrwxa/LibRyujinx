@@ -75,6 +75,8 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
         _isInit = false
         _isStarted = false
 
+        mainViewModel.activity.uiHandler.stop()
+
         _updateThread?.join()
         _renderingThreadWatcher?.join()
     }
@@ -160,6 +162,10 @@ class GameHost(context: Context?, private val mainViewModel: MainViewModel) : Su
                 }
                 mainViewModel.performanceManager?.closeCurrentRenderingSession()
             }
+        }
+
+        thread {
+            mainViewModel.activity.uiHandler.listen()
         }
         _nativeRyujinx.graphicsRendererRunLoop()
 

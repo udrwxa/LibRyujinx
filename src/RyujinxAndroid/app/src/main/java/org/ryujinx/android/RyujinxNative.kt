@@ -74,4 +74,8 @@ class RyujinxNative {
     external fun deviceVerifyFirmware(fileDescriptor: Int, isXci: Boolean): Long
     external fun deviceInstallFirmware(fileDescriptor: Int, isXci: Boolean)
     external fun deviceGetInstalledFirmwareVersion() : Long
+    external fun uiHandlerSetup()
+    external fun uiHandlerWait()
+    external fun uiHandlerStopWait()
+    external fun uiHandlerSetResponse(isOkPressed: Boolean, input: Long)
 }

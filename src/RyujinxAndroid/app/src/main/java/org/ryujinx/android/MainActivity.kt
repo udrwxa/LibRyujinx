@@ -18,6 +18,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.anggrayudi.storage.SimpleStorageHelper
+import com.halilibo.richtext.ui.RichTextThemeIntegration
 import org.ryujinx.android.ui.theme.RyujinxAndroidTheme
 import org.ryujinx.android.viewmodels.MainViewModel
 import org.ryujinx.android.viewmodels.QuickSettings
@@ -32,6 +33,7 @@ class MainActivity : BaseActivity() {
     private var _isInit: Boolean = false
     var isGameRunning = false
     var storageHelper: SimpleStorageHelper? = null
+    lateinit var uiHandler: UiHandler
     companion object {
         var mainViewModel: MainViewModel? = null
         var AppPath : String = ""
@@ -77,6 +79,8 @@ class MainActivity : BaseActivity() {
         RyujinxNative.instance.loggingSetEnabled(LogLevel.Guest.ordinal, quickSettings.enableGuestLogs)
         RyujinxNative.instance.loggingSetEnabled(LogLevel.Trace.ordinal, quickSettings.enableTraceLogs)
         val success = RyujinxNative.instance.initialize(NativeHelpers.instance.storeStringJava(appPath))
+
+        uiHandler = UiHandler()
         _isInit = success
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,12 +111,14 @@ class MainActivity : BaseActivity() {
         mainViewModel?.apply {
             setContent {
                 RyujinxAndroidTheme {
-                    // A surface container using the 'background' color from the theme
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        MainView.Main(mainViewModel = this)
+                    RichTextThemeIntegration(contentColor = { MaterialTheme.colorScheme.onSurface }) {
+                        // A surface container using the 'background' color from the theme
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            MainView.Main(mainViewModel = this)
+                        }
                     }
                 }
             }

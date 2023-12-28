@@ -42,11 +42,36 @@ namespace LibRyujinx
         private extern static JStringLocalRef createString(JEnvRef jEnv, IntPtr ch);
 
         [DllImport("libryujinxjni")]
-        private extern static long storeString(string ch);
-        [DllImport("libryujinxjni")]
-        private extern static IntPtr getString(long id);
+        internal extern static long storeString(string ch);
 
-        private static string GetStoredString(long id)
+        [DllImport("libryujinxjni")]
+        internal extern static IntPtr getString(long id);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerTitle(long title);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerMessage(long message);
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerWatermark(long watermark);
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerInitialText(long text);
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerSubtitle(long text);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerType(int type);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerKeyboardMode(int mode);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerMinLength(int lenght);
+
+        [DllImport("libryujinxjni")]
+        internal extern static long setUiHandlerMaxLength(int lenght);
+
+        internal static string GetStoredString(long id)
         {
             var pointer = getString(id);
             if (pointer != IntPtr.Zero)
@@ -91,7 +116,7 @@ namespace LibRyujinx
 
             Logger.AddTarget(
                 new AsyncLogTargetWrapper(
-                    new AndroidLogTarget("Ryujinx"),
+                    new AndroidLogTarget("RyujinxLog"),
                     1000,
                     AsyncLogTargetOverflowAction.Block
                 ));
@@ -707,6 +732,30 @@ namespace LibRyujinx
             var userId = GetString(jEnv, userIdPtr) ?? "";
 
             DeleteUser(userId);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_uiHandlerSetup")]
+        public static void JniSetupUiHandler(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            SetupUiHandler();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_uiHandlerWait")]
+        public static void JniWaitUiHandler(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            WaitUiHandler();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_uiHandlerStopWait")]
+        public static void JniStopUiHandlerWait(JEnvRef jEnv, JObjectLocalRef jObj)
+        {
+            StopUiHandlerWait();
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_uiHandlerSetResponse")]
+        public static void JniSetUiHandlerResponse(JEnvRef jEnv, JObjectLocalRef jObj, JBoolean isOkPressed, JLong input)
+        {
+            SetUiHandlerResponse(isOkPressed, input);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_userOpenUser")]
