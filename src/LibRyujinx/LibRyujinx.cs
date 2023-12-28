@@ -37,6 +37,8 @@ using System.Collections.Generic;
 using LibHac.Bcat;
 using Ryujinx.Ui.App.Common;
 using System.Text;
+using Ryujinx.HLE.Ui;
+using LibRyujinx.Android;
 
 namespace LibRyujinx
 {
@@ -89,7 +91,7 @@ namespace LibRyujinx
                 Console.WriteLine(ex);
                 return false;
             }
-            
+
             OpenALLibraryNameContainer.OverridePath = "libopenal.so";
 
             Logger.Notice.Print(LogClass.Application, "RyujinxAndroid is ready!");
@@ -142,7 +144,9 @@ namespace LibRyujinx
 
             var gameInfo = new GameInfo
             {
-                FileSize = gameStream.Length * 0.000000000931, TitleName = "Unknown", TitleId = "0000000000000000",
+                FileSize = gameStream.Length * 0.000000000931,
+                TitleName = "Unknown",
+                TitleId = "0000000000000000",
                 Developer = "Unknown",
                 Version = "0",
                 Icon = null
@@ -629,11 +633,11 @@ namespace LibRyujinx
 
         public static List<string> GetDlcContentList(string path, ulong titleId)
         {
-            if(!File.Exists(path))
+            if (!File.Exists(path))
                 return new List<string>();
 
             using FileStream containerFile = File.OpenRead(path);
-            
+
             PartitionFileSystem partitionFileSystem = new();
             partitionFileSystem.Initialize(containerFile.AsStorage()).ThrowIfFailure();
 
@@ -665,6 +669,38 @@ namespace LibRyujinx
 
             return paths;
         }
+
+        public static void SetupUiHandler()
+        {
+            if (SwitchDevice is { } switchDevice)
+            {
+                switchDevice.HostUiHandler = new AndroidUiHandler();
+            }
+        }
+
+        public static void WaitUiHandler()
+        {
+            if (SwitchDevice?.HostUiHandler is AndroidUiHandler uiHandler)
+            {
+                uiHandler.Wait();
+            }
+        }
+
+        public static void StopUiHandlerWait()
+        {
+            if (SwitchDevice?.HostUiHandler is AndroidUiHandler uiHandler)
+            {
+                uiHandler.Set();
+            }
+        }
+
+        public static void SetUiHandlerResponse(bool isOkPressed, long input)
+        {
+            if (SwitchDevice?.HostUiHandler is AndroidUiHandler uiHandler)
+            {
+                uiHandler.SetResponse(isOkPressed, input);
+            }
+        }
     }
 
     public class SwitchDevice : IDisposable
@@ -677,6 +713,7 @@ namespace LibRyujinx
         public UserChannelPersistence UserChannelPersistence { get; set; }
         public InputManager? InputManager { get; set; }
         public Switch? EmulationContext { get; set; }
+        public IHostUiHandler? HostUiHandler { get; set; }
 
         public void Dispose()
         {
@@ -741,7 +778,7 @@ namespace LibRyujinx
                                                                   renderer,
                                                                   LibRyujinx.AudioDriver, //Audio
                                                                   MemoryConfiguration.MemoryConfiguration4GiB,
-                                                                  null,
+                                                                  HostUiHandler,
                                                                   systemLanguage,
                                                                   regionCode,
                                                                   enableVsync,

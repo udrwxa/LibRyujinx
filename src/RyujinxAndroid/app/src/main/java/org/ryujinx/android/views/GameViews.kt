@@ -285,6 +285,8 @@ class GameViews {
                         }
                     }
                 }
+
+                mainViewModel.activity.uiHandler.Compose()
             }
         }
 
