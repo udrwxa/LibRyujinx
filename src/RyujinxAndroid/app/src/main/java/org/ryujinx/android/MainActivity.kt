@@ -206,7 +206,8 @@ class MainActivity : BaseActivity() {
             setFullScreen(true)
             NativeHelpers.instance.setTurboMode(true)
             force60HzRefreshRate(true)
-            motionSensorManager.register()
+            if (QuickSettings(this).enableMotion)
+                motionSensorManager.register()
         }
     }
 

@@ -79,27 +79,37 @@ class MotionSensorManager(val activity: MainActivity) : SensorEventListener2 {
     fun unregister(){
         sensorManager.unregisterListener(this)
         isRegistered = false
+
+        if (controllerId != -1){
+            RyujinxNative.instance.inputSetAccelerometerData(0.0F, 0.0F, 0.0F, controllerId)
+            RyujinxNative.instance.inputSetGyroData(0.0F, 0.0F, 0.0F, controllerId)
+        }
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (controllerId != -1)
-            event?.apply {
-                when (sensor.type) {
-                    Sensor.TYPE_ACCELEROMETER -> {
-                        val x = motionAcelOrientation[0] * event.values[1]
-                        val y = motionAcelOrientation[1] * event.values[0]
-                        val z = motionAcelOrientation[2] * event.values[2]
+            if (isRegistered)
+                event?.apply {
+                    when (sensor.type) {
+                        Sensor.TYPE_ACCELEROMETER -> {
+                            val x = motionAcelOrientation[0] * event.values[1]
+                            val y = motionAcelOrientation[1] * event.values[0]
+                            val z = motionAcelOrientation[2] * event.values[2]
 
-                        RyujinxNative.instance.inputSetAccelerometerData(x, y, z, controllerId)
-                    }
+                            RyujinxNative.instance.inputSetAccelerometerData(x, y, z, controllerId)
+                        }
 
-                    Sensor.TYPE_GYROSCOPE -> {
-                        val x = motionGyroOrientation[0] * event.values[1]
-                        val y = motionGyroOrientation[1] * event.values[0]
-                        val z = motionGyroOrientation[2] * event.values[2]
-                        RyujinxNative.instance.inputSetGyroData(x, y, z, controllerId)
+                        Sensor.TYPE_GYROSCOPE -> {
+                            val x = motionGyroOrientation[0] * event.values[1]
+                            val y = motionGyroOrientation[1] * event.values[0]
+                            val z = motionGyroOrientation[2] * event.values[2]
+                            RyujinxNative.instance.inputSetGyroData(x, y, z, controllerId)
+                        }
                     }
                 }
+            else {
+                RyujinxNative.instance.inputSetAccelerometerData(0.0F, 0.0F, 0.0F, controllerId)
+                RyujinxNative.instance.inputSetGyroData(0.0F, 0.0F, 0.0F, controllerId)
             }
     }
 
