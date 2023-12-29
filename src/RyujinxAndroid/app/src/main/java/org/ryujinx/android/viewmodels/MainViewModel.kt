@@ -365,7 +365,8 @@ class MainViewModel(val activity: MainActivity) {
         activity.setFullScreen(true)
         navController?.navigate("game")
         activity.isGameRunning = true
-        motionSensorManager?.register()
+        if (QuickSettings(activity).enableMotion)
+            motionSensorManager?.register()
     }
 
     fun setProgressStates(

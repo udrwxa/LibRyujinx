@@ -121,6 +121,7 @@ class SettingViews {
             }
             val isGrid = remember { mutableStateOf(true) }
             val useSwitchLayout = remember { mutableStateOf(true) }
+            val enableMotion = remember { mutableStateOf(true) }
 
             val enableDebugLogs = remember { mutableStateOf(true) }
             val enableStubLogs = remember { mutableStateOf(true) }
@@ -142,6 +143,7 @@ class SettingViews {
                     useVirtualController,
                     isGrid,
                     useSwitchLayout,
+                    enableMotion,
                     enableDebugLogs,
                     enableStubLogs,
                     enableInfoLogs,
@@ -174,6 +176,7 @@ class SettingViews {
                                     useVirtualController,
                                     isGrid,
                                     useSwitchLayout,
+                                    enableMotion,
                                     enableDebugLogs,
                                     enableStubLogs,
                                     enableInfoLogs,
@@ -865,6 +868,21 @@ class SettingViews {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
+                                    text = "Enable Motion",
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                                Switch(checked = enableMotion.value, onCheckedChange = {
+                                    enableMotion.value = !enableMotion.value
+                                })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
                                     text = "Use Switch Controller Layout",
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
@@ -1023,6 +1041,7 @@ class SettingViews {
                         useVirtualController,
                         isGrid,
                         useSwitchLayout,
+                        enableMotion,
                         enableDebugLogs,
                         enableStubLogs,
                         enableInfoLogs,
