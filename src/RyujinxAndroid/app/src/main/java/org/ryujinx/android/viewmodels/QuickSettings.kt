@@ -17,6 +17,7 @@ class QuickSettings(val activity: Activity) {
     var resScale : Float
     var isGrid : Boolean
     var useSwitchLayout : Boolean
+    var enableMotion : Boolean
 
     // Logs
     var enableDebugLogs: Boolean
@@ -43,6 +44,7 @@ class QuickSettings(val activity: Activity) {
         useVirtualController = sharedPref.getBoolean("useVirtualController", true)
         isGrid = sharedPref.getBoolean("isGrid", true)
         useSwitchLayout = sharedPref.getBoolean("useSwitchLayout", true)
+        enableMotion = sharedPref.getBoolean("enableMotion", true)
 
         enableDebugLogs = sharedPref.getBoolean("enableDebugLogs", false)
         enableStubLogs = sharedPref.getBoolean("enableStubLogs", false)
@@ -69,6 +71,7 @@ class QuickSettings(val activity: Activity) {
         editor.putBoolean("useVirtualController", useVirtualController)
         editor.putBoolean("isGrid", isGrid)
         editor.putBoolean("useSwitchLayout", useSwitchLayout)
+        editor.putBoolean("enableMotion", enableMotion)
 
         editor.putBoolean("enableDebugLogs", enableDebugLogs)
         editor.putBoolean("enableStubLogs", enableStubLogs)
