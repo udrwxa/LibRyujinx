@@ -85,6 +85,8 @@ class MainViewModel(val activity: MainActivity) {
         if (descriptor == 0)
             return false
 
+        val update = game.openUpdate()
+
         gameModel = game
         isMiiEditorLaunched = false
 
@@ -178,7 +180,7 @@ class MainViewModel(val activity: MainActivity) {
         if (!success)
             return false
 
-        success = nativeRyujinx.deviceLoadDescriptor(descriptor, game.type.ordinal)
+        success = nativeRyujinx.deviceLoadDescriptor(descriptor, game.type.ordinal, update)
 
         if (!success)
             return false

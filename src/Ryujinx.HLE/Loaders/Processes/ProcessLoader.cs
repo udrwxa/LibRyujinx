@@ -39,7 +39,7 @@ namespace Ryujinx.HLE.Loaders.Processes
             return LoadXci(stream);
         }
 
-        public bool LoadXci(Stream stream)
+        public bool LoadXci(Stream stream, Stream updateStream = null)
         {
             Xci xci = new(_device.Configuration.VirtualFileSystem.KeySet, stream.AsStorage());
 
@@ -50,7 +50,7 @@ namespace Ryujinx.HLE.Loaders.Processes
                 return false;
             }
 
-            (bool success, ProcessResult processResult) = xci.OpenPartition(XciPartitionType.Secure).TryLoad(_device, stream, out string errorMessage, "xci");
+            (bool success, ProcessResult processResult) = xci.OpenPartition(XciPartitionType.Secure).TryLoad(_device, stream, out string errorMessage, "xci", updateStream);
 
             if (!success)
             {
@@ -79,12 +79,12 @@ namespace Ryujinx.HLE.Loaders.Processes
             return LoadNsp(file);
         }
 
-        public bool LoadNsp(Stream stream)
+        public bool LoadNsp(Stream stream, Stream updateStream = null)
         {
             PartitionFileSystem partitionFileSystem = new();
             partitionFileSystem.Initialize(stream.AsStorage()).ThrowIfFailure();
 
-            (bool success, ProcessResult processResult) = partitionFileSystem.TryLoad(_device, stream, out string errorMessage, "nsp");
+            (bool success, ProcessResult processResult) = partitionFileSystem.TryLoad(_device, stream, out string errorMessage, "nsp", updateStream);
 
             if (processResult.ProcessId == 0)
             {

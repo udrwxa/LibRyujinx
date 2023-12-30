@@ -77,14 +77,14 @@ namespace LibRyujinx
             return SwitchDevice?.ContentManager?.VerifyFirmwarePackage(stream, isXci) ?? null;
         }
 
-        public static bool LoadApplication(Stream stream, FileType type)
+        public static bool LoadApplication(Stream stream, FileType type, Stream? updateStream = null)
         {
             var emulationContext = SwitchDevice.EmulationContext;
             return type switch
             {
                 FileType.None => false,
-                FileType.Nsp => emulationContext?.LoadNsp(stream) ?? false,
-                FileType.Xci => emulationContext?.LoadXci(stream) ?? false,
+                FileType.Nsp => emulationContext?.LoadNsp(stream, updateStream) ?? false,
+                FileType.Xci => emulationContext?.LoadXci(stream, updateStream) ?? false,
                 FileType.Nro => emulationContext?.LoadProgram(stream, true, "") ?? false,
             };
         }

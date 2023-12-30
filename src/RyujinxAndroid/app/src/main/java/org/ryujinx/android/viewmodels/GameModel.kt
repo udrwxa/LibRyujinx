@@ -1,6 +1,7 @@
 package org.ryujinx.android.viewmodels
 
 import android.content.Context
+import android.net.Uri
 import android.os.ParcelFileDescriptor
 import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.file.extension
@@ -9,6 +10,7 @@ import org.ryujinx.android.RyujinxNative
 
 
 class GameModel(var file: DocumentFile, val context: Context) {
+    private var updateDescriptor: ParcelFileDescriptor? = null
     var type: FileType
     var descriptor: ParcelFileDescriptor? = null
     var fileName: String?
@@ -50,9 +52,29 @@ class GameModel(var file: DocumentFile, val context: Context) {
         return descriptor?.fd ?: 0
     }
 
+    fun openUpdate() : Int {
+        if(titleId?.isNotEmpty() == true) {
+            val vm = TitleUpdateViewModel(titleId ?: "")
+
+            if(vm.data?.selected?.isNotEmpty() == true){
+                val uri = Uri.parse(vm.data?.selected)
+                val file = DocumentFile.fromSingleUri(context, uri)
+                if(file?.exists() == true){
+                    updateDescriptor = context.contentResolver.openFileDescriptor(file.uri, "rw")
+
+                    return updateDescriptor ?.fd ?: -1;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     fun close() {
         descriptor?.close()
         descriptor = null
+        updateDescriptor?.close()
+        updateDescriptor = null
     }
 }
 
