@@ -262,7 +262,7 @@ namespace LibRyujinx
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceLoadDescriptor")]
-        public static JBoolean JniLoadApplicationNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JInt type)
+        public static JBoolean JniLoadApplicationNative(JEnvRef jEnv, JObjectLocalRef jObj, JInt descriptor, JInt type, JInt updateDescriptor)
         {
             Logger.Trace?.Print(LogClass.Application, "Jni Function Call");
             if (SwitchDevice?.EmulationContext == null)
@@ -271,8 +271,9 @@ namespace LibRyujinx
             }
 
             var stream = OpenFile(descriptor);
+            var update = updateDescriptor == -1 ? null : OpenFile(updateDescriptor);
 
-            return LoadApplication(stream, (FileType)(int)type);
+            return LoadApplication(stream, (FileType)(int)type, update);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "Java_org_ryujinx_android_RyujinxNative_deviceVerifyFirmware")]
