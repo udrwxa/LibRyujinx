@@ -336,7 +336,7 @@ class GameViews {
 
             Surface(
                 modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.surface.copy(0.4f)
+                color = MaterialTheme.colorScheme.background.copy(0.4f)
             ) {
                 Column {
                     var gameTimeVal = 0.0
