@@ -37,13 +37,18 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "graphics_initialize")]
         public static bool InitializeGraphicsNative(GraphicsConfiguration graphicsConfiguration)
         {
-            if(Ryujinx.Common.PlatformInfo.IsBionic)
+            if (Ryujinx.Common.PlatformInfo.IsBionic)
             {
                 Silk.NET.Core.Loader.SearchPathContainer.Platform = Silk.NET.Core.Loader.UnderlyingPlatform.Android;
             }
+            else if (OperatingSystem.IsIOS())
+            {
+                // Yes, macOS not iOS
+                Silk.NET.Core.Loader.SearchPathContainer.Platform = Silk.NET.Core.Loader.UnderlyingPlatform.MacOS;
+            }
             return InitializeGraphics(graphicsConfiguration);
         }
-        
+
         public static bool InitializeGraphics(GraphicsConfiguration graphicsConfiguration)
         {
             GraphicsConfig.ResScale = graphicsConfiguration.ResScale;
@@ -282,7 +287,7 @@ namespace LibRyujinx
         {
             _swapBuffersCallback = Marshal.GetDelegateForFunctionPointer<SwapBuffersCallback>(swapBuffersCallback);
         }
-        
+
         public static void SetSwapBuffersCallback(SwapBuffersCallback swapBuffersCallback)
         {
             _swapBuffersCallback = swapBuffersCallback;
