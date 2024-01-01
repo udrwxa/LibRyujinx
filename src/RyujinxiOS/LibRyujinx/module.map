@@ -1,0 +1,11 @@
+//
+//  module.map
+//  Ryujinx
+//
+//  Created by Isaac Marovitz on 01/01/2024.
+//
+
+module LibRyujinx {
+    header "LibRyujinx.h"
+    export *
+}

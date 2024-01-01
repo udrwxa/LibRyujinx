@@ -16,7 +16,32 @@
 		6E5EAF922B42382E002CDADA /* RegionCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5EAF912B42382E002CDADA /* RegionCode.swift */; };
 		6E5EAF942B42391B002CDADA /* SystemLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5EAF932B42391B002CDADA /* SystemLanguage.swift */; };
 		6E5EAF962B423E87002CDADA /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5EAF952B423E87002CDADA /* GameView.swift */; };
+		6E5EAFC12B43739B002CDADA /* LibRyujinx.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6E5EAFC02B43739B002CDADA /* LibRyujinx.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		6E5EAFC22B4373CC002CDADA /* LibRyujinx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E5EAF992B429231002CDADA /* LibRyujinx.dylib */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6E5EAF9E2B429231002CDADA /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6E5EAFBF2B43737F002CDADA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6E5EAFC12B43739B002CDADA /* LibRyujinx.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		6E5EAF7A2B422D73002CDADA /* Ryujinx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ryujinx.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -29,6 +54,10 @@
 		6E5EAF912B42382E002CDADA /* RegionCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionCode.swift; sourceTree = "<group>"; };
 		6E5EAF932B42391B002CDADA /* SystemLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemLanguage.swift; sourceTree = "<group>"; };
 		6E5EAF952B423E87002CDADA /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		6E5EAF992B429231002CDADA /* LibRyujinx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = LibRyujinx.dylib; path = "../LibRyujinx/bin/Release/net8.0/ios-arm64/publish/LibRyujinx.dylib"; sourceTree = "<group>"; };
+		6E5EAFA72B429760002CDADA /* LibRyujinx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LibRyujinx.h; sourceTree = "<group>"; };
+		6E5EAFBE2B437275002CDADA /* module.map */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.map; sourceTree = "<group>"; };
+		6E5EAFC02B43739B002CDADA /* LibRyujinx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = LibRyujinx.dylib; path = "../LibRyujinx/bin/Release/net8.0/ios-arm64/publish/LibRyujinx.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E5EAFC22B4373CC002CDADA /* LibRyujinx.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,8 +75,11 @@
 		6E5EAF712B422D73002CDADA = {
 			isa = PBXGroup;
 			children = (
+				6E5EAFC02B43739B002CDADA /* LibRyujinx.dylib */,
 				6E5EAF7C2B422D73002CDADA /* Ryujinx */,
+				6E5EAFA62B429760002CDADA /* LibRyujinx */,
 				6E5EAF7B2B422D73002CDADA /* Products */,
+				6E5EAF972B429231002CDADA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +131,23 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		6E5EAF972B429231002CDADA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6E5EAF992B429231002CDADA /* LibRyujinx.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6E5EAFA62B429760002CDADA /* LibRyujinx */ = {
+			isa = PBXGroup;
+			children = (
+				6E5EAFA72B429760002CDADA /* LibRyujinx.h */,
+				6E5EAFBE2B437275002CDADA /* module.map */,
+			);
+			path = LibRyujinx;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -106,8 +156,10 @@
 			buildConfigurationList = 6E5EAF882B422D74002CDADA /* Build configuration list for PBXNativeTarget "Ryujinx" */;
 			buildPhases = (
 				6E5EAF762B422D73002CDADA /* Sources */,
+				6E5EAFBF2B43737F002CDADA /* CopyFiles */,
 				6E5EAF772B422D73002CDADA /* Frameworks */,
 				6E5EAF782B422D73002CDADA /* Resources */,
+				6E5EAF9E2B429231002CDADA /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -240,6 +292,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_INCLUDE_PATHS = ./LibRyujinx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -296,6 +349,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_INCLUDE_PATHS = ./LibRyujinx;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
