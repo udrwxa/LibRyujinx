@@ -58,6 +58,8 @@
 		6E5EAFA72B429760002CDADA /* LibRyujinx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LibRyujinx.h; sourceTree = "<group>"; };
 		6E5EAFBE2B437275002CDADA /* module.map */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.map; sourceTree = "<group>"; };
 		6E5EAFC02B43739B002CDADA /* LibRyujinx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = LibRyujinx.dylib; path = "../LibRyujinx/bin/Release/net8.0/ios-arm64/publish/LibRyujinx.dylib"; sourceTree = "<group>"; };
+		6E5EAFC32B4387BB002CDADA /* Ryujinx.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ryujinx.entitlements; sourceTree = "<group>"; };
+		6E5EAFC42B4387D8002CDADA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,8 @@
 		6E5EAF7C2B422D73002CDADA /* Ryujinx */ = {
 			isa = PBXGroup;
 			children = (
+				6E5EAFC42B4387D8002CDADA /* Info.plist */,
+				6E5EAFC32B4387BB002CDADA /* Ryujinx.entitlements */,
 				6E5EAF7D2B422D73002CDADA /* RyujinxApp.swift */,
 				6E5EAF8F2B42380D002CDADA /* Views */,
 				6E5EAF902B423817002CDADA /* Models */,
@@ -359,12 +363,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Ryujinx/Ryujinx.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Ryujinx/Preview Content\"";
 				DEVELOPMENT_TEAM = 92S3SG4PTH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ryujinx/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -388,12 +394,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Ryujinx/Ryujinx.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Ryujinx/Preview Content\"";
 				DEVELOPMENT_TEAM = 92S3SG4PTH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ryujinx/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
