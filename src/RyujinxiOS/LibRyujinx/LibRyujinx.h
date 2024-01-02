@@ -112,6 +112,12 @@ struct Vector2 {
     float Y;
 };
 
+struct Vector3 {
+    float X;
+    float Y;
+    float Z;
+};
+
 extern bool initialize(char*);
 extern bool device_initialize();
 extern void device_reloadFilesystem();
@@ -129,5 +135,7 @@ extern void input_release_touch_point();
 extern void input_update();
 extern void input_set_button_pressed(enum GamepadButtonInputId, int);
 extern void input_set_button_released(enum GamepadButtonInputId, int);
+extern void input_set_accelerometer_data(struct Vector3, int);
+extern void input_set_gyro_data(struct Vector3, int);
 extern void input_set_stick_axis(enum StickInputId, struct Vector2, int);
 extern long input_connect_gamepad(int);
