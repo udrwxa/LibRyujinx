@@ -119,7 +119,7 @@ struct Vector3 {
 };
 
 extern bool initialize(char*);
-extern bool device_initialize();
+extern bool device_initialize(bool, bool, int, int, bool, bool, bool, bool, long, bool);
 extern void device_reloadFilesystem();
 extern bool device_load(long);
 extern void device_install_firmware(int, bool);
