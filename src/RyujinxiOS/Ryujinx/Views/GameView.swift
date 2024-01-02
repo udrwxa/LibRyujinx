@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GameView: View {
     @State var game: Game
-    @State var icon: Image = Image("TOTK")
+    @State var icon: Image = Image("Icon_NSP")
 
     var body: some View {
         VStack {
@@ -40,5 +40,5 @@ struct GameView: View {
                         titleId: "",
                         developer: "",
                         version: "",
-                        icon: Image("BOTW")))
+                        icon: Image("Icon_NSP")))
 }
