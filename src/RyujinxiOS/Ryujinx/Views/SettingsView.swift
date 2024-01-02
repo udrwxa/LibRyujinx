@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import LibRyujinx
 
 struct SettingsView: View {
     @State var useGrid: Bool = true
-    @State var firmwareVersion: String = "17.0.0"
+    @State var firmwareVersion: String = "N/A"
+    @State var isFirmwareInstalled: Bool = false
     @State var showingKeyImport = false
     @State var showingFimrwareImport = false
 
@@ -29,10 +31,12 @@ struct SettingsView: View {
         Form {
             Section("App") {
                 Toggle("Use Grid", isOn: $useGrid)
+                    .disabled(true)
                 HStack {
                     Text("System Firmware")
                     Spacer()
                     Text(firmwareVersion)
+                        .foregroundStyle(isFirmwareInstalled ? .primary : .secondary)
                 }
                 Button("Import Keys") {
                     showingKeyImport.toggle()
@@ -80,6 +84,14 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onAppear {
+            let cstring = device_get_installed_firmware_version()
+            let version = String(cString: cstring!)
+            if version != String() {
+                isFirmwareInstalled = true
+                firmwareVersion = version
+            }
+        }
     }
 }
 

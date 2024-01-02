@@ -122,6 +122,7 @@ extern bool initialize(char*);
 extern bool device_initialize();
 extern void device_reloadFilesystem();
 extern bool device_load(long);
+extern char* device_get_installed_firmware_version();
 extern bool graphics_initialize(struct GraphicsConfiguration);
 extern bool graphics_initialize_renderer(enum GraphicsBackend, struct NativeGraphicsInterop);
 extern void graphics_renderer_set_size(int, int);
