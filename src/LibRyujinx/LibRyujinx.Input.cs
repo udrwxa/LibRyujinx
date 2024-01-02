@@ -244,6 +244,18 @@ namespace LibRyujinx
             SetButtonReleased(button, id);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "input_set_accelerometer_data")]
+        public static void SetAccelerometerDataNative(Vector3 accel, int id)
+        {
+            SetAccelerometerData(accel, id);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "input_set_gyro_data")]
+        public static void SetGryoDataNatuve(Vector3 gyro, int id)
+        {
+            SetGryoData(gyro, id);
+        }
+
         [UnmanagedCallersOnly(EntryPoint = "input_set_stick_axis")]
         public static void SetStickAxisNative(StickInputId stick, Vector2 axes, int id)
         {
