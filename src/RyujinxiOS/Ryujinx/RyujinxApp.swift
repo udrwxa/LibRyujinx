@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
+#if !targetEnvironment(simulator)
 import LibRyujinx
+#endif
 
 @main
 struct RyujinxApp: App {
@@ -15,7 +17,9 @@ struct RyujinxApp: App {
             ContentView()
                 .onAppear {
                     let documentsDirectory = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+#if !targetEnvironment(simulator)
                     initialize(strdup(documentsDirectory.path(percentEncoded: false)))
+#endif
                 }
         }
     }

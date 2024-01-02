@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
+#if !targetEnvironment(simulator)
 import LibRyujinx
+#endif
 
 struct SettingsView: View {
     @EnvironmentObject var settings: Settings
@@ -75,7 +77,9 @@ struct SettingsView: View {
                                 }
 
                                 let handle = try FileHandle(forUpdating: url)
+#if !targetEnvironment(simulator)
                                 device_install_firmware(handle.fileDescriptor, false)
+#endif
 
                                 try handle.close()
                                 url.stopAccessingSecurityScopedResource()
@@ -132,12 +136,14 @@ struct SettingsView: View {
     }
 
     func checkFirmware() {
+#if !targetEnvironment(simulator)
         let cstring = device_get_installed_firmware_version()
         let version = String(cString: cstring!)
         if version != String() {
             isFirmwareInstalled = true
             firmwareVersion = version
         }
+#endif
     }
 }
 

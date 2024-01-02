@@ -17,6 +17,10 @@ struct GameView: View {
                 .resizable()
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(.regularMaterial, lineWidth: 1)
+                )
             Text(title)
                 .multilineTextAlignment(.center)
                 .lineLimit(2, reservesSpace: true)

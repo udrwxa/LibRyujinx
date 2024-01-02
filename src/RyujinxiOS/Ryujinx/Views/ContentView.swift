@@ -13,6 +13,7 @@ struct ContentView: View {
     var body: some View {
         TabView {
             LibraryView()
+                .environmentObject(settings)
                 .tabItem {
                     Label("Library", systemImage: "square.grid.2x2")
                 }
