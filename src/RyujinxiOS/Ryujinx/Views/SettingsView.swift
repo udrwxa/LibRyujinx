@@ -40,10 +40,31 @@ struct SettingsView: View {
                 }
                 Button("Import Keys") {
                     showingKeyImport.toggle()
-                }.fileImporter(isPresented: $showingKeyImport, allowedContentTypes: [.text], allowsMultipleSelection: false) { result in
+                }.fileImporter(isPresented: $showingKeyImport, allowedContentTypes: [.data], allowsMultipleSelection: false) { result in
                     switch result {
-                    case .success(let url):
-                        print(url)
+                    case .success(let urls):
+                        do {
+                            try urls.forEach { url in
+                                let gotAccess = url.startAccessingSecurityScopedResource()
+                                if !gotAccess {
+                                    print("Failed to get access to imported keys at \(url)!")
+                                    return
+                                }
+
+                                let documentsUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                                let keysUrl = documentsUrl.appending(path: "system").appending(path: "prod").appendingPathExtension("keys")
+
+                                if FileManager.default.fileExists(atPath: keysUrl.path(percentEncoded: false)) {
+                                    try FileManager.default.removeItem(at: keysUrl)
+                                }
+
+                                try FileManager.default.copyItem(at: url, to: keysUrl)
+
+                                url.stopAccessingSecurityScopedResource()
+                            }
+                        } catch {
+                            print(error)
+                        }
                     case .failure(let error):
                         print(error)
                     }
@@ -52,8 +73,25 @@ struct SettingsView: View {
                     showingFimrwareImport.toggle()
                 }.fileImporter(isPresented: $showingFimrwareImport, allowedContentTypes: [.zip, .folder], allowsMultipleSelection: false) { result in
                     switch result {
-                    case .success(let url):
-                        print(url)
+                    case .success(let urls):
+                        do {
+                            try urls.forEach { url in
+                                let gotAccess = url.startAccessingSecurityScopedResource()
+                                if !gotAccess {
+                                    print("Failed to get access to imported firmware at \(url)!")
+                                    return
+                                }
+
+                                let handle = try FileHandle(forUpdating: url)
+                                device_install_firmware(handle.fileDescriptor, false)
+
+                                try handle.close()
+                                url.stopAccessingSecurityScopedResource()
+                                checkFirmware()
+                            }
+                        } catch {
+                            print(error)
+                        }
                     case .failure(let error):
                         print(error)
                     }
@@ -85,12 +123,16 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .onAppear {
-            let cstring = device_get_installed_firmware_version()
-            let version = String(cString: cstring!)
-            if version != String() {
-                isFirmwareInstalled = true
-                firmwareVersion = version
-            }
+            checkFirmware()
+        }
+    }
+
+    func checkFirmware() {
+        let cstring = device_get_installed_firmware_version()
+        let version = String(cString: cstring!)
+        if version != String() {
+            isFirmwareInstalled = true
+            firmwareVersion = version
         }
     }
 }
