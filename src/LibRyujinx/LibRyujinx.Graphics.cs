@@ -117,7 +117,7 @@ namespace LibRyujinx
         [UnmanagedCallersOnly(EntryPoint = "graphics_renderer_set_size")]
         public static void SetRendererSizeNative(int width, int height)
         {
-            Renderer?.Window?.SetSize(width, height);
+            SetRendererSize(width, height);
         }
 
         public static void SetRendererSize(int width, int height)
