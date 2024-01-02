@@ -7,13 +7,13 @@
 
 #import <Foundation/Foundation.h>
 
-enum BackendThreading {
+typedef NS_ENUM(NSInteger, BackendThreading) {
     Auto,
     Off,
     On
 };
 
-enum AspectRatio {
+typedef NS_ENUM(NSInteger, AspectRatio) {
     Fixed4x3,
     Fixed16x9,
     Fixed16x10,
@@ -22,12 +22,12 @@ enum AspectRatio {
     Stretched,
 };
 
-enum GraphicsBackend {
+typedef NS_ENUM(NSInteger, GraphicsBackend) {
     Vulkan,
     OpenGL
 };
 
-enum GamepadButtonInputId {
+typedef NS_ENUM(unsigned char, GamepadButtonInputId) {
     Unbound,
     A,
     B,
@@ -78,7 +78,7 @@ enum GamepadButtonInputId {
     Count
 };
 
-enum StickInputId {
+typedef NS_ENUM(unsigned char, StickInputId) {
     StickUnbound,
     Left,
     Right,
@@ -95,8 +95,8 @@ struct GraphicsConfiguration {
     bool EnableMacroHLE;
     bool EnableShaderCache;
     bool EnableTextureRecompression;
-    enum BackendThreading BackendThreading;
-    enum AspectRatio AspectRatio;
+    BackendThreading BackendThreading;
+    AspectRatio AspectRatio;
 };
 
 struct NativeGraphicsInterop {
@@ -125,7 +125,7 @@ extern bool device_load(long);
 extern void device_install_firmware(int, bool);
 extern char* device_get_installed_firmware_version();
 extern bool graphics_initialize(struct GraphicsConfiguration);
-extern bool graphics_initialize_renderer(enum GraphicsBackend, struct NativeGraphicsInterop);
+extern bool graphics_initialize_renderer(GraphicsBackend, struct NativeGraphicsInterop);
 extern void graphics_renderer_set_size(int, int);
 extern void graphics_renderer_run_loop();
 extern void graphics_renderer_set_vsync(bool);
@@ -135,9 +135,9 @@ extern void input_set_client_size(int, int);
 extern void input_set_touch_point(int, int);
 extern void input_release_touch_point();
 extern void input_update();
-extern void input_set_button_pressed(enum GamepadButtonInputId, int);
-extern void input_set_button_released(enum GamepadButtonInputId, int);
+extern void input_set_button_pressed(GamepadButtonInputId, int);
+extern void input_set_button_released(GamepadButtonInputId, int);
 extern void input_set_accelerometer_data(struct Vector3, int);
 extern void input_set_gyro_data(struct Vector3, int);
-extern void input_set_stick_axis(enum StickInputId, struct Vector2, int);
+extern void input_set_stick_axis(StickInputId, struct Vector2, int);
 extern long input_connect_gamepad(int);

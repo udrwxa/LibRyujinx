@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import LibRyujinx
 
 public class RyujinxSettings: Codable {
     var region: RegionCode = .USA
@@ -65,5 +66,19 @@ public class RyujinxSettings: Codable {
         } catch {
             print("Failed to save settings \(error)!")
         }
+    }
+
+    public func getGraphicsConfig() -> GraphicsConfiguration {
+        return GraphicsConfiguration(
+            ResScale: 1.0,
+            MaxAnisotropy: -1.0,
+            FastGpuTime: true,
+            Fast2DCopy: true,
+            EnableMacroJit: false,
+            EnableMacroHLE: true,
+            EnableShaderCache: self.shaderCache,
+            EnableTextureRecompression: self.textureRecomp,
+            BackendThreading: BackendThreading.Auto,
+            AspectRatio: AspectRatio.Fixed16x9)
     }
 }
