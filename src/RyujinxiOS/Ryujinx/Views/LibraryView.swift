@@ -11,6 +11,7 @@ struct LibraryView: View {
     @EnvironmentObject var settings: Settings
 
     @State var search: String = ""
+    @State var games: [Game] = []
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100))]
 
@@ -18,11 +19,9 @@ struct LibraryView: View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: gridLayout, spacing: 10) {
-                    GameView(imageName: "Racing", title: "SEGA AGES VIRTUA RACING")
-                    GameView(imageName: "Mania", title: "Sonic Mania")
-                    GameView(imageName: "BOTW", title: "The Legend of Zelda: Breath of the Wild")
-                    GameView(imageName: "TOTK", title: "The Legend of Zelda: Tears of the Kingdom")
-                    GameView(imageName: "Undertale", title: "Undertale")
+                    ForEach(games, id: \.id) { game in
+                        GameView(game: game)
+                    }
                 }
                 .padding(.horizontal)
             }
