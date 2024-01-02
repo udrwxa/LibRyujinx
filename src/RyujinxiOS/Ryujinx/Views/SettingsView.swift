@@ -11,6 +11,7 @@ import LibRyujinx
 struct SettingsView: View {
     @State var useGrid: Bool = true
     @State var firmwareVersion: String = "N/A"
+    @State var areKeysInstalled: Bool = false
     @State var isFirmwareInstalled: Bool = false
     @State var showingKeyImport = false
     @State var showingFimrwareImport = false
@@ -26,6 +27,8 @@ struct SettingsView: View {
     @State var touchInput: Bool = false
     @State var motionControls: Bool = false
     @State var onscreenController: Bool = true
+
+    @State var keysUrl: URL?
 
     var body: some View {
         Form {
@@ -51,14 +54,11 @@ struct SettingsView: View {
                                     return
                                 }
 
-                                let documentsUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                                let keysUrl = documentsUrl.appending(path: "system").appending(path: "prod").appendingPathExtension("keys")
-
-                                if FileManager.default.fileExists(atPath: keysUrl.path(percentEncoded: false)) {
-                                    try FileManager.default.removeItem(at: keysUrl)
+                                if FileManager.default.fileExists(atPath: keysUrl!.path(percentEncoded: false)) {
+                                    try FileManager.default.removeItem(at: keysUrl!)
                                 }
 
-                                try FileManager.default.copyItem(at: url, to: keysUrl)
+                                try FileManager.default.copyItem(at: url, to: keysUrl!)
 
                                 url.stopAccessingSecurityScopedResource()
                             }
@@ -68,6 +68,8 @@ struct SettingsView: View {
                     case .failure(let error):
                         print(error)
                     }
+
+                    checkKeys()
                 }
                 Button("Import Firmware") {
                     showingFimrwareImport.toggle()
@@ -96,6 +98,7 @@ struct SettingsView: View {
                         print(error)
                     }
                 }
+                .disabled(!areKeysInstalled)
             }
             Section("System") {
                 Picker("System Region", selection: $region) {
@@ -123,7 +126,18 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .onAppear {
+            checkKeys()
             checkFirmware()
+        }
+    }
+
+    func checkKeys() {
+        do {
+            let documentsUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            keysUrl = documentsUrl.appending(path: "system").appending(path: "prod").appendingPathExtension("keys")
+            areKeysInstalled = FileManager.default.fileExists(atPath: keysUrl!.path(percentEncoded: false))
+        } catch {
+            print(error)
         }
     }
 
