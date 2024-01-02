@@ -739,9 +739,15 @@ namespace LibRyujinx
             UserChannelPersistence = new UserChannelPersistence();
 
             _firmwareVersion = ContentManager.GetCurrentFirmwareVersion();
-            
-            
-            Logger.Notice.Print(LogClass.Application, $"System Firmware Version: {_firmwareVersion.VersionString}");
+
+            if (_firmwareVersion != null)
+            {
+                Logger.Notice.Print(LogClass.Application, $"System Firmware Version: {_firmwareVersion.VersionString}");
+            }
+            else
+            {
+                Logger.Notice.Print(LogClass.Application, $"System Firmware not installed");
+            }
         }
 
         public bool InitializeContext(bool isHostMapped,
