@@ -67,9 +67,28 @@ namespace LibRyujinx
             return LoadApplication(path);
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "device_get_installed_firmware_version")]
+        public static IntPtr GetInstalledFirmwareVersionNative()
+        {
+            var result = GetInstalledFirmwareVersion();
+            return Marshal.StringToHGlobalAnsi(result);
+        }
+
         public static void InstallFirmware(Stream stream, bool isXci)
         {
             SwitchDevice?.ContentManager.InstallFirmware(stream, isXci);
+        }
+
+        public static string GetInstalledFirmwareVersion()
+        {
+            var version = SwitchDevice?.ContentManager.GetCurrentFirmwareVersion();
+
+            if (version != null)
+            {
+                return version.VersionString;
+            }
+
+            return String.Empty;
         }
 
         public static SystemVersion? VerifyFirmware(Stream stream, bool isXci)
