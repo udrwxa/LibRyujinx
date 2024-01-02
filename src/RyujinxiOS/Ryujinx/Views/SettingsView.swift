@@ -9,24 +9,14 @@ import SwiftUI
 import LibRyujinx
 
 struct SettingsView: View {
+    @EnvironmentObject var settings: Settings
+
     @State var useGrid: Bool = true
     @State var firmwareVersion: String = "N/A"
     @State var areKeysInstalled: Bool = false
     @State var isFirmwareInstalled: Bool = false
     @State var showingKeyImport = false
     @State var showingFimrwareImport = false
-
-    @State var region: RegionCode = .USA
-    @State var language: SystemLanguage = .AmericanEnglish
-    @State var ignoreMissingServices: Bool = false
-
-    @State var shaderCache: Bool = true
-    @State var textureRecomp: Bool = true
-    @State var colorSpacePassthrough: Bool = true
-
-    @State var touchInput: Bool = false
-    @State var motionControls: Bool = false
-    @State var onscreenController: Bool = true
 
     @State var keysUrl: URL?
 
@@ -101,27 +91,27 @@ struct SettingsView: View {
                 .disabled(!areKeysInstalled)
             }
             Section("System") {
-                Picker("System Region", selection: $region) {
+                Picker("System Region", selection: $settings.settings.region) {
                     ForEach(RegionCode.allCases, id: \.self) { region in
                         Text(region.rawValue).id(region)
                     }
                 }
-                Picker("System Language", selection: $language) {
+                Picker("System Language", selection: $settings.settings.language) {
                     ForEach(SystemLanguage.allCases, id: \.self) { lang in
                         Text(lang.rawValue).id(lang)
                     }
                 }
-                Toggle("Ignore Missing Services", isOn: $ignoreMissingServices)
+                Toggle("Ignore Missing Services", isOn: $settings.settings.ignoreMissingServices)
             }
             Section("Graphics") {
-                Toggle("Enable Shader Cache", isOn: $shaderCache)
-                Toggle("Enable Texture Recompression", isOn: $textureRecomp)
-                Toggle("Color Space Passthrough", isOn: $colorSpacePassthrough)
+                Toggle("Enable Shader Cache", isOn: $settings.settings.shaderCache)
+                Toggle("Enable Texture Recompression", isOn: $settings.settings.textureRecomp)
+                Toggle("Color Space Passthrough", isOn: $settings.settings.colorSpacePassthrough)
             }
             Section("Input") {
-                Toggle("Enable Touchscreen Input", isOn: $touchInput)
-                Toggle("Enable Motion Controls", isOn: $motionControls)
-                Toggle("Enable Onscreen Controller", isOn: $onscreenController)
+                Toggle("Enable Touchscreen Input", isOn: $settings.settings.touchInput)
+                Toggle("Enable Motion Controls", isOn: $settings.settings.motionControls)
+                Toggle("Enable Onscreen Controller", isOn: $settings.settings.onscreenController)
             }
         }
         .formStyle(.grouped)
@@ -153,4 +143,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
+        .environmentObject(Settings())
 }

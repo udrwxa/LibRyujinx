@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum RegionCode: String, CaseIterable {
+enum RegionCode: String, Codable, CaseIterable {
     case Japan, USA, Europe, Australia, China, Korea, Taiwan
 }

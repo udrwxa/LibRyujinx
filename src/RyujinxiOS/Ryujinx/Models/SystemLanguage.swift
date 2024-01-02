@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum SystemLanguage: String, CaseIterable {
+enum SystemLanguage: String, Codable, CaseIterable {
     case Japanese = "Japanese"
     case AmericanEnglish = "American English"
     case French = "French"

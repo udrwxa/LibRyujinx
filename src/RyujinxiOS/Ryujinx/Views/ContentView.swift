@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    private let settings: Settings = Settings()
+
     var body: some View {
         TabView {
             LibraryView()
@@ -15,6 +17,7 @@ struct ContentView: View {
                     Label("Library", systemImage: "square.grid.2x2")
                 }
             SettingsView()
+                .environmentObject(settings)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
