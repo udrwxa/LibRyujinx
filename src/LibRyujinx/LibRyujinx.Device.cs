@@ -16,9 +16,27 @@ namespace LibRyujinx
     public static partial class LibRyujinx
     {
         [UnmanagedCallersOnly(EntryPoint = "device_initialize")]
-        public static bool InitializeDeviceNative()
+        public static bool InitializeDeviceNative(bool isHostMapped,
+                                                  bool useNce,
+                                                  SystemLanguage systemLanguage,
+                                                  RegionCode regionCode,
+                                                  bool enableVsync,
+                                                  bool enableDockedMode,
+                                                  bool enablePtc,
+                                                  bool enableInternetAccess,
+                                                  IntPtr timeZone,
+                                                  bool ignoreMissingServices)
         {
-            return InitializeDevice(true, false, SystemLanguage.AmericanEnglish, RegionCode.USA, true, true, true, false, "UTC", false);
+            return InitializeDevice(isHostMapped,
+                                    useNce,
+                                    systemLanguage,
+                                    regionCode,
+                                    enableVsync,
+                                    enableDockedMode,
+                                    enablePtc,
+                                    enableInternetAccess,
+                                    Marshal.PtrToStringAnsi(timeZone),
+                                    ignoreMissingServices);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "device_reloadFilesystem")]
