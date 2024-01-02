@@ -1,6 +1,7 @@
 using ARMeilleure.Translation;
 using LibHac.Ncm;
 using LibHac.Tools.FsSystem.NcaUtils;
+using Microsoft.Win32.SafeHandles;
 using Ryujinx.Common.Logging;
 using Ryujinx.HLE.FileSystem;
 using Ryujinx.HLE.HOS.SystemState;
@@ -65,6 +66,14 @@ namespace LibRyujinx
             var path = Marshal.PtrToStringAnsi(pathPtr);
 
             return LoadApplication(path);
+        }
+
+        [UnmanagedCallersOnly(EntryPoint = "device_install_firmware")]
+        public static void InstallFirmwareNative(int descriptor, bool isXci)
+        {
+            var stream = OpenFile(descriptor);
+
+            InstallFirmware(stream, isXci);
         }
 
         [UnmanagedCallersOnly(EntryPoint = "device_get_installed_firmware_version")]
@@ -256,6 +265,13 @@ namespace LibRyujinx
                 SwitchDevice?.DisposeContext();
                 Renderer = null;
             }
+        }
+
+        private static FileStream OpenFile(int descriptor)
+        {
+            var safeHandle = new SafeFileHandle(descriptor, false);
+
+            return new FileStream(safeHandle, FileAccess.ReadWrite);
         }
 
         public enum FileType
