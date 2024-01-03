@@ -16,6 +16,7 @@ struct LibraryView: View {
     @State var search: String = ""
     @State var games: [Game] = []
     @State var isFirmwareInstalled: Bool = false
+    @State var showingGameImport = false
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100))]
     private var searchedGames: [Game] {
@@ -54,7 +55,7 @@ struct LibraryView: View {
                 }
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button {
-                        print("Add a game")
+                        showingGameImport.toggle()
                     } label: {
                         Image(systemName: "plus")
                             .foregroundStyle(.primary)
@@ -75,6 +76,14 @@ struct LibraryView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
+            .fileImporter(isPresented: $showingGameImport, allowedContentTypes: [.nca, .nro, .nso, .nsp], allowsMultipleSelection: false) { result in
+                switch result {
+                case .success(let urls):
+                    break
+                case .failure(let error):
+                    print(error)
+                }
+            }
         }
         .animation(.easeInOut(duration: 0.2), value: searchedGames)
         .animation(.easeInOut(duration: 0.2), value: search)
