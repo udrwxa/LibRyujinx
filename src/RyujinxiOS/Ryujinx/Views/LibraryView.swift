@@ -17,16 +17,56 @@ struct LibraryView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: gridLayout, spacing: 10) {
-                    ForEach(games, id: \.id) { game in
-                        GameView(game: game)
+            Group {
+                if games.isEmpty {
+                    VStack {
+                        Spacer()
+                        Group {
+                            Text("No games installed.\n Press the ") + Text(Image(systemName: "plus")) + Text(" button to add some.")
+                        }
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: gridLayout, spacing: 10) {
+                            ForEach(games, id: \.id) { game in
+                                GameView(game: game)
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                 }
-                .padding(.horizontal)
             }
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Text("Library")
+                        .font(.headline)
+                        .padding(.leading, 5)
+                }
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button {
+                        print("Add a game")
+                    } label: {
+                        Image(systemName: "plus")
+                            .foregroundStyle(.primary)
+                    }
+                }
+                ToolbarItemGroup(placement: .secondaryAction) {
+                    Button {
+                        print("Open Mii Editor")
+                    } label: {
+                        Label {
+                            Text("Open Mii Editor")
+                        } icon: {
+                            Image(systemName: "person")
+                        }
+                    }
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
         }
-        .searchable(text: $search)
     }
 }
 
