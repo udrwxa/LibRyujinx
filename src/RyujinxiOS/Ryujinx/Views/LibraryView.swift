@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 #if !targetEnvironment(simulator)
 import LibRyujinx
 #endif
@@ -153,7 +154,21 @@ struct LibraryView: View {
                                                                 includingPropertiesForKeys: [.isDirectoryKey],
                                                                 options: [.skipsSubdirectoryDescendants])
             while let url = gameEnumerator?.nextObject() as? URL {
+                var type: UTType = .nsp
+                let filesEnumerator = FileManager.default.enumerator(at: url,
+                                                                     includingPropertiesForKeys: [.isRegularFileKey])
+                
+                // TODO: This works but it's spaghetti and I don't like it
+                while let url = filesEnumerator?.nextObject() as? URL {
+                    let urlExtension = url.pathExtension
+                    let url = url.deletingPathExtension()
+                    if url.lastPathComponent == "Title" {
+                        type = UTType(filenameExtension: urlExtension) ?? .nsp
+                    }
+                }
+
                 games.games.append(Game(containerFolder: url,
+                                        fileType: type,
                                         titleName: url.lastPathComponent,
                                         titleId: "",
                                         developer: "",

@@ -30,6 +30,8 @@ struct GameView: View {
         }
         .padding(5)
         .onAppear {
+            self.icon = game.placeholderForFiletype()
+
             if let icon = game.icon {
                 self.icon = icon
             }
@@ -51,6 +53,7 @@ struct GameView: View {
 
 #Preview {
     GameView(game: Game(containerFolder: URL(fileURLWithPath: ""),
+                        fileType: .nsp, 
                         titleName: "Legend of Zelda: Breath of the Wild",
                         titleId: "",
                         developer: "",
