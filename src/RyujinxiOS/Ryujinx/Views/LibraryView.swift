@@ -79,7 +79,44 @@ struct LibraryView: View {
             .fileImporter(isPresented: $showingGameImport, allowedContentTypes: [.nca, .nro, .nso, .nsp], allowsMultipleSelection: false) { result in
                 switch result {
                 case .success(let urls):
-                    break
+                    do {
+                        try urls.forEach { url in
+                            let gotAccess = url.startAccessingSecurityScopedResource()
+                            if !gotAccess {
+                                print("Failed to get access to imported game at \(url)!")
+                                return
+                            }
+
+                            // Check if the game is valid before copying it
+                            let handle = try FileHandle(forReadingFrom: url)
+                            #if !targetEnvironment(simulator)
+                            // Something something LibRyujinx
+                            #endif
+                            try handle.close()
+
+                            let documentsFolder = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                            let gameFiles = documentsFolder.appending(path: "GameFiles")
+
+                            // We can't use title ID as a unique file name as many homebrew just have all 0s
+                            let gameFolder = gameFiles.appending(path: UUID().uuidString)
+
+                            if !FileManager.default.fileExists(atPath: gameFolder.path(percentEncoded: false)) {
+                                try FileManager.default.createDirectory(at: gameFolder, withIntermediateDirectories: true)
+                            }
+
+                            let finalLocation = gameFolder.appending(path: "Title").appendingPathExtension(url.pathExtension)
+
+                            if FileManager.default.fileExists(atPath: finalLocation.path(percentEncoded: false)) {
+                                try FileManager.default.removeItem(at: finalLocation)
+                            }
+
+                            try FileManager.default.copyItem(at: url, to: finalLocation)
+
+                            url.stopAccessingSecurityScopedResource()
+                        }
+                    } catch {
+                        print(error)
+                    }
                 case .failure(let error):
                     print(error)
                 }

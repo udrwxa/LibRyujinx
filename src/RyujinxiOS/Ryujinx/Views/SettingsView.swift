@@ -76,7 +76,7 @@ struct SettingsView: View {
                                     return
                                 }
 
-                                let handle = try FileHandle(forUpdating: url)
+                                let handle = try FileHandle(forReadingFrom: url)
 #if !targetEnvironment(simulator)
                                 device_install_firmware(handle.fileDescriptor, false)
 #endif
