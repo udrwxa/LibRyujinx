@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+#if !targetEnvironment(simulator)
+import LibRyujinx
+#endif
 
 struct LibraryView: View {
     @EnvironmentObject var settings: Settings
 
     @State var search: String = ""
     @State var games: [Game] = []
+    @State var isFirmwareInstalled: Bool = false
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100))]
     private var searchedGames: [Game] {
@@ -66,6 +70,7 @@ struct LibraryView: View {
                             Image(systemName: "person")
                         }
                     }
+                    .disabled(!isFirmwareInstalled)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -73,6 +78,16 @@ struct LibraryView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: searchedGames)
         .animation(.easeInOut(duration: 0.2), value: search)
+    }
+
+    func checkFirmware() {
+#if !targetEnvironment(simulator)
+        let cstring = device_get_installed_firmware_version()
+        let version = String(cString: cstring!)
+        if version != String() {
+            isFirmwareInstalled = true
+        }
+#endif
     }
 }
 
