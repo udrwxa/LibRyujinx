@@ -78,6 +78,9 @@ struct LibraryView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: searchedGames)
         .animation(.easeInOut(duration: 0.2), value: search)
+        .onAppear {
+            checkFirmware()
+        }
     }
 
     func checkFirmware() {
