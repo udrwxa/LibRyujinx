@@ -14,6 +14,10 @@ struct LibraryView: View {
     @State var games: [Game] = []
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100))]
+    private var searchedGames: [Game] {
+        guard !search.isEmpty else { return games }
+        return games.filter({ $0.titleName.localizedCaseInsensitiveContains(search) })
+    }
 
     var body: some View {
         NavigationStack {
@@ -30,7 +34,7 @@ struct LibraryView: View {
                 } else {
                     ScrollView {
                         LazyVGrid(columns: gridLayout, spacing: 10) {
-                            ForEach(games, id: \.id) { game in
+                            ForEach(searchedGames, id: \.id) { game in
                                 GameView(game: game)
                             }
                         }
@@ -67,6 +71,8 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always))
         }
+        .animation(.easeInOut(duration: 0.2), value: searchedGames)
+        .animation(.easeInOut(duration: 0.2), value: search)
     }
 }
 
