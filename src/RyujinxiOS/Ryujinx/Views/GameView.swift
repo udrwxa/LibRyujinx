@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct GameView: View {
+    @EnvironmentObject var games: Games
+
     @State var game: Game
     @State var icon: Image = Image("Icon_NSP")
 
@@ -32,11 +34,24 @@ struct GameView: View {
                 self.icon = icon
             }
         }
+        .contextMenu {
+            Button(role: .destructive) {
+                do {
+                    try FileManager.default.removeItem(at: game.containerFolder)
+                    games.games.removeAll(where: { $0 == game })
+                } catch {
+                    print(error)
+                }
+            } label: {
+                Label("Delete Game", systemImage: "trash")
+            }
+        }
     }
 }
 
 #Preview {
-    GameView(game: Game(titleName: "Legend of Zelda: Breath of the Wild",
+    GameView(game: Game(containerFolder: URL(fileURLWithPath: ""),
+                        titleName: "Legend of Zelda: Breath of the Wild",
                         titleId: "",
                         developer: "",
                         version: "",

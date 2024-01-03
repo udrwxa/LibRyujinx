@@ -10,6 +10,7 @@ import SwiftUI
 public struct Game: Identifiable, Equatable {
     public var id = UUID()
 
+    var containerFolder: URL
     var titleName: String
     var titleId: String
     var developer: String

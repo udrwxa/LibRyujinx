@@ -12,22 +12,22 @@ import LibRyujinx
 
 struct LibraryView: View {
     @EnvironmentObject var settings: Settings
+    @EnvironmentObject var games: Games
 
     @State var search: String = ""
-    @State var games: [Game] = []
     @State var isFirmwareInstalled: Bool = false
     @State var showingGameImport = false
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100))]
     private var searchedGames: [Game] {
-        guard !search.isEmpty else { return games }
-        return games.filter({ $0.titleName.localizedCaseInsensitiveContains(search) })
+        guard !search.isEmpty else { return games.games }
+        return games.games.filter({ $0.titleName.localizedCaseInsensitiveContains(search) })
     }
 
     var body: some View {
         NavigationStack {
             Group {
-                if games.isEmpty {
+                if games.games.isEmpty {
                     VStack {
                         Spacer()
                         Group {
@@ -41,6 +41,7 @@ struct LibraryView: View {
                         LazyVGrid(columns: gridLayout, spacing: 10) {
                             ForEach(searchedGames, id: \.id) { game in
                                 GameView(game: game)
+                                    .environmentObject(games)
                             }
                         }
                         .padding(.horizontal)
@@ -113,6 +114,7 @@ struct LibraryView: View {
                             try FileManager.default.copyItem(at: url, to: finalLocation)
 
                             url.stopAccessingSecurityScopedResource()
+                            loadGames()
                         }
                     } catch {
                         print(error)
@@ -125,6 +127,7 @@ struct LibraryView: View {
         .animation(.easeInOut(duration: 0.2), value: searchedGames)
         .animation(.easeInOut(duration: 0.2), value: search)
         .onAppear {
+            loadGames()
             checkFirmware()
         }
     }
@@ -137,6 +140,28 @@ struct LibraryView: View {
             isFirmwareInstalled = true
         }
 #endif
+    }
+
+    func loadGames() {
+        games.games.removeAll()
+
+        do {
+            let documentsFolder = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let gameFiles = documentsFolder.appending(path: "GameFiles")
+
+            let gameEnumerator = FileManager.default.enumerator(at: gameFiles, 
+                                                                includingPropertiesForKeys: [.isDirectoryKey],
+                                                                options: [.skipsSubdirectoryDescendants])
+            while let url = gameEnumerator?.nextObject() as? URL {
+                games.games.append(Game(containerFolder: url,
+                                        titleName: url.lastPathComponent,
+                                        titleId: "",
+                                        developer: "",
+                                        version: ""))
+            }
+        } catch {
+            print(error)
+        }
     }
 }
 
