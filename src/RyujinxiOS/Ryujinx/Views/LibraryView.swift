@@ -155,23 +155,48 @@ struct LibraryView: View {
                                                                 options: [.skipsSubdirectoryDescendants])
             while let url = gameEnumerator?.nextObject() as? URL {
                 var type: UTType = .nsp
+                var titleName = url.lastPathComponent
+                var developer = ""
+
                 let filesEnumerator = FileManager.default.enumerator(at: url,
                                                                      includingPropertiesForKeys: [.isRegularFileKey])
                 
                 // TODO: This works but it's spaghetti and I don't like it
                 while let url = filesEnumerator?.nextObject() as? URL {
                     let urlExtension = url.pathExtension
-                    let url = url.deletingPathExtension()
-                    if url.lastPathComponent == "Title" {
+                    let titleUrl = url.deletingPathExtension()
+                    if titleUrl.lastPathComponent == "Title" {
                         type = UTType(filenameExtension: urlExtension) ?? .nsp
+
+#if !targetEnvironment(simulator)
+                        let handle = try FileHandle(forReadingFrom: url)
+                        let fileExtension = (url.pathExtension as NSString).utf8String
+                        let extensionPtr = UnsafeMutablePointer<CChar>(mutating: fileExtension)
+
+                        var gameInfo = get_game_info(handle.fileDescriptor, extensionPtr)
+
+                        titleName = withUnsafePointer(to: &gameInfo.TitleName) {
+                            $0.withMemoryRebound(to: UInt8.self, capacity: MemoryLayout.size(ofValue: $0)) {
+                                String(cString: $0)
+                            }
+                        }
+
+                        developer = withUnsafePointer(to: &gameInfo.TitleName) {
+                            $0.withMemoryRebound(to: UInt8.self, capacity: MemoryLayout.size(ofValue: $0)) {
+                                String(cString: $0)
+                            }
+                        }
+
+                        try handle.close()
+#endif
                     }
                 }
 
                 games.games.append(Game(containerFolder: url,
                                         fileType: type,
-                                        titleName: url.lastPathComponent,
+                                        titleName: titleName,
                                         titleId: "",
-                                        developer: "",
+                                        developer: developer,
                                         version: ""))
             }
         } catch {

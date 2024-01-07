@@ -118,7 +118,16 @@ struct Vector3 {
     float Z;
 };
 
+struct GameInfo {
+    long FileSize;
+    char TitleName[512];
+    long TitleId;
+    char Developer[256];
+    int Version;
+};
+
 extern bool initialize(char*);
+extern struct GameInfo get_game_info(int, char*);
 extern bool device_initialize(bool, bool, int, int, bool, bool, bool, bool, long, bool);
 extern void device_reloadFilesystem();
 extern bool device_load(long);
