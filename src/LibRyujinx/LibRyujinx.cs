@@ -134,6 +134,17 @@ namespace LibRyujinx
             return GetGameInfo(stream, new FileInfo(file).Extension.Remove('.'));
         }
 
+        [UnmanagedCallersOnly(EntryPoint = "get_game_info")]
+        public static GameInfoNative GetGameInfoNative(int descriptor, IntPtr extensionPtr)
+        {
+            var extension = Marshal.PtrToStringAnsi(extensionPtr);
+            var stream = OpenFile(descriptor);
+
+            var gameInfo = GetGameInfo(stream, extension);
+
+            return new GameInfoNative(0, gameInfo.TitleName, 0, gameInfo.Developer, 0);
+        }
+
         public static GameInfo? GetGameInfo(Stream gameStream, string extension)
         {
             if (SwitchDevice == null)
@@ -832,6 +843,35 @@ namespace LibRyujinx
         public string? Developer;
         public string? Version;
         public byte[]? Icon;
+    }
+
+    public unsafe struct GameInfoNative
+    {
+        public ulong FileSize;
+        public fixed byte TitleName[512];
+        public ulong TitleId;
+        public fixed byte Developer[256];
+        public uint Version;
+
+        public GameInfoNative(ulong fileSize, string titleName, ulong titleId, string developer, uint version)
+        {
+            FileSize = fileSize;
+            TitleId = titleId;
+            Version = version;
+
+            fixed (byte* developerPtr = Developer)
+            fixed (byte* titleNamePtr = TitleName)
+            {
+                CopyStringToFixedArray(titleName, titleNamePtr, 512);
+                CopyStringToFixedArray(developer, developerPtr, 256);
+            }
+        }
+
+        private void CopyStringToFixedArray(string source, byte* destination, int length)
+        {
+            var span = new Span<byte>(destination, length);
+            Encoding.UTF8.GetBytes(source, span);
+        }
     }
 
     public class GameStats
