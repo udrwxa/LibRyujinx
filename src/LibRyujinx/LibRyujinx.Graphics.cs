@@ -1,4 +1,4 @@
-﻿using ARMeilleure.Translation;
+using ARMeilleure.Translation;
 using LibHac.Bcat;
 using LibRyujinx.Shared;
 using OpenTK.Graphics.OpenGL;
@@ -171,7 +171,6 @@ namespace LibRyujinx
                     _gpuDoneEvent.Reset();
                     device.Gpu.SetGpuThread();
                     device.Gpu.InitializeShaderCache(_gpuCancellationTokenSource.Token);
-                    Translator.IsReadyForTranslation.Set();
 
                     _isActive = true;
 

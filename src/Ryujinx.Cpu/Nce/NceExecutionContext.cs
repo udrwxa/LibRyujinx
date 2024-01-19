@@ -1,5 +1,5 @@
-using ARMeilleure.Signal;
 using ARMeilleure.State;
+using Ryujinx.Cpu.Signal;
 using Ryujinx.Memory;
 using System;
 using System.Runtime.InteropServices;
