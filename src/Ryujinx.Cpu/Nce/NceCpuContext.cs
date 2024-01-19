@@ -1,6 +1,6 @@
-﻿using ARMeilleure.Signal;
-using Ryujinx.Cpu.Jit;
 using Ryujinx.Common;
+using Ryujinx.Cpu.Jit;
+using Ryujinx.Cpu.Signal;
 using Ryujinx.Memory;
 using System;
 using System.Collections.Generic;
@@ -79,8 +79,6 @@ namespace Ryujinx.Cpu.Nce
             ulong ehSuspendCodeOffset = codeWriter.Write(ehSuspendCode);
 
             MemoryBlock codeBlock = null;
-
-            NativeSignalHandler.Initialize(new JitMemoryAllocator());
 
             NativeSignalHandler.InitializeSignalHandler(MemoryBlock.GetPageSize(), (IntPtr oldSignalHandlerSegfaultPtr, IntPtr signalHandlerPtr) =>
             {

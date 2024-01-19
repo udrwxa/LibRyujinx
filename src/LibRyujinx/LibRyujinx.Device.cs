@@ -244,8 +244,6 @@ namespace LibRyujinx
                 return false;
             }
 
-            Translator.IsReadyForTranslation.Reset();
-
             return true;
         }
 
