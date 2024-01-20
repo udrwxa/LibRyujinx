@@ -37,6 +37,7 @@ class MainActivity : BaseActivity() {
         var mainViewModel: MainViewModel? = null
         var AppPath : String = ""
         var StorageHelper: SimpleStorageHelper? = null
+        val performanceMonitor = PerformanceMonitor()
 
         @JvmStatic
         fun updateRenderSessionPerformance(gameTime : Long)
@@ -120,6 +121,8 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
+
+        val freq = performanceMonitor.getFrequencies()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
