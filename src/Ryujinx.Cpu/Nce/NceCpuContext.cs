@@ -136,5 +136,9 @@ namespace Ryujinx.Cpu.Nce
         public void PrepareCodeRange(ulong address, ulong size)
         {
         }
+
+        public void Dispose()
+        {
+        }
     }
 }
