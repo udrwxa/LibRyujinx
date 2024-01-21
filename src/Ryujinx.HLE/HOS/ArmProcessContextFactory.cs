@@ -60,7 +60,7 @@ namespace Ryujinx.HLE.HOS
 
             bool isArm64Host = RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
-            if (OperatingSystem.IsMacOS() && isArm64Host && for64Bit && context.Device.Configuration.UseHypervisor)
+            if (isArm64Host && for64Bit && context.Device.Configuration.UseHypervisor)
             {
                 if (OperatingSystem.IsMacOS())
                 {
