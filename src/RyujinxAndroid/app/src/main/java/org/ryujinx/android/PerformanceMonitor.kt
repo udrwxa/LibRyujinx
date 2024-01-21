@@ -11,33 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.io.RandomAccessFile
-import kotlin.concurrent.thread
 
 class PerformanceMonitor {
     val numberOfCores = Runtime.getRuntime().availableProcessors()
-    private var isMonitoring: Boolean = false
-    fun startMonitoring() {
-        if(isMonitoring)
-            return
-
-        isMonitoring = true
-
-        thread {
-            monitor()
-        }
-    }
-
-    init {
-
-    }
-
-    fun monitor(){
-        while(isMonitoring) {
-            //lastCpuUsages = HardwarePropertiesManager.
-
-            //Thread.sleep(1000);
-        }
-    }
 
     fun getFrequencies() : List<Double> {
         val frequencies = mutableListOf<Double>()
@@ -49,6 +25,7 @@ class PerformanceMonitor {
                     "r"
                 )
                 val f = reader.readLine()
+                reader.close()
                 freq = f.toDouble() / 1000.0
             }
             catch (e:Exception){

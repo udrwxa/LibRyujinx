@@ -121,8 +121,6 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-
-        val freq = performanceMonitor.getFrequencies()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
